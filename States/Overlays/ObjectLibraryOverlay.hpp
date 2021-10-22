@@ -99,18 +99,12 @@ private:
 	std::list<ObjectIcon*> m_on_screen;
 
 	std::vector<ke::Colorf> m_obj_colors;
-	std::array<ke::Colorf, 6> m_GUI_colors;
+	std::array<ke::Colorf, 12> m_GUI_colors;
 
 	float m_next_position;
-
-	float m_offset;
 
 
 	sf::View m_obj_view;
 	sf::Vector2f mPosView; // mouse position by obj_view;
-
-	bool m_view_scrolling;
-	float m_next_vpos;
-	float m_last_vpos;
 };
 

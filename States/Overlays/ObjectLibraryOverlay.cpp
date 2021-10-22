@@ -7,10 +7,6 @@ ObjectLibraryOverlay::ObjectLibraryOverlay()
 	, m_active(false)
 	, m_window(nullptr)
 	, m_next_position(0)
-	, m_offset(110)
-	, m_view_scrolling(false)
-	, m_next_vpos(0)
-	, m_last_vpos(0)
 {
 }
 
@@ -46,8 +42,8 @@ void ObjectLibraryOverlay::initUI()
 	m_filtering_options[2].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45 + winsize.x * 0.1250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
 	m_filtering_options[3].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45 + winsize.x * 0.1875, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
 
-	m_add_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y - winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"ADD", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(75, 148, 49, 128), sf::Color(255, 255, 255, 129));
-	m_close_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"CLOSE", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(168, 38, 29, 128), sf::Color(255, 255, 255, 129));
+	m_add_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y - winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"ADD", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 192, 32, 128), sf::Color(255, 255, 255, 129));
+	m_close_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"CLOSE", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(192, 32, 32, 128), sf::Color(255, 255, 255, 129));
 
 	m_add_button.setTextStyle(sf::Text::Bold);
 	m_close_button.setTextStyle(sf::Text::Bold);
@@ -65,13 +61,13 @@ void ObjectLibraryOverlay::initUI()
 	m_object_info[5].create(sf::Vector2f(winsize.x * 0.16, winsize.y / 20), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 5 + 8 * winsize.y / 24 + 5 * winsize.y / 48), ke::Origin::MIDDLE_MIDDLE, nullptr, L"system name", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 32, 32, 128), sf::Color(255, 255, 255, 128));
 	//m_object_info[6].create(sf::Vector2f(winsize.x * 0.16, winsize.y / 20), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 5 + 9 * winsize.y / 24 + 6 * winsize.y / 48), ke::Origin::MIDDLE_MIDDLE, nullptr, L"system name", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 32, 32, 128), sf::Color(255, 255, 255, 128));
 
-	m_GUI_colors.fill(ke::Colorf(255, 255, 255, 192));
+	//m_GUI_colors.fill(ke::Colorf(255, 255, 255, 192));
 
 
 	m_hints.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 9), sf::Vector2f(m_right_section.getShapeCenter().x, (m_add_button.getShapeCenter().y + m_object_info.back().getShapeCenter().y) * 0.5), ke::Origin::MIDDLE_MIDDLE, nullptr, L"", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 32, 32, 128), sf::Color(255, 255, 255, 128));
 
 	m_slider.create(sf::Vector2f(winsize.x / 128, winsize.y - winsize.y / 9), sf::Vector2f(m_background.getShapeCenter().x + m_background.getSize().x * 0.5 - m_right_section.getSize().x, winsize.y),
-		winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color::White, sf::Color((64, 64, 64, 64)));
+		winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(255, 255, 255, 128), sf::Color((64, 64, 64, 64)));
 }
 
 void ObjectLibraryOverlay::loadObjects()
@@ -229,6 +225,14 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 	{
+		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
+		m_active = false;
+		return;
+	}
+	else if (m_close_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
+		m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
 		m_active = false;
 		return;
 	}
@@ -308,6 +312,13 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		}
 	}
 
+	if (m_add_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT;
+		m_active = false;
+		return;
+	}
+
 }
 
 
@@ -322,6 +333,13 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 		++GUI_color_itr;
 	}
 
+	ke::SmoothColorChange(&m_add_button, m_add_button.isInvaded(mousePosition), sf::Color(32, 255, 32, 128), sf::Color(32, 192, 32, 128), *GUI_color_itr, 512, dt); ++GUI_color_itr;
+	ke::SmoothTextColorChange(&m_add_button, m_add_button.isInvaded(mousePosition), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(&m_close_button, m_close_button.isInvaded(mousePosition), sf::Color(255, 32, 32, 128), sf::Color(192, 32, 32, 128), *GUI_color_itr, 512, dt); ++GUI_color_itr;
+	ke::SmoothTextColorChange(&m_close_button, m_close_button.isInvaded(mousePosition), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
+
+	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 2048, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color(96, 96, 96, 96), sf::Color(64, 64, 64, 64), *GUI_color_itr, 512, dt); ++GUI_color_itr;
 
 	auto obj_color_itr = m_obj_colors.begin();
 

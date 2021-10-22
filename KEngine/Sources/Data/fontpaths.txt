@@ -1,0 +1,35 @@
+KEngine/Sources/Fonts/arial.ttf
+KEngine/Sources/Fonts/arialUNI.ttf
+KEngine/Sources/Fonts/calibri.ttf
+KEngine/Sources/Fonts/comic.ttf
+KEngine/Sources/Fonts/cour.ttf
+KEngine/Sources/Fonts/times.ttf
+KEngine/Sources/Fonts/trebuc.ttf
+KEngine/Sources/Fonts/verdana.ttf
+
+// paths for fonts, if out don't want to copy
+// fonts folder you can change these paths to
+// your system fonts file
+
+fonts: 
+1.	arial
+2.	airal unicode
+3.	colibri
+4.	comic sans
+5.	courier new
+6.	times new roman
+7.	trebuchetMS
+8.	vardana
+
+
+
+default paths: 
+
+KEngine/Sources/Fonts/arial.ttf
+KEngine/Sources/Fonts/arialUNI.ttf
+KEngine/Sources/Fonts/calibri.ttf
+KEngine/Sources/Fonts/comic.ttf
+KEngine/Sources/Fonts/cour.ttf
+KEngine/Sources/Fonts/times.ttf
+KEngine/Sources/Fonts/trebuc.ttf
+KEngine/Sources/Fonts/verdana.ttf

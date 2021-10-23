@@ -103,7 +103,7 @@ void ObjectLibraryOverlay::loadObjects()
 		loadStr.binRead(obj_count);
 
 
-		//std::cout << system_name << ", " << obj_count << '\n';
+		std::cout << system_name << ", " << obj_count << '\n';
 
 		m_system_names.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(field_size.x, uniheight), sf::Vector2f(field_beg, m_next_position), ke::Origin::LEFT_TOP,
 			nullptr, ke::fixed::stow(system_name), field_size.y / 20, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color::White, 0, sf::Color::Transparent, 0, sf::Text::Bold, sf::Vector2f(field_size.x / 100, uniheight / 10)));
@@ -139,6 +139,8 @@ void ObjectLibraryOverlay::loadObjects()
 
 			loadStr.binRead(filename);
 			loadStr.binRead(texture_path);
+
+			//std::cout << '\t' << texture_path << '\n';
 
 			loadStr.binRead(brightness);
 			loadStr.binRead(color.x);

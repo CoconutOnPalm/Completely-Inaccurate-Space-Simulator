@@ -81,6 +81,7 @@ private:
     
 
     bool m_text_entered;
+    bool m_object_buffer_ready; // variable that checks if object added from ObjectLibraryOverlay is loaded
 
 
     std::list<SpaceObject*> m_onScreen; // currently visible objects

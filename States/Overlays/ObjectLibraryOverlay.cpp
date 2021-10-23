@@ -24,6 +24,8 @@ void ObjectLibraryOverlay::initUI()
 {
 	sf::Vector2f winsize(m_window->getSize());
 
+	m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
+
 
 	m_background.create(sf::Vector2f(winsize.x * 0.75, winsize.y), winsize * 0.5f, ke::Origin::MIDDLE_MIDDLE, std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black);
 	m_top_section.create(sf::Vector2f(winsize.x * 0.75, winsize.y / 9), sf::Vector2f(winsize.x / 2, 0), ke::Origin::MIDDLE_TOP, std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(8, 8, 8, 255));
@@ -64,10 +66,10 @@ void ObjectLibraryOverlay::initUI()
 	//m_GUI_colors.fill(ke::Colorf(255, 255, 255, 192));
 
 
-	m_hints.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 9), sf::Vector2f(m_right_section.getShapeCenter().x, (m_add_button.getShapeCenter().y + m_object_info.back().getShapeCenter().y) * 0.5), ke::Origin::MIDDLE_MIDDLE, nullptr, L"", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 32, 32, 128), sf::Color(255, 255, 255, 128));
+	m_quick_info.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 9), sf::Vector2f(m_right_section.getShapeCenter().x, (m_add_button.getShapeCenter().y + m_object_info.back().getShapeCenter().y) * 0.5), ke::Origin::MIDDLE_MIDDLE, nullptr, L"", winsize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 128), sf::Color::White, {}, {}, {}, {}, sf::Vector2f(winsize.x * 0.0032, 0));
 
 	m_slider.create(sf::Vector2f(winsize.x / 128, winsize.y - winsize.y / 9), sf::Vector2f(m_background.getShapeCenter().x + m_background.getSize().x * 0.5 - m_right_section.getSize().x, winsize.y),
-		winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(255, 255, 255, 128), sf::Color((64, 64, 64, 64)));
+		winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(255, 255, 255, 128), sf::Color((32, 32, 32, 32)));
 }
 
 void ObjectLibraryOverlay::loadObjects()
@@ -143,41 +145,20 @@ void ObjectLibraryOverlay::loadObjects()
 			loadStr.binRead(color.y);
 			loadStr.binRead(color.z);
 
-			//std::cout << obj_name << '\n';
-
-
-
 			if (i == 0)
 			{
 				m_system_begining.push_back(m_objects.begin());
 
 				if (m_system_bounds.empty())
-				{
 					m_system_bounds.push_back(std::make_pair<unsigned int, unsigned int>(0, obj_count - 1));
-					//std::cout << system_name << '\n';
-					//std::cout << "Dla system_bounds.size() = 0:\n";
-					//std::cout << 0 << ' ' << obj_count - 1 << '\n';
-				}
 				else
-				{
 					m_system_bounds.push_back(std::make_pair<unsigned int, unsigned int>(m_system_bounds.back().second + 1, m_system_bounds.back().second + obj_count));
-					//std::cout << system_name << '\n';
-					//std::cout << "Dla system_bounds.size() > 0:\n";
-					//std::cout << m_system_bounds.back().second + 1 << ' ' << m_system_bounds.back().second + obj_count << '\n';
-				}
-
 			}
 
 			if (i % (icons_per_row) == 0 && i)
-			{
 				position.y += uniheight;
-				//std::cout << i << '\n';
-			}
 
 			m_objects.emplace_back(std::make_unique<ObjectIcon>(texture_path, filename, size, position, obj_name, type, obj_class, subtype, mass, radius, brightness, color));
-			//m_objects.back()->icon.getTextureShape()->setFillColor(sf::Color(255, 255, 255, 128));
-
-			//ke::debug::printVector2(position, std::to_string(i));
 		}
 
 		m_next_position = position.y + uniheight;
@@ -190,22 +171,23 @@ void ObjectLibraryOverlay::loadObjects()
 	for (int i = 0; i < m_objects.size(); ++i)
 		m_obj_colors.push_back(sf::Color::Transparent);
 
-	
-	m_slider.setFieldHeight((m_next_position > winsize.y) ? m_next_position :  winsize.y);
+
+	m_slider.setFieldHeight((m_next_position > winsize.y) ? m_next_position : winsize.y);
 	m_slider.setViewPositionShift(0, nullptr);
 
 	m_view_barrier.setView(&m_obj_view);
 	m_view_barrier.setBorders(sf::Vector2f(0, 0), sf::Vector2f(winsize.x, m_next_position));
 
-	for (auto& itr : m_objects)
-		if (ke::ionRange(itr->icon.getPosition().y, -1.5 * itr->icon.getSize().y, m_window->getSize().y + 1.5 * itr->icon.getSize().y))
-			m_on_screen.push_back(itr.get());
+	for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		if (ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
+			m_on_screen.push_back(itr);
 
 	std::cout << m_system_bounds.size() << '\n';
 	for (auto& itr : m_system_bounds)
 		std::cout << itr.first << ' ' << itr.second << '\n';
 
 	m_selected = m_objects.end();
+	m_invaded_icon = m_objects.end();
 }
 
 void ObjectLibraryOverlay::updateEvents(const MousePosition& mousePosition, float dt)
@@ -226,14 +208,14 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 	{
 		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
-		m_active = false;
+		this->deactivate();
 		return;
 	}
 	else if (m_close_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
-		m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
-		m_active = false;
+		m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudioIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
+		this->deactivate();
 		return;
 	}
 
@@ -265,10 +247,10 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		m_on_screen.clear();
 
 		int color_itr = 0;
-		for (auto& itr : m_objects)
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
 		{
-			if (ke::ionRange(itr->icon.getPosition().y, -1.5 * itr->icon.getSize().y, m_window->getSize().y + 1.5 * itr->icon.getSize().y))
-				m_on_screen.push_back(itr.get());
+			if (ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
+				m_on_screen.push_back(itr);
 
 			color_itr++;
 		}
@@ -278,7 +260,7 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 
 
-	for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+	for (auto& itr : m_on_screen)
 	{
 		if (!ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
 			continue;
@@ -314,11 +296,26 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	if (m_add_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT;
-		m_active = false;
-		return;
+		if (m_output.name() != "__EMPTY")
+		{
+			m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT;
+			this->deactivate();
+			return;
+		}
 	}
 
+
+	for (auto& itr : m_on_screen)
+	{
+		if ((*itr)->icon.isInvaded(mPosView))
+		{
+			m_invaded_icon = itr;
+			m_quick_info.setText(ke::fixed::stow((*itr)->object_name() + "\n\n" + TypeTranslator::getClassName((*itr)->object_class())));
+			break;
+		}
+
+		m_quick_info.setText(std::wstring());
+	}
 }
 
 
@@ -339,13 +336,13 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 	ke::SmoothTextColorChange(&m_close_button, m_close_button.isInvaded(mousePosition), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
 
 	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 2048, dt); ++GUI_color_itr;
-	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color(96, 96, 96, 96), sf::Color(64, 64, 64, 64), *GUI_color_itr, 512, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color(48, 48, 48, 48), sf::Color(32, 32, 32, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
 
 	auto obj_color_itr = m_obj_colors.begin();
 
 	for (auto itr = m_on_screen.begin(); itr != m_on_screen.end(); ++itr)
 	{
-		ke::SmoothColorChange(&(*itr)->icon, (*itr)->icon.isInvaded(mPosView), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *obj_color_itr, 511, dt);
+		ke::SmoothColorChange(&(**itr)->icon, (**itr)->icon.isInvaded(mPosView), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *obj_color_itr, 511, dt);
 		++obj_color_itr;
 	}
 }
@@ -353,6 +350,11 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 int ObjectLibraryOverlay::quitStatus() const
 {
 	return m_quitStatus;
+}
+
+void ObjectLibraryOverlay::resetQuitStatus()
+{
+	m_quitStatus = OL_NOT_QUITTING;
 }
 
 void ObjectLibraryOverlay::render()
@@ -371,7 +373,7 @@ void ObjectLibraryOverlay::render()
 		itr->render(m_window);
 
 	for (auto& itr : m_on_screen)
-		itr->icon.render(m_window);
+		(*itr)->icon.render(m_window);
 
 	mPosView = m_window->mapPixelToCoords(sf::Mouse::getPosition(*m_window));
 
@@ -392,7 +394,7 @@ void ObjectLibraryOverlay::render()
 	for (auto& itr : m_object_info)
 		itr.render(m_window);
 
-	m_hints.render(m_window);
+	m_quick_info.render(m_window);
 
 	m_slider.render(m_window);
 }
@@ -410,6 +412,15 @@ void ObjectLibraryOverlay::activate()
 void ObjectLibraryOverlay::deactivate()
 {
 	m_active = false;
+
+	if (m_selected != m_objects.end())
+	{
+		(*m_selected)->icon.setOutlineColor(sf::Color::Transparent);
+		(*m_selected)->icon.setOutlineThickness(0);
+		m_selected = m_objects.end();
+	}
+
+	this->updateObjectInfo();
 }
 
 ObjectBuffer* ObjectLibraryOverlay::output()

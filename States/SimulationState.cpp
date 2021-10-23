@@ -13,6 +13,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_shader_scale(1.0)
 	, m_brightness_scale(1.0)
 	, m_text_entered(false)
+	, m_object_buffer_ready(false)
 {
 	m_stateMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Black);
 	m_sm_color.setColor(sf::Color::Black);
@@ -591,7 +592,8 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	else
 	{
 		m_outro_clock.restart();
-		ke::SmoothColorChange(&m_stateMask, true, sf::Color::Transparent, sf::Color::Black, m_sm_color, 256, dt);
+		if (ke::SmoothColorChange(&m_stateMask, true, sf::Color::Transparent, sf::Color::Black, m_sm_color, 256, dt))
+			m_ObjectLibraryOverlay->updateColors(mousePosition.byWindow, dt);
 	}
 
 
@@ -630,7 +632,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 		// FEATURE: updating Placed Object preview
 
-		if ((*m_icon_inv_iterator)->icon.isActive())
+		if ((*m_icon_inv_iterator)->icon.isActive() || m_object_buffer_ready)
 		{
 			if (m_orbit_preview.isActive())
 			{
@@ -817,9 +819,30 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	m_StateControlPanel.updatePollEvents(mousePosition, dt, event, window, view);
 
 
-	// FEATURE: adding new object by user
 
-	//if ((*m_icon_iterator)->icon.isActive())
+	// FEATURE: getting object from Databese (Object Library Overlay)
+
+	if (!m_ObjectLibraryOverlay->active())
+	{
+		if (m_ObjectLibraryOverlay->quitStatus() == OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT)
+		{
+			m_ObjectLibraryOverlay->resetQuitStatus();
+			m_object_buffer_ready = false; // for safety reasons
+		}
+		else if (m_ObjectLibraryOverlay->quitStatus() == OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT)
+		{
+			m_ObjectLibraryOverlay->resetQuitStatus();
+			m_objectBuffer = *m_ObjectLibraryOverlay->output();
+			m_ObjController.createObjectPreview(&m_objectBuffer);
+			m_icon_iterator = m_object_icons.begin() + 1; // set to sth that isn't .begin()
+			m_placed_object.setActiveStatus(true);
+			m_object_buffer_ready = true;
+		}
+	}
+
+
+	// FEATURE: adding new object by user from top panel
+
 	if (m_icon_iterator != m_object_icons.begin())
 	{
 		bool mouse_on_field = true;
@@ -859,7 +882,6 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 					// adding object by module
 
 					m_ObjController.addObject(m_selected_object, &m_objectBuffer, mousePosition, view->getSize(), winSize, name);
-					//std::cout << "c: " << (*m_selected_object)->objectClass() << '\n';
 
 
 					// pushing icon to history panel
@@ -880,7 +902,6 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 					// giving object's name to the right panel
 
-					//m_object_name.setEPS(true);
 					m_object_name.setTextColor(sf::Color::White);
 					m_object_name.setText(ke::fixed::stow(name));
 
@@ -916,6 +937,109 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			m_distance_preview.setActiveStatus(false);
 		}
 	}
+
+
+
+	// FEATURE: adding new object by user from Database (ObjectLibraryOverlay)
+
+	if (m_object_buffer_ready)
+	{
+		bool mouse_on_field = true;
+
+		// checking if mouse is on field
+
+		for (auto& itr : m_backgrounds)
+			if (itr->isInvaded(mousePosition.byWindow))
+				mouse_on_field = false;
+
+		if (mouse_on_field)
+		{
+			if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
+			{
+				// checking if user hasn't clicked outside the field
+
+				bool sth_clicked = false;
+				for (auto itr = m_objects.begin(), eoi = m_objects.end(); itr != eoi; ++itr)
+					if (abs(mousePosition.byView.y - (*itr)->object.getPosition().y) < (*itr)->clickRange()->getRadius())
+						if ((*itr)->invaded(mousePosition.byView))
+						{
+							m_selected_object = itr;
+							sth_clicked = true;
+							break;
+						}
+
+
+				if (!sth_clicked)
+				{
+					// checking object name
+
+					std::string name = m_objectBuffer.name();
+
+					m_ObjController.checkName(name);
+
+
+					// adding object by module
+
+					m_ObjController.addObject(m_selected_object, &m_objectBuffer, mousePosition, view->getSize(), winSize, name);
+
+
+					// pushing icon to history panel
+
+					m_objIconPanel.pushIcon(m_objectBuffer);
+
+
+					// Shift -> user can place more than one object 
+
+					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+					{
+						//(*m_icon_iterator)->icon.setActiveStatus(false);
+
+						m_icon_iterator = m_object_icons.begin();
+						m_placed_object.setActiveStatus(false);
+					}
+
+
+					// giving object's name to the right panel
+
+					m_object_name.setTextColor(sf::Color::White);
+					m_object_name.setText(ke::fixed::stow(name));
+
+					if (m_object_name.getText().size() > 35)
+						m_object_name.setCharacterSize(winSize.y / 80);
+					else if (m_object_name.getText().size() > 25)
+						m_object_name.setCharacterSize(winSize.y / 64);
+					else
+						m_object_name.setCharacterSize(winSize.y / 48);
+
+					//m_object_name.setEPS(false);
+
+
+					// turning off previews
+
+					m_orbit_preview.setActiveStatus(false);
+					m_distance_preview.setActiveStatus(false);
+
+				}
+
+				m_object_buffer_ready = false; // unloads buffer status
+			}
+			else
+			{
+				// updating object preview
+
+				m_ObjController.updateObjectPreview(m_selected_object, mousePosition, view->getSize(), winSize);
+			}
+		}
+		else
+		{
+			// turning off previews
+
+			m_orbit_preview.setActiveStatus(false);
+			m_distance_preview.setActiveStatus(false);
+		}
+	}
+
+
 
 
 	// FEATURE: deleting object

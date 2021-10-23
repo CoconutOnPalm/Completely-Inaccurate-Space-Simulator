@@ -35,6 +35,7 @@ public:
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
 	int quitStatus() const;
+	void resetQuitStatus();
 
 	void render();
 
@@ -62,6 +63,7 @@ private:
 	ObjectBuffer m_output;
 
 	std::vector<std::unique_ptr<ObjectIcon>>::iterator m_selected;
+	std::vector<std::unique_ptr<ObjectIcon>>::iterator m_invaded_icon;
 
 
 	// backgrounds
@@ -80,7 +82,7 @@ private:
 
 	std::array<ke::Button, 6> m_object_info; // | name | mass | radius | class | subtype | system name |
 
-	ke::Button m_hints;
+	ke::Button m_quick_info; // name and class for icons inv by mouse
 
 	// other
 
@@ -96,7 +98,7 @@ private:
 	std::vector<std::unique_ptr<ObjectIcon>> m_objects;
 	
 
-	std::list<ObjectIcon*> m_on_screen;
+	std::list<std::vector<std::unique_ptr<ObjectIcon>>::iterator> m_on_screen;
 
 	std::vector<ke::Colorf> m_obj_colors;
 	std::array<ke::Colorf, 12> m_GUI_colors;

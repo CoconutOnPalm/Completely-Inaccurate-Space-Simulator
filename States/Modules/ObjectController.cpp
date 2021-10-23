@@ -135,15 +135,15 @@ void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector:
 	case PLANET:
 		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_planet_scale);
 		//(*selected_object)->data.radius = object_data->radius();
-		(*selected_object)->updatePhysicalData();
+		//(*selected_object)->updatePhysicalData(); ???
 		break;
 	case STAR:
 		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_star_scale);
 		//(*selected_object)->data.radius = object_data->radius();
-		(*selected_object)->updatePhysicalData();
+		//(*selected_object)->updatePhysicalData(); ???
 		break;
 	default:
-		ke::throw_error("ObjectController::createObjectPreview(...)", "incorrect object type", "ERROR");
+		ke::throw_error("ObjectController::createObjectPreview(...) - 1", "incorrect object type", "ERROR");
 		break;
 	}
 
@@ -153,6 +153,9 @@ void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector:
 
 void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object)
 {
+	// used to copy objet
+
+	// copying object
 	object_data->load(selected_object);
 
 	std::cout << (*selected_object)->name() << '\n';
@@ -170,7 +173,32 @@ void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector:
 		(*selected_object)->updatePhysicalData();
 		break;
 	default:
-		ke::throw_error("ObjectController::createObjectPreview(..)", "incorrect object type", "ERROR");
+		ke::throw_error("ObjectController::createObjectPreview(...) - 2", "incorrect object type", "ERROR");
+		break;
+	}
+
+	m_placed_object->setTexture(object_data->filename());
+	m_placed_object->setFillColor(sf::Color(255, 255, 255, 128));
+}
+
+void ObjectController::createObjectPreview(ObjectBuffer* object_data)
+{
+	// NOTE: object_data is loaded here
+
+	switch (object_data->type())
+	{
+	case PLANET:
+		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_planet_scale);
+		//(*selected_object)->data.radius = object_data->radius();
+		//(*selected_object)->updatePhysicalData(); ???
+		break;
+	case STAR:
+		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_star_scale);
+		//(*selected_object)->data.radius = object_data->radius();
+		//(*selected_object)->updatePhysicalData(); ???
+		break;
+	default:
+		ke::throw_error("ObjectController::createObjectPreview(...) - 3", "incorrect object type", "ERROR");
 		break;
 	}
 

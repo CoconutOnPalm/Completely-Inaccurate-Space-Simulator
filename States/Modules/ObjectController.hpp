@@ -33,6 +33,7 @@ public:
 
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon);
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object);
+	void createObjectPreview(ObjectBuffer* object_data);
 	void deleteObject(objvector::iterator& selected_object);
 
 	void updateObjects(float dt, unsigned int time_scale, float sim_speed);

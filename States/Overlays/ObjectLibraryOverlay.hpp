@@ -16,6 +16,15 @@ enum OBJECT_LIBRARY_OverlayQuitStatus
 };
 
 
+enum OBJECT_LIRARY_SORTING_BY
+{
+	SYSTEMS,
+	A_Z,
+	Z_A
+};
+
+
+
 class ObjectLibraryOverlay
 {
 public:
@@ -73,7 +82,9 @@ private:
 
 	// top section
 	ke::InputButton m_search_box;
-	std::array<ke::Button, 4> m_filtering_options;
+	std::array<ke::Button, 3> m_filtering_options;
+
+	short m_sorting_type;
 
 	// right section
 	ke::Button m_add_button;

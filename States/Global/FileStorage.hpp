@@ -2,6 +2,7 @@
 
 #include <KEngine/Algorithms.hpp>
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 
@@ -24,7 +25,7 @@ public:
 
 	std::map<std::string, std::string> linked_files;
 	std::map<std::string, std::string> linked_icon_layouts_files;
-	std::map<std::string, std::string> linked_space_objects_database;
+	std::unordered_map<std::string, std::string> linked_space_objects_database;
 
 private:
 

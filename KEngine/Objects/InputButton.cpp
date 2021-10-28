@@ -1253,6 +1253,11 @@ namespace ke
 
 
 		}
+		else if (m_imp_text.empty())
+		{
+			m_object.setText(m_def_text);
+			m_object.setTextColor(m_def_text_color);
+		}
 
 		return retv_buffer;
 	}

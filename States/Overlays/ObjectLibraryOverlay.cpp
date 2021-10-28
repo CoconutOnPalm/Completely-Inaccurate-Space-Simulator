@@ -1,4 +1,4 @@
-#include "ObjectLibraryOverlay.hpp"
+﻿#include "ObjectLibraryOverlay.hpp"
 
 #define object_ptr (*m_selected)
 
@@ -7,6 +7,7 @@ ObjectLibraryOverlay::ObjectLibraryOverlay()
 	, m_active(false)
 	, m_window(nullptr)
 	, m_next_position(0)
+	, m_sorting_type(0)
 {
 }
 
@@ -34,20 +35,21 @@ void ObjectLibraryOverlay::initUI()
 	m_next_position = winsize.y / 9;
 
 
-	m_search_box.create(sf::Vector2f(winsize.x * 0.25, winsize.y / 12), sf::Vector2f(winsize.x / 8 + winsize.x / 64, winsize.y / 18), ke::Origin::LEFT_MIDDLE, nullptr,
+	m_search_box.create(sf::Vector2f(winsize.x * 0.38, winsize.y / 15), sf::Vector2f(winsize.x / 8 + winsize.x / 64, winsize.y / 18), ke::Origin::LEFT_MIDDLE, nullptr,
 		L"Search...", ke::TextScope::ASCII_Everything, 50, 1, winsize.y / 32, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255),
-		sf::Color::White, sf::Color(64, 64, 64, 255), 0, sf::Color::Transparent, {}, sf::Vector2f(winsize.x * 0.0125, 0));
+		sf::Color::White, sf::Color(92, 92, 92, 255), 0, sf::Color::Transparent, {}, sf::Vector2f(winsize.x * 0.0125, 0));
 
 	// | favourite | by systems |    A-Z    |    Z-A    |
-	m_filtering_options[0].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/EmptyStar.png");
-	m_filtering_options[1].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45 + winsize.x * 0.0625, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
-	m_filtering_options[2].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45 + winsize.x * 0.1250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
-	m_filtering_options[3].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.45 + winsize.x * 0.1875, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
+	//m_filtering_options[0].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.53, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/EmptyStar.png");
+	m_filtering_options[0].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.03125, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
+	m_filtering_options[1].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.06250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
+	m_filtering_options[2].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.09375, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
 
 	m_add_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y - winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"ADD", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 192, 32, 128), sf::Color(255, 255, 255, 129));
 	m_close_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"CLOSE", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(192, 32, 32, 128), sf::Color(255, 255, 255, 129));
 
 	m_add_button.setTextStyle(sf::Text::Bold);
+
 	m_close_button.setTextStyle(sf::Text::Bold);
 
 	m_add_button.setFont(ke::Font::Calibri);
@@ -87,9 +89,17 @@ void ObjectLibraryOverlay::loadObjects()
 	ke::debug::printVector2(m_obj_view.getSize(), "viewSize");
 	ke::debug::printVector2(m_obj_view.getCenter(), "viewCenter");
 
-
+	std::vector<std::pair<std::string, std::string>> systems;
 
 	for (auto& itr : FileStorage::Get().linked_space_objects_database)
+		systems.push_back(std::make_pair(itr.first, itr.second));
+
+	// sorting systems by name
+	std::sort(systems.begin(), systems.end());
+
+
+
+	for (auto& itr : systems)
 	{
 		ke::FileStream loadStr(itr.second, std::ios::in | std::ios::binary);
 
@@ -222,8 +232,11 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 
 
-
-	m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr);
+	
+	if (ke::inRange(m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr) - 1, -0.01, 0.01)) // equal to 1
+	{
+		std::cout << "char entered\n";
+	}
 
 	m_slider.update(mousePosition.byWindow, event, sf::Mouse::Left, &m_obj_view);
 	m_view_barrier.updateClick(mousePosition.byWindow, sf::Mouse::Right, event);

@@ -6,8 +6,9 @@ ObjectLibraryOverlay::ObjectLibraryOverlay()
 	: m_quitStatus(false)
 	, m_active(false)
 	, m_window(nullptr)
+	, m_icons_per_row(10)
 	, m_next_position(0)
-	, m_sorting_type(0)
+	, m_sorting_type(OBJECT_LIRARY_SORTING_BY::SYSTEMS)
 {
 }
 
@@ -80,8 +81,7 @@ void ObjectLibraryOverlay::loadObjects()
 	sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, winsize.y - m_top_section.getSize().y);
 
 	float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
-	const int icons_per_row = 10;
-	float uniheight = field_size.x / icons_per_row; // height of objects and system names
+	float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
 
 	m_obj_view.setSize(winsize);
 	m_obj_view.setCenter(winsize.x * 0.5, winsize.y * 0.5);
@@ -115,7 +115,7 @@ void ObjectLibraryOverlay::loadObjects()
 
 		std::cout << system_name << ", " << obj_count << '\n';
 
-		m_system_names.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(field_size.x, uniheight), sf::Vector2f(field_beg, m_next_position), ke::Origin::LEFT_TOP,
+		m_system_names.emplace_back(std::make_unique<SystemNameTile>(sf::Vector2f(field_size.x, uniheight), sf::Vector2f(field_beg, m_next_position), ke::Origin::LEFT_TOP,
 			nullptr, ke::fixed::stow(system_name), field_size.y / 20, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color::White, 0, sf::Color::Transparent, 0, sf::Text::Bold, sf::Vector2f(field_size.x / 100, uniheight / 10)));
 
 		m_next_position += uniheight;
@@ -133,11 +133,11 @@ void ObjectLibraryOverlay::loadObjects()
 		sf::Vector3f color(1.0, 1.0, 1.0);
 
 		sf::Vector2f position(field_beg, m_next_position);
-		const sf::Vector2f size(field_size.x / icons_per_row, field_size.x / icons_per_row);
+		const sf::Vector2f size(uniheight, uniheight);
 
 		for (int i = 0; i < obj_count; i++)
 		{
-			position.x = field_beg + (i % (icons_per_row)) * size.x;
+			position.x = field_beg + (i % (m_icons_per_row)) * size.x;
 
 			loadStr.binRead(obj_name);
 			loadStr.binRead(type);
@@ -157,20 +157,11 @@ void ObjectLibraryOverlay::loadObjects()
 			loadStr.binRead(color.y);
 			loadStr.binRead(color.z);
 
-			if (i == 0)
-			{
-				m_system_begining.push_back(m_objects.begin());
 
-				if (m_system_bounds.empty())
-					m_system_bounds.push_back(std::make_pair<unsigned int, unsigned int>(0, obj_count - 1));
-				else
-					m_system_bounds.push_back(std::make_pair<unsigned int, unsigned int>(m_system_bounds.back().second + 1, m_system_bounds.back().second + obj_count));
-			}
-
-			if (i % (icons_per_row) == 0 && i)
+			if (i % (m_icons_per_row) == 0 && i)
 				position.y += uniheight;
 
-			m_objects.emplace_back(std::make_unique<ObjectIcon>(texture_path, filename, size, position, obj_name, type, obj_class, subtype, mass, radius, brightness, color));
+			m_objects.emplace_back(std::make_unique<Tile>(texture_path, filename, size, position, obj_name, type, obj_class, subtype, mass, radius, brightness, color, system_name));
 		}
 
 		m_next_position = position.y + uniheight;
@@ -191,12 +182,8 @@ void ObjectLibraryOverlay::loadObjects()
 	m_view_barrier.setBorders(sf::Vector2f(0, 0), sf::Vector2f(winsize.x, m_next_position));
 
 	for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
-		if (ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
+		if (ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
 			m_on_screen.push_back(itr);
-
-	std::cout << m_system_bounds.size() << '\n';
-	for (auto& itr : m_system_bounds)
-		std::cout << itr.first << ' ' << itr.second << '\n';
 
 	m_selected = m_objects.end();
 	m_invaded_icon = m_objects.end();
@@ -232,10 +219,27 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 
 
-	
+	// sorting update
+
 	if (ke::inRange(m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr) - 1, -0.01, 0.01)) // equal to 1
 	{
-		std::cout << "char entered\n";
+		m_filter = ke::fixed::wtos(m_search_box.getText());
+
+		std::transform(m_filter.begin(), m_filter.end(), m_filter.begin(),
+			[](unsigned char c) { return std::tolower(c); });
+
+		//std::cout << "filter: " << m_filter << '\n';
+		this->updateObjectPosition();
+
+		// updating objects on screen
+		m_on_screen.clear();
+
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		{
+			if ((*itr)->Icon().icon.isActive())
+				if (ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
+					m_on_screen.push_back(itr);
+		}
 	}
 
 	m_slider.update(mousePosition.byWindow, event, sf::Mouse::Left, &m_obj_view);
@@ -261,13 +265,11 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 		m_on_screen.clear();
 
-		int color_itr = 0;
 		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
 		{
-			if (ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
-				m_on_screen.push_back(itr);
-
-			color_itr++;
+			if ((*itr)->Icon().icon.isActive())
+				if (ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
+					m_on_screen.push_back(itr);
 		}
 	}
 
@@ -277,15 +279,15 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	for (auto& itr : m_on_screen)
 	{
-		if (!ke::ionRange((*itr)->icon.getPosition().y, -1.5 * (*itr)->icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->icon.getSize().y))
+		if (!ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
 			continue;
 
-		if ((*itr)->icon.isClicked(sf::Mouse::Left, mPosView, event))
+		if ((*itr)->Icon().icon.isClicked(sf::Mouse::Left, mPosView, event))
 		{
 			if (m_selected == itr)
 			{
-				(*m_selected)->icon.setOutlineColor(sf::Color::Transparent);
-				(*m_selected)->icon.setOutlineThickness(0);
+				(*m_selected)->Icon().icon.setOutlineColor(sf::Color::Transparent);
+				(*m_selected)->Icon().icon.setOutlineThickness(0);
 
 				m_selected = m_objects.end();
 				m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
@@ -296,14 +298,14 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 			{
 				if (m_selected != m_objects.end())
 				{
-					(*m_selected)->icon.setOutlineColor(sf::Color::Transparent);
-					(*m_selected)->icon.setOutlineThickness(0);
+					(*m_selected)->Icon().icon.setOutlineColor(sf::Color::Transparent);
+					(*m_selected)->Icon().icon.setOutlineThickness(0);
 				}
 
-				m_output.load(**itr);
+				m_output.load((**itr).Icon());
 				m_selected = itr;
-				(*m_selected)->icon.setOutlineColor(sf::Color(0, 64, 0, 255));
-				(*m_selected)->icon.setOutlineThickness(m_window->getSize().x / 512);
+				(*m_selected)->Icon().icon.setOutlineColor(sf::Color(0, 64, 0, 255));
+				(*m_selected)->Icon().icon.setOutlineThickness(m_window->getSize().x / 512);
 				updateObjectInfo();
 			}
 		}
@@ -322,10 +324,10 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	for (auto& itr : m_on_screen)
 	{
-		if ((*itr)->icon.isInvaded(mPosView))
+		if ((*itr)->Icon().icon.isInvaded(mPosView))
 		{
 			m_invaded_icon = itr;
-			m_quick_info.setText(ke::fixed::stow((*itr)->object_name() + "\n\n" + TypeTranslator::getClassName((*itr)->object_class())));
+			m_quick_info.setText(ke::fixed::stow((*itr)->Icon().object_name() + "\n\n" + TypeTranslator::getClassName((*itr)->Icon().object_class())));
 			break;
 		}
 
@@ -357,7 +359,7 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 
 	for (auto itr = m_on_screen.begin(); itr != m_on_screen.end(); ++itr)
 	{
-		ke::SmoothColorChange(&(**itr)->icon, (**itr)->icon.isInvaded(mPosView), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *obj_color_itr, 511, dt);
+		ke::SmoothColorChange(&(**itr)->Icon().icon, (**itr)->Icon().icon.isInvaded(mPosView), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *obj_color_itr, 511, dt);
 		++obj_color_itr;
 	}
 }
@@ -385,10 +387,10 @@ void ObjectLibraryOverlay::render()
 	m_window->setView(m_obj_view);
 
 	for (auto& itr : m_system_names)
-		itr->render(m_window);
+		itr->Button().render(m_window);
 
 	for (auto& itr : m_on_screen)
-		(*itr)->icon.render(m_window);
+		(*itr)->Icon().icon.render(m_window);
 
 	mPosView = m_window->mapPixelToCoords(sf::Mouse::getPosition(*m_window));
 
@@ -430,8 +432,8 @@ void ObjectLibraryOverlay::deactivate()
 
 	if (m_selected != m_objects.end())
 	{
-		(*m_selected)->icon.setOutlineColor(sf::Color::Transparent);
-		(*m_selected)->icon.setOutlineThickness(0);
+		(*m_selected)->Icon().icon.setOutlineColor(sf::Color::Transparent);
+		(*m_selected)->Icon().icon.setOutlineThickness(0);
 		m_selected = m_objects.end();
 	}
 
@@ -451,19 +453,19 @@ void ObjectLibraryOverlay::updateObjectInfo()
 {
 	if (m_selected != m_objects.end())
 	{
-		m_object_info.at(0).setText(ke::fixed::stow(object_ptr->object_name()));
+		m_object_info.at(0).setText(ke::fixed::stow(object_ptr->Icon().object_name()));
 
-		m_object_info.at(3).setText(ke::fixed::stow(TypeTranslator::getClassName(object_ptr->object_class())));
-		m_object_info.at(4).setText(ke::fixed::stow(TypeTranslator::getSubtypeName((object_ptr->subtype()))));
-		m_object_info.at(5).setText(findSystemName(m_selected));
+		m_object_info.at(3).setText(ke::fixed::stow(TypeTranslator::getClassName(object_ptr->Icon().object_class())));
+		m_object_info.at(4).setText(ke::fixed::stow(TypeTranslator::getSubtypeName((object_ptr->Icon().subtype()))));
+		m_object_info.at(5).setText(ke::fixed::stow(object_ptr->systemName()));
 
 
 		std::wstringstream valstr;
-		valstr << std::scientific << std::setprecision(4) << object_ptr->mass() << L" kg";
+		valstr << std::scientific << std::setprecision(4) << object_ptr->Icon().mass() << L" kg";
 		m_object_info.at(1).setText(valstr.str());
 
 		valstr.str(std::wstring());
-		valstr << std::scientific << std::setprecision(4) << object_ptr->radius() << L" m";
+		valstr << std::scientific << std::setprecision(4) << object_ptr->Icon().radius() << L" m";
 		m_object_info.at(2).setText(valstr.str());
 	}
 	else
@@ -477,23 +479,184 @@ void ObjectLibraryOverlay::updateObjectInfo()
 	}
 }
 
-std::wstring ObjectLibraryOverlay::findSystemName(std::vector<std::unique_ptr<ObjectIcon>>::iterator selected)
+
+void ObjectLibraryOverlay::updateObjectPosition()
 {
-	for (auto itr = m_system_bounds.begin(); itr != m_system_bounds.end(); ++itr)
+	switch (m_sorting_type)
 	{
-		if (ke::ionRange(std::distance(m_objects.begin(), m_selected), itr->first, itr->second))
-			return m_system_names.at(std::distance(m_system_bounds.begin(), itr))->getText();
-	}
-
-	return L"ERROR: out of range";
-
-	auto system = m_system_begining.begin();
-
-	for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+	case OBJECT_LIRARY_SORTING_BY::SYSTEMS:
 	{
-		if (itr == selected)
-			return m_system_names.at(std::distance(m_system_begining.begin(), system))->getText();
-	}
+		if (m_filter.empty())
+		{
+			for (auto& itr : m_objects)
+			{
+				itr->Icon().icon.setPosition(itr->defaultPosition());
+				itr->Icon().icon.setActiveStatus(true);
+			}
+		}
+		else
+		{
+			sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
+			float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
+			float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
 
-	return L"ERROR: out of range";
+			std::string system_name = m_objects.front()->systemName();
+			auto system_itr = m_system_names.begin();
+			sf::Vector2f position = (*system_itr)->Button().getPosition();
+
+			position.y += uniheight;
+			int i = 0;
+
+			// position.x = field_beg + (i % (icons_per_row)) * size.x;
+			//
+			// if (i % (icons_per_row) == 0 && i)
+			//		position.y += uniheight;
+
+			for (auto& itr : m_objects)
+			{
+				if (itr->systemName() != system_name)
+				{
+					system_name = itr->systemName();
+					system_itr++;
+					position = (*system_itr)->Button().getPosition();
+					position.y += uniheight;
+					i = 0;
+				}
+
+				bool matches_filter = 0;
+
+				std::string objName_buffer = itr->Icon().object_name();
+				std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
+					[](unsigned char c) { return std::tolower(c); });
+
+				if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
+				{;
+					position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+					if (i % (m_icons_per_row) == 0 && i)
+						position.y += uniheight;
+
+					itr->Icon().icon.setActiveStatus(true);
+					itr->Icon().icon.setPosition(position);
+
+					i++;
+				}
+				else
+				{
+					//itr->Icon().icon.setPosition(-100, -100);
+					itr->Icon().icon.setActiveStatus(false);
+				}
+			}
+		}
+	}
+	break;
+
+	case OBJECT_LIRARY_SORTING_BY::A_Z:
+	{
+		if (m_filter.empty())
+		{
+			/*ke::debug::Benchmark b("Copy time");
+			auto m_object_vector_buffer = m_objects;
+			b.Stop();*/
+
+
+		}
+	}
+	break;
+
+	case OBJECT_LIRARY_SORTING_BY::Z_A:
+	{
+
+	}
+	break;
+
+	default:
+	{
+
+	}
+	break;
+	}
+}
+
+//std::wstring ObjectLibraryOverlay::findSystemName(std::vector<std::unique_ptr<Tile>>::iterator selected)
+//{
+//	for (auto itr = m_system_bounds.begin(); itr != m_system_bounds.end(); ++itr)
+//	{
+//		if (ke::ionRange(std::distance(m_objects.begin(), m_selected), itr->first, itr->second))
+//			return m_system_names.at(std::distance(m_system_bounds.begin(), itr))->getText();
+//	}
+//
+//	return L"ERROR: out of range";
+//
+//	auto system = m_system_begining.begin();
+//
+//	for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+//	{
+//		if (itr == selected)
+//			return m_system_names.at(std::distance(m_system_begining.begin(), system))->getText();
+//	}
+//
+//	return L"ERROR: out of range";
+//}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+Tile::Tile(const std::string& icon_filename, const std::string& object_filename, const sf::Vector2f& size, const sf::Vector2f& position, const std::string& obj_name, int type, int _class, int subtype, long double obj_mass, long double obj_radius, float brightness, const sf::Vector3f& color, std::string system_name)
+	: m_icon(icon_filename, object_filename, size, position, obj_name, type, _class, subtype, obj_mass, obj_radius, brightness, color)
+{
+	m_system_name = system_name;
+	m_default_position = position;
+}
+
+Tile::~Tile()
+{
+
+}
+
+sf::Vector2f Tile::defaultPosition() const
+{
+	return m_default_position;
+}
+
+std::string Tile::systemName() const
+{
+	return m_system_name;
+}
+
+ObjectIcon& Tile::Icon()
+{
+	return m_icon;
+}
+
+SystemNameTile::SystemNameTile(const sf::Vector2f& size, const sf::Vector2f& position, int origin, const sf::Texture* texture, const std::wstring& text, unsigned int character_size, int text_position, const sf::Color& object_color, const sf::Color& text_color, float outline_thickness, const sf::Color& outline_color, float rotation, unsigned int text_style, const sf::Vector2f& text_shift)
+	: m_tile(size, position, origin, texture, text, character_size, text_position, object_color, text_color, outline_thickness, outline_color, rotation, text_style, text_shift)
+{
+	m_str_name = ke::fixed::wtos(text);
+	m_default_position = position;
+}
+
+SystemNameTile::~SystemNameTile()
+{
+
+}
+
+ke::Button& SystemNameTile::Button()
+{
+	return m_tile;
+}
+
+std::string& SystemNameTile::name()
+{
+	return m_str_name;
+}
+
+sf::Vector2f SystemNameTile::defaultPosition() const
+{
+	return m_default_position;
 }

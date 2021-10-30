@@ -42,9 +42,12 @@ void ObjectLibraryOverlay::initUI()
 
 	// | favourite | by systems |    A-Z    |    Z-A    |
 	//m_filtering_options[0].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.53, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/EmptyStar.png");
-	m_filtering_options[0].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.03125, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
-	m_filtering_options[1].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.06250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
-	m_filtering_options[2].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.09375, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, nullptr, std::wstring(), {}, {}, sf::Color::Green);
+	m_filtering_options[0].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.03125, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingBySystemsIcon.png");
+	m_filtering_options[1].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.06250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingByAZIcon.png");
+	m_filtering_options[2].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.09375, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingByZAIcon.png");
+
+	m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
+
 
 	m_add_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y - winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"ADD", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 192, 32, 128), sf::Color(255, 255, 255, 129));
 	m_close_button.create(sf::Vector2f(winsize.x * 0.16, winsize.y / 12), sf::Vector2f(m_right_section.getShapeCenter().x, winsize.y / 15), ke::Origin::MIDDLE_MIDDLE, nullptr, L"CLOSE", winsize.y / 18, ke::Origin::MIDDLE_MIDDLE, sf::Color(192, 32, 32, 128), sf::Color(255, 255, 255, 129));
@@ -187,6 +190,16 @@ void ObjectLibraryOverlay::loadObjects()
 
 	m_selected = m_objects.end();
 	m_invaded_icon = m_objects.end();
+
+
+	m_sorted_object_order.reserve(m_objects.size());
+	int _i = 0;
+
+	for (auto& itr : m_objects)
+	{
+		m_sorted_object_order.push_back(std::make_pair(_i, itr->name()));
+		_i++;
+	}
 }
 
 void ObjectLibraryOverlay::updateEvents(const MousePosition& mousePosition, float dt)
@@ -219,9 +232,42 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 
 
+	if (m_filtering_options.at(0).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_sorting_type = OBJECT_LIRARY_SORTING_BY::SYSTEMS;
+		this->updateSystemSorting();
+
+		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
+		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+	}
+	else if (m_filtering_options.at(1).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_sorting_type = OBJECT_LIRARY_SORTING_BY::A_Z;
+		this->updateAZSorting();
+
+		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
+		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+	}
+	else if (m_filtering_options.at(2).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_sorting_type = OBJECT_LIRARY_SORTING_BY::Z_A;
+		this->updateZASorting();
+
+		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
+	}
+	else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Tab)
+	{
+		m_search_box.setEPS(true);
+	}
+
 	// sorting update
 
-	if (ke::inRange(m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr) - 1, -0.01, 0.01)) // equal to 1
+	if (ke::inRange(m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr) - 1, -0.01, 0.01) ||	// equal to 1
+		ke::inRange(m_search_box.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr) - 1, 0.99, 1.01))		// equal to 2
 	{
 		m_filter = ke::fixed::wtos(m_search_box.getText());
 
@@ -355,6 +401,14 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 2048, dt); ++GUI_color_itr;
 	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color(48, 48, 48, 48), sf::Color(32, 32, 32, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
 
+
+	for (auto& itr : m_filtering_options)
+	{
+		ke::SmoothColorChange(&itr, itr.isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *GUI_color_itr, 511, dt);
+		++GUI_color_itr;
+	}
+
+
 	auto obj_color_itr = m_obj_colors.begin();
 
 	for (auto itr = m_on_screen.begin(); itr != m_on_screen.end(); ++itr)
@@ -486,95 +540,240 @@ void ObjectLibraryOverlay::updateObjectPosition()
 	{
 	case OBJECT_LIRARY_SORTING_BY::SYSTEMS:
 	{
-		if (m_filter.empty())
-		{
-			for (auto& itr : m_objects)
-			{
-				itr->Icon().icon.setPosition(itr->defaultPosition());
-				itr->Icon().icon.setActiveStatus(true);
-			}
-		}
-		else
-		{
-			sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
-			float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
-			float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
-
-			std::string system_name = m_objects.front()->systemName();
-			auto system_itr = m_system_names.begin();
-			sf::Vector2f position = (*system_itr)->Button().getPosition();
-
-			position.y += uniheight;
-			int i = 0;
-
-			// position.x = field_beg + (i % (icons_per_row)) * size.x;
-			//
-			// if (i % (icons_per_row) == 0 && i)
-			//		position.y += uniheight;
-
-			for (auto& itr : m_objects)
-			{
-				if (itr->systemName() != system_name)
-				{
-					system_name = itr->systemName();
-					system_itr++;
-					position = (*system_itr)->Button().getPosition();
-					position.y += uniheight;
-					i = 0;
-				}
-
-				bool matches_filter = 0;
-
-				std::string objName_buffer = itr->Icon().object_name();
-				std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
-					[](unsigned char c) { return std::tolower(c); });
-
-				if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
-				{;
-					position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
-
-					if (i % (m_icons_per_row) == 0 && i)
-						position.y += uniheight;
-
-					itr->Icon().icon.setActiveStatus(true);
-					itr->Icon().icon.setPosition(position);
-
-					i++;
-				}
-				else
-				{
-					//itr->Icon().icon.setPosition(-100, -100);
-					itr->Icon().icon.setActiveStatus(false);
-				}
-			}
-		}
+		this->updateSystemSorting();
 	}
 	break;
 
 	case OBJECT_LIRARY_SORTING_BY::A_Z:
 	{
-		if (m_filter.empty())
-		{
-			/*ke::debug::Benchmark b("Copy time");
-			auto m_object_vector_buffer = m_objects;
-			b.Stop();*/
-
-
-		}
+		this->updateAZSorting();
 	}
 	break;
 
 	case OBJECT_LIRARY_SORTING_BY::Z_A:
 	{
-
+		this->updateZASorting();
 	}
 	break;
 
 	default:
 	{
-
+		ke::throw_error("ObjectLibraryOverlay::updateObjectPosition()", "reached *default* statement", "WARNING");
+		this->updateSystemSorting();
 	}
 	break;
+	}
+}
+
+void ObjectLibraryOverlay::updateSystemSorting()
+{
+	for (auto& itr : m_system_names)
+		itr->Button().setActiveStatus(true);
+
+
+	if (m_filter.empty())
+	{
+		for (auto& itr : m_objects)
+		{
+			itr->Icon().icon.setPosition(itr->defaultPosition());
+			itr->Icon().icon.setActiveStatus(true);
+		}
+
+		for (auto& itr : m_system_names)
+		{
+			itr->Button().setPosition(itr->defaultPosition());
+		}
+	}
+	else
+	{
+		sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
+		float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
+		float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
+
+		std::string system_name = m_objects.front()->systemName();
+		auto system_itr = m_system_names.begin();
+		sf::Vector2f position = (*system_itr)->Button().getPosition();
+
+		position.y += uniheight;
+		int i = 0;
+
+		// position.x = field_beg + (i % (icons_per_row)) * size.x;
+		//
+		// if (i % (icons_per_row) == 0 && i)
+		//		position.y += uniheight;
+
+		for (auto& itr : m_objects)
+		{
+			if (itr->systemName() != system_name)
+			{
+				system_name = itr->systemName();
+				system_itr++;
+				(*system_itr)->Button().setPosition(field_beg, position.y + uniheight);
+				position = (*system_itr)->Button().getPosition();
+				position.y += uniheight;
+				i = 0;
+			}
+
+			std::string objName_buffer = itr->Icon().object_name();
+			std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
+				[](unsigned char c) { return std::tolower(c); });
+
+			if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
+			{
+				position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+				if (i % (m_icons_per_row) == 0 && i)
+					position.y += uniheight;
+
+				itr->Icon().icon.setActiveStatus(true);
+				itr->Icon().icon.setPosition(position);
+
+				i++;
+			}
+			else
+			{
+				//itr->Icon().icon.setPosition(-100, -100);
+				itr->Icon().icon.setActiveStatus(false);
+			}
+		}
+	}
+}
+
+void ObjectLibraryOverlay::updateAZSorting()
+{
+	for (auto& itr : m_system_names)
+		itr->Button().setActiveStatus(false);
+
+
+	sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
+	float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
+	float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
+
+
+	//auto itr = m_default_object_order
+	//for (auto itr = m_objects.begin())
+
+	std::sort(m_sorted_object_order.begin(), m_sorted_object_order.end(), [](const std::pair<int, std::string>& p1, const std::pair<int, std::string>& p2) { return p1.second < p2.second; });
+
+	if (m_filter.empty())
+	{
+		sf::Vector2f position(field_beg, m_system_names.front()->defaultPosition().y);
+
+		int i = 0;
+		for (auto& itr : m_sorted_object_order)
+		{
+			m_objects[itr.first]->Icon().icon.setActiveStatus(true);
+
+			position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+			if (i % (m_icons_per_row) == 0 && i)
+				position.y += uniheight;
+
+
+			m_objects[itr.first]->Icon().icon.setPosition(position);
+
+			i++;
+		}
+	}
+	else
+	{
+		sf::Vector2f position(field_beg, m_system_names.front()->defaultPosition().y);
+
+
+		int i = 0;
+		for (auto& itr : m_sorted_object_order)
+		{
+			std::string objName_buffer = m_objects[itr.first]->Icon().object_name();
+			std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
+				[](unsigned char c) { return std::tolower(c); });
+
+			if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
+			{
+				position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+				if (i % (m_icons_per_row) == 0 && i)
+					position.y += uniheight;
+
+				m_objects[itr.first]->Icon().icon.setActiveStatus(true);
+				m_objects[itr.first]->Icon().icon.setPosition(position);
+
+				i++;
+			}
+			else
+			{
+				//itr->Icon().icon.setPosition(-100, -100);
+				m_objects[itr.first]->Icon().icon.setActiveStatus(false);
+			}
+		}
+	}
+}
+
+void ObjectLibraryOverlay::updateZASorting()
+{
+	for (auto& itr : m_system_names)
+		itr->Button().setActiveStatus(false);
+
+
+	sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
+	float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
+	float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
+
+
+	//auto itr = m_default_object_order
+	//for (auto itr = m_objects.begin())
+
+	std::sort(m_sorted_object_order.begin(), m_sorted_object_order.end(), [](const std::pair<int, std::string>& p1, const std::pair<int, std::string>& p2) { return p1.second > p2.second; });
+
+	if (m_filter.empty())
+	{
+		sf::Vector2f position(field_beg, m_system_names.front()->defaultPosition().y);
+
+		int i = 0;
+		for (auto& itr : m_sorted_object_order)
+		{
+			m_objects[itr.first]->Icon().icon.setActiveStatus(true);
+
+			position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+			if (i % (m_icons_per_row) == 0 && i)
+				position.y += uniheight;
+
+
+			m_objects[itr.first]->Icon().icon.setPosition(position);
+
+			i++;
+		}
+	}
+	else
+	{
+		sf::Vector2f position(field_beg, m_system_names.front()->defaultPosition().y);
+
+
+		int i = 0;
+		for (auto& itr : m_sorted_object_order)
+		{
+			std::string objName_buffer = m_objects[itr.first]->Icon().object_name();
+			std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
+				[](unsigned char c) { return std::tolower(c); });
+
+			if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
+			{
+				position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+				if (i % (m_icons_per_row) == 0 && i)
+					position.y += uniheight;
+
+				m_objects[itr.first]->Icon().icon.setActiveStatus(true);
+				m_objects[itr.first]->Icon().icon.setPosition(position);
+
+				i++;
+			}
+			else
+			{
+				//itr->Icon().icon.setPosition(-100, -100);
+				m_objects[itr.first]->Icon().icon.setActiveStatus(false);
+			}
+		}
 	}
 }
 
@@ -627,6 +826,11 @@ sf::Vector2f Tile::defaultPosition() const
 std::string Tile::systemName() const
 {
 	return m_system_name;
+}
+
+std::string Tile::name() const
+{
+	return m_icon.object_name();
 }
 
 ObjectIcon& Tile::Icon()

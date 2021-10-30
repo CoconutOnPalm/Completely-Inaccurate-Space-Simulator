@@ -64,6 +64,10 @@ private:
 	void updateObjectInfo();
 	void updateObjectPosition();
 
+	void updateSystemSorting();
+	void updateAZSorting();
+	void updateZASorting();
+
 	//std::wstring findSystemName(std::vector<std::unique_ptr<ObjectIcon>>::iterator selected);
 
 
@@ -114,12 +118,13 @@ private:
 	//std::vector<std::unique_ptr<Tile>> m_default_ptr_layout;
 	std::vector<std::unique_ptr<SystemNameTile>> m_system_names;
 	std::vector<std::unique_ptr<Tile>> m_objects;
+	std::vector<std::pair<int , std::string>> m_sorted_object_order;
 	
 
 	std::list<std::vector<std::unique_ptr<Tile>>::iterator> m_on_screen;
 
 	std::vector<ke::Colorf> m_obj_colors;
-	std::array<ke::Colorf, 12> m_GUI_colors;
+	std::array<ke::Colorf, 15> m_GUI_colors;
 
 	float m_next_position;
 
@@ -159,6 +164,7 @@ public:
 
 	sf::Vector2f defaultPosition() const;
 	std::string systemName() const;
+	std::string name() const;
 	ObjectIcon& Icon();
 	
 

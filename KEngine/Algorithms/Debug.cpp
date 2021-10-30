@@ -13,6 +13,7 @@ namespace ke
 
 		Benchmark::~Benchmark()
 		{
+			this->Stop();
 		}
 
 		void Benchmark::Stop()

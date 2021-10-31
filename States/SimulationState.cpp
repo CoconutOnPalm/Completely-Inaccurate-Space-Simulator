@@ -832,9 +832,13 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		else if (m_ObjectLibraryOverlay->quitStatus() == OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT)
 		{
 			m_ObjectLibraryOverlay->resetQuitStatus();
+
 			m_objectBuffer = *m_ObjectLibraryOverlay->output();
+			m_ObjectLibraryOverlay->resetOutput();
 			m_ObjController.createObjectPreview(&m_objectBuffer);
+
 			m_icon_iterator = m_object_icons.begin() + 1; // set to sth that isn't .begin()
+
 			m_placed_object.setActiveStatus(true);
 			m_object_buffer_ready = true;
 		}

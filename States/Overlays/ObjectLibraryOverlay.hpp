@@ -57,6 +57,7 @@ public:
 	void deactivate();
 
 	ObjectBuffer* output();
+	void resetOutput();
 
 private:
 
@@ -124,7 +125,7 @@ private:
 	std::list<std::vector<std::unique_ptr<Tile>>::iterator> m_on_screen;
 
 	std::vector<ke::Colorf> m_obj_colors;
-	std::array<ke::Colorf, 15> m_GUI_colors;
+	std::array<ke::Colorf, 16> m_GUI_colors;
 
 	float m_next_position;
 

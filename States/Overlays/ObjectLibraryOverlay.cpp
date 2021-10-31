@@ -26,7 +26,7 @@ void ObjectLibraryOverlay::initUI()
 {
 	sf::Vector2f winsize(m_window->getSize());
 
-	m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
+	this->resetOutput();
 
 
 	m_background.create(sf::Vector2f(winsize.x * 0.75, winsize.y), winsize * 0.5f, ke::Origin::MIDDLE_MIDDLE, std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black);
@@ -220,13 +220,14 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 	{
 		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
+		this->resetOutput();
 		this->deactivate();
 		return;
 	}
 	else if (m_close_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
-		m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudioIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
+		this->resetOutput();
 		this->deactivate();
 		return;
 	}
@@ -336,7 +337,7 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 				(*m_selected)->Icon().icon.setOutlineThickness(0);
 
 				m_selected = m_objects.end();
-				m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudiIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
+				this->resetOutput();
 				updateObjectInfo();
 				return;
 			}
@@ -400,6 +401,8 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 
 	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 2048, dt); ++GUI_color_itr;
 	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition) || m_slider.isHolded(), sf::Color(48, 48, 48, 48), sf::Color(32, 32, 32, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
+
+	ke::SmoothColorChange(&m_search_box, m_search_box.isInvaded(mousePosition) || m_search_box.getEPS(), sf::Color(40, 40, 40, 255), sf::Color(32, 32, 32, 255), *GUI_color_itr, 64, dt); ++GUI_color_itr;
 
 
 	for (auto& itr : m_filtering_options)
@@ -497,6 +500,11 @@ void ObjectLibraryOverlay::deactivate()
 ObjectBuffer* ObjectLibraryOverlay::output()
 {
 	return &m_output;
+}
+
+void ObjectLibraryOverlay::resetOutput()
+{
+	m_output.load(ObjectType::UNDEFINED, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0.0, 0.0, "__EMPTY", "Textures/AudioIcon.png", "Textures/IconTextures/Empty_icon.png", 0, sf::Vector3f(0.0, 0.0, 0.0));
 }
 
 

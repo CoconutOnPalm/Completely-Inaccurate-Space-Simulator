@@ -69,6 +69,8 @@ private:
 
     // simulation behaiour
 
+    float m_deltaTime;
+
     bool m_running;
     unsigned int m_time_scale;
     float m_simulation_speed;

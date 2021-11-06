@@ -3,6 +3,7 @@
 SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	: State(sf_window, sf_view, SIMULATION)
 	, m_next_state(NextState::NONE)
+	, m_deltaTime(0.0001)
 	, m_outro_time(0)
 	, m_running(false)
 	, m_time_scale(100000)
@@ -617,6 +618,8 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	if (m_running)
 	{
+		m_deltaTime = dt;
+
 		// FEATURE: centering view to object position
 		
 		if (m_selected_object != m_objects.begin())
@@ -627,7 +630,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 		// FEATURE: updating objects with Object controller (ObjectController - menager)
 
-		m_ObjController.updateObjects(dt, m_time_scale, m_simulation_speed);
+		m_ObjController.updateObjects(m_deltaTime, m_time_scale, m_simulation_speed);
 
 
 		// FEATURE: updating Placed Object preview

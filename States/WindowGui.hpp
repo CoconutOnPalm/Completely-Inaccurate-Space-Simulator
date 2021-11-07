@@ -26,7 +26,7 @@ public:
     void renderByWindow();
 
 
-    int Quit();
+    StateQuitCode Quit();
 
 private:
 

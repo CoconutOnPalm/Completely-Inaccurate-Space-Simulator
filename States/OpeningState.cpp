@@ -2,9 +2,9 @@
 
 
 OpeningState::OpeningState(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, SIM_OPENING)
+	: State(sf_window, sf_view, STATE::SIM_OPENING)
 	, m_sm_color(sf::Color::Black)
-	, m_next_state(NextState::NONE)
+	, m_next_state(STATE::NONE)
 	, m_outro_time(0)
 {
 	view->setCenter(winSize / 2.f);
@@ -93,10 +93,10 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
-			case NextState::SIMULATION:
+			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view);
 				break;
 			default:
@@ -115,10 +115,10 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
-			case NextState::SIMULATION:
+			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view);
 				break;
 			default:
@@ -151,22 +151,22 @@ void OpeningState::updatePollEvents(const MousePosition& mousePosition, float dt
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 	else if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::XButton1)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 	else if (m_back_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 	else if (m_create_new.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = SIMULATION;
+		m_next_state = STATE::SIMULATION;
 	}
 }
 

@@ -27,13 +27,13 @@ public:
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
-	int quitStatus() const;
+	OverlayQuitCode quitStatus() const;
 
 	void render(sf::RenderWindow* window);
 
 private:
 
-	int m_quitStatus;
+	OverlayQuitCode m_quitCode;
 
 	ke::Button m_button;
 	//ke::Button m_quit_button;

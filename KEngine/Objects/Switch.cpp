@@ -720,9 +720,9 @@ namespace ke
 
 
 
-	void Switch::setSignal(bool m_signal)
+	void Switch::setSignal(bool signal)
 	{
-		m_signal = m_signal;
+		m_signal = signal;
 
 		if (m_signal)
 		{
@@ -793,14 +793,17 @@ namespace ke
 	////////////////////////////////
 
 
-	void Switch::SSC_click_update(const sf::Vector2f& mousePosition, sf::Event& event, sf::Mouse::Button button)
+	bool Switch::SSC_click_update(const sf::Vector2f& mousePosition, sf::Event& event, sf::Mouse::Button button)
 	{
 		if (this->isClicked(button, mousePosition, event) && !m_moving)
 		{
 			m_moving = true;
 
 			m_signal ^= 1;
+
+			return true;
 		}
+		return false;
 	}
 
 

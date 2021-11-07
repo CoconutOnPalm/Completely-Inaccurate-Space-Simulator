@@ -1071,7 +1071,7 @@ namespace ke
 
 				case Numbers:
 				{
-					if ((((event.text.unicode > 47 && event.text.unicode < 58)) || event.text.unicode == '\b' || event.text.unicode == ' '))
+					if ((((event.text.unicode > 47 && event.text.unicode < 58)) || event.text.unicode == '\b' || event.text.unicode == ' ' || event.text.unicode == '.'))
 					{
 						if (event.text.unicode == '\b')
 						{

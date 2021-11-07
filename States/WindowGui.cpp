@@ -1,7 +1,7 @@
 #include "WindowGui.hpp"
 
 WindowGui::WindowGui(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, NONE)
+	: State(sf_window, sf_view, STATE::NONE)
 	, m_windowStatus((AppSettings::WindowStyle() != sf::Style::Fullscreen) ? false : true)
 	, m_windowCatchDiff(0, 0)
 {
@@ -98,7 +98,7 @@ void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, s
 				viewSize = sf::Vector2f(wSize);
 				m_windowStatus = true;
 
-				if (p_current_state != SIMULATION)
+				if (p_current_state != STATE::SIMULATION)
 					window->setFramerateLimit(AppSettings::MaxMenuFPS());
 				else
 					window->setFramerateLimit(AppSettings::MaxSimulationFPS());
@@ -110,7 +110,7 @@ void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, s
 				winSize = AppSettings::DefaultWindowSize();
 				viewSize = AppSettings::DefaultWindowSize();
 
-				if (p_current_state != SIMULATION)
+				if (p_current_state != STATE::SIMULATION)
 					window->setFramerateLimit(AppSettings::MaxMenuFPS());
 				else
 					window->setFramerateLimit(AppSettings::MaxSimulationFPS());
@@ -154,7 +154,7 @@ void WindowGui::renderByWindow()
 	//m_mousePosVis.render(window);
 }
 
-int WindowGui::Quit()
+StateQuitCode WindowGui::Quit()
 {
 	return p_quitCode;
 }

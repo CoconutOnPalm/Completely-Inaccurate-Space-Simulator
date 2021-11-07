@@ -1,8 +1,8 @@
 #include "SimulationState.hpp"
 
 SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, SIMULATION)
-	, m_next_state(NextState::NONE)
+	: State(sf_window, sf_view, STATE::SIMULATION)
+	, m_next_state(STATE::NONE)
 	, m_deltaTime(0.0001)
 	, m_outro_time(0)
 	, m_running(false)
@@ -36,43 +36,18 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	m_ObjController.assing(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
 	m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
 
-	m_StateControlPanel.assign(&m_state_controllers, &m_upperState, &m_quitOverlay);
+	m_StateControlPanel.assign(&m_state_controllers, &m_upperState, &m_quitOverlay, &m_SettingsOverlay);
 
-	m_ObjectLibraryOverlay = std::make_unique<ObjectLibraryOverlay>();
-	m_ObjectLibraryOverlay->assign(window);
-	m_ObjectLibraryOverlay->initUI();
-	m_ObjectLibraryOverlay->loadObjects();
-	
+	//m_ObjectLibraryOverlay = std::make_unique<ObjectLibraryOverlay>();
+	m_ObjectLibraryOverlay.assign(window);
+	m_ObjectLibraryOverlay.initUI();
+	m_ObjectLibraryOverlay.loadObjects();
 
-	//m_objIconPanel.assign(&m_iconUI, &m_object_icons);
+	m_SettingsOverlay.assign(window);
+	m_SettingsOverlay.initUI();
 
 
 	m_placed_object.create(100, { 1000, 1000 }, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
-
-
-	/*ke::FileStream fstr;
-	fstr.createFile("Data/IconLayouts/test1.slo");
-	fstr.open("Data/IconLayouts/test1.slo", std::ios::binary | std::ios::out);
-
-	for (size_t i = 0; i < 16; i++)
-	{
-		fstr.binWrite((std::string)("TestName1."));
-		fstr.binWrite(PLANET);
-		fstr.binWrite((double)i * 1e24);
-		fstr.binWrite((double)i * 100000);
-		fstr.binWrite((std::string)"Textures/Unused/Galaxy1.png");
-		fstr.binWrite((std::string)"Textures/Unused/Galaxy1.png");
-	}
-
-	FileStorage::Get().linked_icon_layouts_files["test1"] = "Data/IconLayouts/test1.slo";*/
-
-	//m_starShader.loadFromFile("Textures/Shaders/star_shader.frag", sf::Shader::Fragment);
-	//m_starShader.setUniform("position", sf::Glsl::Vec2(0, 0));
-	//m_starShader.setUniform("basic_a", 1.f);
-	//m_test_shader.setUniform("size", 500.f);
-
-	//for (auto& itr : m_object_icons)
-		//std::cout << itr->object_class() << '\n';
 }
 
 
@@ -326,7 +301,7 @@ void SimulationState::InitTopGUI()
 	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Neptune", 1.0244e+26, 24'766'360, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
 	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "International Space Station", 419'725, 109, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
 
-	m_objIconPanel.assign(&m_iconUI, &m_object_icons, m_ObjectLibraryOverlay.get());
+	m_objIconPanel.assign(&m_iconUI, &m_object_icons, &m_ObjectLibraryOverlay);
 
 
 	//ke::FileStream gstream;
@@ -559,7 +534,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			default:
@@ -578,7 +553,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			default:
@@ -594,7 +569,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	{
 		m_outro_clock.restart();
 		if (ke::SmoothColorChange(&m_stateMask, true, sf::Color::Transparent, sf::Color::Black, m_sm_color, 256, dt))
-			m_ObjectLibraryOverlay->updateColors(mousePosition.byWindow, dt);
+			m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 	}
 
 
@@ -606,8 +581,8 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FETURE: module & overlay event update
 
 	m_StateControlPanel.updateEvents(mousePosition, dt);
-	m_ObjectLibraryOverlay->updateEvents(mousePosition, dt);
-
+	m_ObjectLibraryOverlay.updateEvents(mousePosition, dt);
+	m_SettingsOverlay.updateEvents(mousePosition, dt);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -749,13 +724,16 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay->active(), sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SettingsOverlay.active(), sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
 
-	if (m_ObjectLibraryOverlay->active())
-		m_ObjectLibraryOverlay->updateColors(mousePosition.byWindow, dt);
+	if (m_ObjectLibraryOverlay.active())
+		m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
+
+	if (m_SettingsOverlay.active())
+		m_SettingsOverlay.updateColors(mousePosition.byWindow, dt);
 }
 
 
@@ -778,18 +756,18 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		
 		switch (m_quitOverlay->quitStatus())
 		{
-		case QUITTING:
+		case OverlayQuitCode::QUITTING:
 			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = MAIN_MENU;
+			m_next_state = STATE::MAIN_MENU;
 			break;
 
-		case QUITTING_AND_SAVING:
+		case OverlayQuitCode::QUITTING_AND_SAVING:
 			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = MAIN_MENU;
+			m_next_state = STATE::MAIN_MENU;
 			// TODO: SAVING
 			break;
 
-		case CLOSING_OVRL:
+		case OverlayQuitCode::CLOSING_OVRL:
 			m_quitOverlay = nullptr;
 			break;
 		default:
@@ -800,9 +778,16 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	}
 
-	if (m_ObjectLibraryOverlay->active())
+	if (m_ObjectLibraryOverlay.active())
 	{
-		m_ObjectLibraryOverlay->updatePollEvents(mousePosition, dt, event);
+		m_ObjectLibraryOverlay.updatePollEvents(mousePosition, dt, event);
+		return;
+	}
+
+
+	if (m_SettingsOverlay.active())
+	{
+		m_SettingsOverlay.updatePollEvents(mousePosition, dt, event);
 		return;
 	}
 
@@ -812,7 +797,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::XButton1)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 
 
@@ -825,19 +810,19 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	// FEATURE: getting object from Databese (Object Library Overlay)
 
-	if (!m_ObjectLibraryOverlay->active())
+	if (!m_ObjectLibraryOverlay.active())
 	{
-		if (m_ObjectLibraryOverlay->quitStatus() == OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT)
+		if (m_ObjectLibraryOverlay.quitStatus() == OverlayQuitCode::QUITTING_WITHOUT_OBJECT)
 		{
-			m_ObjectLibraryOverlay->resetQuitStatus();
+			m_ObjectLibraryOverlay.resetQuitStatus();
 			m_object_buffer_ready = false; // for safety reasons
 		}
-		else if (m_ObjectLibraryOverlay->quitStatus() == OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT)
+		else if (m_ObjectLibraryOverlay.quitStatus() == OverlayQuitCode::QUITTING_WITH_OBJECT)
 		{
-			m_ObjectLibraryOverlay->resetQuitStatus();
+			m_ObjectLibraryOverlay.resetQuitStatus();
 
-			m_objectBuffer = *m_ObjectLibraryOverlay->output();
-			m_ObjectLibraryOverlay->resetOutput();
+			m_objectBuffer = *m_ObjectLibraryOverlay.output();
+			m_ObjectLibraryOverlay.resetOutput();
 			m_ObjController.createObjectPreview(&m_objectBuffer);
 
 			m_icon_iterator = m_object_icons.begin() + 1; // set to sth that isn't .begin()
@@ -1538,7 +1523,8 @@ void SimulationState::renderByWindow()
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->render(window);
 
-	m_ObjectLibraryOverlay->render();
+	m_ObjectLibraryOverlay.render();
+	m_SettingsOverlay.render();
 	
 
 	m_stateMask.render(window);

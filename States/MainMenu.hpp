@@ -27,7 +27,7 @@ public:
     void renderByWindow();
 
 
-    int Quit();
+    StateQuitCode Quit();
 
 
 private:
@@ -46,7 +46,7 @@ private:
 
     std::vector<ke::Colorf> m_floatcolors;
 
-    int m_next_state;
+    STATE m_next_state;
 
     sf::Clock m_outro_clock;
     float m_outro_time;

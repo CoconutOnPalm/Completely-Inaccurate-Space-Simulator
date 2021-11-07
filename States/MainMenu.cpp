@@ -1,9 +1,9 @@
 #include "MainMenu.hpp"
 
 MainMenu::MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, MAIN_MENU)
+	: State(sf_window, sf_view, STATE::MAIN_MENU)
 	, m_sm_color(sf::Color::Black)
-	, m_next_state(NextState::NONE)
+	, m_next_state(STATE::NONE)
 	, m_outro_time(0)
 {
 	view->setCenter(winSize / 2.f);
@@ -76,10 +76,10 @@ void MainMenu::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::SETTINGS:
+			case STATE::SETTINGS:
 				states->back() = std::make_unique<SettingsState>(window, view);
 				break;
-			case NextState::SIM_OPENING:
+			case STATE::SIM_OPENING:
 				states->back() = std::make_unique<OpeningState>(window, view);
 				break;
 			default:
@@ -98,10 +98,10 @@ void MainMenu::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::SETTINGS:
+			case STATE::SETTINGS:
 				states->back() = std::make_unique<SettingsState>(window, view);
 				break;
-			case NextState::SIM_OPENING:
+			case STATE::SIM_OPENING:
 				states->back() = std::make_unique<OpeningState>(window, view);
 				break;
 			default:
@@ -130,7 +130,7 @@ void MainMenu::updatePollEvents(const MousePosition& mousePosition, float dt, sf
 		if (m_buttons.at(0)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
 			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = NextState::SIM_OPENING;
+			m_next_state = STATE::SIM_OPENING;
 		}
 		else if (m_buttons.at(1)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
@@ -140,7 +140,7 @@ void MainMenu::updatePollEvents(const MousePosition& mousePosition, float dt, sf
 		else if (m_buttons.at(2)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
 			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = NextState::SETTINGS;
+			m_next_state = STATE::SETTINGS;
 		}
 
 		if (m_buttons.at(3)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
@@ -165,7 +165,7 @@ void MainMenu::renderByWindow()
 	m_stateMask.render(window);
 }
 
-int MainMenu::Quit()
+StateQuitCode MainMenu::Quit()
 {
 	return p_quitCode;
 }

@@ -1,7 +1,7 @@
 #include "SettingsState.hpp"
 
 SettingsState::SettingsState(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, SETTINGS)
+	: State(sf_window, sf_view, STATE::SETTINGS)
 	, m_selected_type_id(0)
 	, m_last_sel_type_id(0)
 	, m_vSyncStatus(AppSettings::vSync())
@@ -11,7 +11,7 @@ SettingsState::SettingsState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_current_window_size(0)
 	, m_sm_color(sf::Color::Black)
 	, m_outro_time(0)
-	, m_next_state(NextState::NONE)
+	, m_next_state(STATE::NONE)
 {
 	//p_quitCode = StateQuitCode::NOT_QUITTING;
 
@@ -609,7 +609,7 @@ void SettingsState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			default:
@@ -628,7 +628,7 @@ void SettingsState::updateEvents(const MousePosition& mousePosition, float dt)
 		{
 			switch (m_next_state)
 			{
-			case NextState::MAIN_MENU:
+			case STATE::MAIN_MENU:
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			default:
@@ -664,12 +664,12 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 	else if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::XButton1)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
-		m_next_state = MAIN_MENU;
+		m_next_state = STATE::MAIN_MENU;
 	}
 
 
@@ -877,7 +877,7 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 			//return;
 
 			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = MAIN_MENU;
+			m_next_state = STATE::MAIN_MENU;
 		}
 	}
 
@@ -1310,7 +1310,7 @@ void SettingsState::renderByWindow()
 
 
 
-int SettingsState::Quit()
+StateQuitCode SettingsState::Quit()
 {
 	return p_quitCode;
 }

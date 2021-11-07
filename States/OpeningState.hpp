@@ -42,7 +42,7 @@ private:
     std::array<ke::Colorf, 7> m_button_colors;
 
 
-    int m_next_state;
+    STATE m_next_state;
 
     sf::Clock m_outro_clock;
     float m_outro_time;

@@ -3,7 +3,7 @@
 #define object_ptr (*m_selected)
 
 ObjectLibraryOverlay::ObjectLibraryOverlay()
-	: m_quitStatus(false)
+	: m_quitCode(OverlayQuitCode::NOT_QUITTING)
 	, m_active(false)
 	, m_window(nullptr)
 	, m_icons_per_row(10)
@@ -219,14 +219,14 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 	{
-		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
+		m_quitCode = OverlayQuitCode::QUITTING_WITHOUT_OBJECT;
 		this->resetOutput();
 		this->deactivate();
 		return;
 	}
 	else if (m_close_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITHOUT_OBJECT;
+		m_quitCode = OverlayQuitCode::QUITTING_WITHOUT_OBJECT;
 		this->resetOutput();
 		this->deactivate();
 		return;
@@ -362,7 +362,7 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	{
 		if (m_output.name() != "__EMPTY")
 		{
-			m_quitStatus = OBJECT_LIBRARY_OverlayQuitStatus::QUITTING_WITH_OBJECT;
+			m_quitCode = OverlayQuitCode::QUITTING_WITH_OBJECT;
 			this->deactivate();
 			return;
 		}
@@ -421,14 +421,14 @@ void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const
 	}
 }
 
-int ObjectLibraryOverlay::quitStatus() const
+OverlayQuitCode ObjectLibraryOverlay::quitStatus() const
 {
-	return m_quitStatus;
+	return m_quitCode;
 }
 
 void ObjectLibraryOverlay::resetQuitStatus()
 {
-	m_quitStatus = OL_NOT_QUITTING;
+	m_quitCode = OverlayQuitCode::NOT_QUITTING;
 }
 
 void ObjectLibraryOverlay::render()
@@ -872,3 +872,6 @@ sf::Vector2f SystemNameTile::defaultPosition() const
 {
 	return m_default_position;
 }
+
+
+#undef object_ptr

@@ -1,7 +1,7 @@
 #include "Intro.hpp"
 
 IntroState::IntroState(sf::RenderWindow* sf_window, sf::View* sf_view)
-	: State(sf_window, sf_view, INTRO)
+	: State(sf_window, sf_view, STATE::INTRO)
 	, m_sm_color(sf::Color::Black)
 	, m_time(0)
 	, m_pause_time(0)
@@ -121,7 +121,7 @@ void IntroState::renderByWindow()
 }
 
 
-int IntroState::Quit()
+StateQuitCode IntroState::Quit()
 {
 	return p_quitCode;
 }

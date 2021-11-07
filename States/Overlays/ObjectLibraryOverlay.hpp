@@ -8,15 +8,8 @@
 
 
 
-enum OBJECT_LIBRARY_OverlayQuitStatus
-{
-	OL_NOT_QUITTING,
-	QUITTING_WITH_OBJECT,
-	QUITTING_WITHOUT_OBJECT,
-};
 
-
-enum OBJECT_LIRARY_SORTING_BY
+enum class OBJECT_LIRARY_SORTING_BY
 {
 	SYSTEMS,
 	A_Z,
@@ -47,7 +40,7 @@ public:
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
-	int quitStatus() const;
+	OverlayQuitCode quitStatus() const;
 	void resetQuitStatus();
 
 	void render();
@@ -76,7 +69,7 @@ private:
 
 	sf::RenderWindow* m_window;
 
-	int m_quitStatus;
+	OverlayQuitCode m_quitCode;
 	bool m_active;
 
 	ObjectBuffer m_output;
@@ -94,7 +87,7 @@ private:
 	ke::InputButton m_search_box;
 	std::array<ke::Button, 3> m_filtering_options;
 
-	short m_sorting_type;
+	OBJECT_LIRARY_SORTING_BY m_sorting_type;
 	std::string m_filter;
 
 	// right section

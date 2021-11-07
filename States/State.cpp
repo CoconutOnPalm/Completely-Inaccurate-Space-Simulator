@@ -1,6 +1,6 @@
 #include "State.hpp"
 
-State::State(sf::RenderWindow* sf_window, sf::View* sf_view, int current_state)
+State::State(sf::RenderWindow* sf_window, sf::View* sf_view, STATE current_state)
 	: p_quitCode(StateQuitCode::NOT_QUITTING)
 {
 	window = sf_window;
@@ -11,7 +11,7 @@ State::State(sf::RenderWindow* sf_window, sf::View* sf_view, int current_state)
 
 	p_current_state = current_state;
 
-	if (p_current_state != SIMULATION)
+	if (p_current_state != STATE::SIMULATION)
 		window->setFramerateLimit(AppSettings::MaxMenuFPS());
 	else
 		window->setFramerateLimit(AppSettings::MaxSimulationFPS());
@@ -27,7 +27,7 @@ sf::Vector2f State::viewSize;
 
 std::vector<std::unique_ptr<State>>* State::states;
 
-int State::p_current_state;
+STATE State::p_current_state;
 
 
 State::~State()
@@ -40,7 +40,7 @@ void State::LoadStaticData(static std::vector<std::unique_ptr<State>>* states_ve
 	states = states_vec;
 }
 
-int State::Quit()
+StateQuitCode State::Quit()
 {
 	return p_quitCode;
 }

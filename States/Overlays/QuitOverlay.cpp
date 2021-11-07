@@ -1,10 +1,10 @@
 #include "QuitOverlay.hpp"
 
 QuitOverlay::QuitOverlay(const sf::Vector2f& winSize)
-	: m_quitStatus(QS_NOT_QUITTING)
+	: m_quitCode(OverlayQuitCode::NOT_QUITTING)
 {
 	m_button.create(
-		sf::Vector2f(winSize.x / 4.f, winSize.y / 5), winSize / 2.f, ke::Origin::MIDDLE_MIDDLE, ke::Settings::EmptyTexturePath(), L"Do you want to quit?", 
+		sf::Vector2f(winSize.x / 4.f, winSize.y / 5), winSize / 2.f, ke::Origin::MIDDLE_MIDDLE, nullptr, L"Do you want to quit?", 
 		winSize.x / 56.f, ke::Origin::MIDDLE_MIDDLE, sf::Color(8, 8, 8, 255), sf::Color::White, {}, {}, {}, {}, {0, -winSize.y / 32});
 
 	m_buttonColors.fill(sf::Color(16, 16, 16, 255));
@@ -42,16 +42,16 @@ void QuitOverlay::updatePollEvents(const MousePosition& mousePosition, float dt,
 {
 	// closing by clicking out of the box
 	if (!m_button.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
-		m_quitStatus = CLOSING_OVRL;
+		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 
 	else if (m_buttons["_QUIT"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
-		m_quitStatus = QUITTING;
+		m_quitCode = OverlayQuitCode::QUITTING;
 
 	else if (m_buttons["_SAVE_N_QUIT"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
-		m_quitStatus = QUITTING_AND_SAVING;
+		m_quitCode = OverlayQuitCode::QUITTING_AND_SAVING;
 
 	else if (m_buttons["_CANCEL"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
-		m_quitStatus = CLOSING_OVRL;
+		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 
 	//else
 		//m_quitStatus = NOT_QUITTING;
@@ -68,9 +68,9 @@ void QuitOverlay::updateColors(const sf::Vector2f& mousePosition, const float dt
 	}
 }
 
-int QuitOverlay::quitStatus() const
+OverlayQuitCode QuitOverlay::quitStatus() const
 {
-	return m_quitStatus;
+	return m_quitCode;
 }
 
 void QuitOverlay::render(sf::RenderWindow* window)

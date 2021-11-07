@@ -773,7 +773,8 @@ namespace ke
 		/// <param name="mousePosition">mouse position</param>
 		/// <param name="event">SFML event</param>
 		/// <param name="button">SMFL mouse button</param>
-		void SSC_click_update(const sf::Vector2f& mousePosition, sf::Event& event, sf::Mouse::Button button);
+		/// /// <returns>if clicked - true</returns>
+		bool SSC_click_update(const sf::Vector2f& mousePosition, sf::Event& event, sf::Mouse::Button button);
 
 
 		/// <summary>

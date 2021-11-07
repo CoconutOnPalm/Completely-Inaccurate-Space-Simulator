@@ -45,8 +45,29 @@ public:
 	static float SFXVolume();
 
 
+	static void setPlanetSize(long double planet_size);
+	static long double PlanetSize();
+
+	static void setStarSize(long double star_size);
+	static long double StarSize();
+
+	static void setStarShader(bool star_shader);
+	static bool StarShader();
+
+	static void setGlowShader(bool glow_shader);
+	static bool GlowShader();
+
+	static void setCustomDt(bool custom_dt);
+	static bool CustomDt();
+
+	static void setCustomTimeStep(float custom_timestep);
+	static float CustomTimeStep();
+
+
+
 private:
 
+	// graphics
 	sf::Vector2f m_UDWindowSize; // user default window size
 	unsigned int m_maxMenuFPS;
 	unsigned int m_maxSimFPS;
@@ -54,6 +75,17 @@ private:
 	float m_background_brightnes;
 	bool m_vSyncOn;
 
+	// audio
 	float m_musicVolume;
 	float m_sfxVolume;
+
+	// keybinds
+
+	// simulation
+	long double m_planetSize;
+	long double m_starSize;
+	bool m_starShader;
+	bool m_glowShader;
+	bool m_custom_dt;
+	float m_custom_timestep;
 };

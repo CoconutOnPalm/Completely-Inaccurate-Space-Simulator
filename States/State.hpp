@@ -19,7 +19,7 @@
 #include <functional>
 
 
-enum StateQuitCode
+enum class StateQuitCode
 {
 	NOT_QUITTING,
 	STATE_QUIT,
@@ -28,7 +28,20 @@ enum StateQuitCode
 };
 
 
-enum NextState
+enum class OverlayQuitCode
+{
+	NOT_QUITTING,
+	QUITTING,
+
+	QUITTING_WITH_OBJECT,
+	QUITTING_WITHOUT_OBJECT,
+
+	QUITTING_AND_SAVING,
+	CLOSING_OVRL,
+};
+
+
+enum class STATE
 {
 	NONE,
 	INTRO,
@@ -59,7 +72,7 @@ class State
 {
 public:
 
-	State(sf::RenderWindow* sf_window, sf::View* sf_view, int current_state);
+	State(sf::RenderWindow* sf_window, sf::View* sf_view, STATE current_state);
 	virtual ~State();
 
 	static void LoadStaticData(static std::vector<std::unique_ptr<State>>* states_vec);
@@ -76,12 +89,10 @@ public:
 	virtual void renderByView() = 0;
 	virtual void renderByWindow() = 0;
 
-	virtual int Quit();
+	virtual StateQuitCode Quit();
 
 
-	StateQuitCode SQuitCode;
-
-	int p_quitCode;
+	StateQuitCode p_quitCode;
 
 
 protected:
@@ -94,7 +105,7 @@ protected:
 
 	static std::vector<std::unique_ptr<State>>* states;
 
-	static int p_current_state;
+	static STATE p_current_state;
 
 
 private:

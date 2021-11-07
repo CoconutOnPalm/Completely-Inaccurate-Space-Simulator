@@ -16,6 +16,7 @@
 #include "Modules/StateControlPanel.hpp"
 
 #include "Overlays/ObjectLibraryOverlay.hpp"
+#include "Overlays/SettingsOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -60,7 +61,7 @@ public:
 
 private:
 
-    int m_next_state;
+    STATE m_next_state;
 
     sf::Clock m_outro_clock;
     float m_outro_time;
@@ -164,7 +165,8 @@ private:
     
     std::unique_ptr<State> m_upperState;
     std::unique_ptr<QuitOverlay> m_quitOverlay;
-    std::unique_ptr<ObjectLibraryOverlay> m_ObjectLibraryOverlay;
+    ObjectLibraryOverlay m_ObjectLibraryOverlay;
+    SettingsOverlay m_SettingsOverlay;
 
 
     // shaders

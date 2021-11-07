@@ -44,7 +44,7 @@ public:
     void renderByWindow();
 
 
-    int Quit();
+    StateQuitCode Quit();
 
 private:
 
@@ -58,7 +58,7 @@ private:
 
     // State behaviour
 
-    int m_next_state;
+    STATE m_next_state;
 
     sf::Clock m_outro_clock;
     float m_outro_time;

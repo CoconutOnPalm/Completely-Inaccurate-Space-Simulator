@@ -104,7 +104,7 @@ void Application::UpdateEvents()
 	{
 		itr->updateEvents({ mPosView, mPosWindow, mPosScreen }, dt);
 
-		if (itr->Quit() == APP_END)
+		if (itr->Quit() == StateQuitCode::APP_END)
 			this->End();
 	}
 }

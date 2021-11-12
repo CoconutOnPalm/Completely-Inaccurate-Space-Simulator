@@ -265,4 +265,12 @@ void ObjectSelectionPanel::updateColors(const sf::Vector2f& mousePosition, const
 		ke::SmoothColorChange(&itr->icon, itr->icon.isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 64), *color_itr, 256, dt);
 		++color_itr;
 	}
+
+	auto ui_colors = m_UI_colors.begin();
+
+	for (auto& itr : *m_iconUI)
+	{
+		ke::SmoothColorChange(itr.get(), itr->isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 64), *ui_colors, 256, dt);
+		++ui_colors;
+	}
 }

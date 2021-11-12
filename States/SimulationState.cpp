@@ -9,8 +9,8 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_time_scale(100000)
 	, m_simulation_speed(1.f)
 	, m_space_scale(0.0000001)
-	, m_star_scale(100)
-	, m_planet_scale(500)
+	, m_star_scale(AppSettings::StarSize())
+	, m_planet_scale(AppSettings::PlanetSize())
 	, m_shader_scale(1.0)
 	, m_brightness_scale(1.0)
 	, m_text_entered(false)
@@ -33,7 +33,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 
 	m_TimeController.assign(&m_time_menagers);
 
-	m_ObjController.assing(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
+	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
 	m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
 
 	m_StateControlPanel.assign(&m_state_controllers, &m_upperState, &m_quitOverlay, &m_SettingsOverlay);
@@ -107,13 +107,7 @@ void SimulationState::InitSpaceObjects()
 
 	double v = std::sqrt(G * 1.989 * std::pow(10, 30) / (au * 0.3));
 
-	m_test_orbits.reserve(5);
-	m_test_orbits.emplace_back(std::make_unique<ke::Circle>(au * m_space_scale * 0.9, sf::Vector2f(0, 0), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::RIGHT_MIDDLE, sf::Color::Black, sf::Color::White, 30, sf::Color::Blue));
-	m_test_orbits.emplace_back(std::make_unique<ke::Circle>(au * m_space_scale * 1.2, sf::Vector2f(0, 0), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::RIGHT_MIDDLE, sf::Color::Black, sf::Color::White, 30, sf::Color::Blue));
-	m_test_orbits.emplace_back(std::make_unique<ke::Circle>(au * m_space_scale * 2.0, sf::Vector2f(0, 0), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::RIGHT_MIDDLE, sf::Color::Black, sf::Color::White, 30, sf::Color::Blue));
-	m_test_orbits.emplace_back(std::make_unique<ke::Circle>(au * m_space_scale * 3.14, sf::Vector2f(0, 0), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::RIGHT_MIDDLE, sf::Color::Black, sf::Color::White, 30, sf::Color::Blue));
-	m_test_orbits.emplace_back(std::make_unique<ke::Circle>(au * m_space_scale * 6.9, sf::Vector2f(0, 0), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::RIGHT_MIDDLE, sf::Color::Black, sf::Color::White, 30, sf::Color::Blue));
-
+	
 	//m_objects.push_back(std::make_unique<Planet>(sf::Vector2f(au * m_space_scale * 0.9, 1), L"Earth1", "Textures/AudioIcon.png", 3.972 * std::pow(10, 24), 5370000 * m_space_scale * m_planet_scale, 24));
 	//m_objects.push_back(std::make_unique<Planet>(sf::Vector2f(au * m_space_scale * 1.2, 1), L"Earth2", "Textures/AudioIcon.png", 6.972 * std::pow(10, 24), 7370000 * m_space_scale * m_planet_scale, 24));
 	//m_objects.push_back(std::make_unique<Star>(sf::Vector2f(10, 10), "Sun", "Textures/AudioIcon.png", 1.989 * std::pow(10, 30), 6.957 * std::pow(10, 8) * m_space_scale * m_star_scale, 24));
@@ -138,9 +132,6 @@ void SimulationState::InitSpaceObjects()
 	//	k++;
 	//	std::cout << itr->name() << '\n';
 	//}
-
-	for (auto& itr : m_test_orbits)
-		itr->getShape()->setPointCount(314);
 
 
 	for (auto itr = m_objects.begin() + 1, eoi = m_objects.end(); itr != eoi; ++itr)
@@ -204,7 +195,7 @@ void SimulationState::InitSpaceObjects()
 
 
 		(*itr)->object.physics()->setSpeed(round_orbit_velocity((*m_selected_object)->object.physics()->getMass() - (*itr)->data.mass,
-			position_to_destance((*m_selected_object)->object.getPosition(), (*itr)->object.getPosition() / static_cast<float>(m_space_scale))), angle - 90);
+			position_to_distance((*m_selected_object)->object.getPosition(), (*itr)->object.getPosition() / static_cast<float>(m_space_scale))), angle - 90);
 
 		//std::cout << angle - 90 << '\n';
 
@@ -251,7 +242,7 @@ void SimulationState::InitTopGUI()
 
 	m_state_controllers.reserve(3); // Quit to menu | settings | clear
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuitButton.png"));
-	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, nullptr));
+	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuickSettingsIcon.png"));
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, nullptr));
 
 
@@ -263,10 +254,10 @@ void SimulationState::InitTopGUI()
 	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(9 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, nullptr));
 
 
-	m_iconUI.reserve(3); // main objects | recently used
-	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(4 * winSize.y / 16, 1 * winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
-	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(4 * winSize.y / 16, 3 * winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
-	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 8), sf::Vector2f(21 * winSize.y / 16, 1 * winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
+	m_iconUI.reserve(3); // recently used | main objects | object library
+	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(4 * winSize.y / 16, 1 * winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/ObjectHistoryIcon.png"));
+	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(4 * winSize.y / 16, 3 * winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/LayoutsIcon.png"));
+	m_iconUI.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 8), sf::Vector2f(21 * winSize.y / 16, 1 * winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/ObjectLibraryIcon.png"));
 
 
 	const int icon_count = 32;
@@ -280,68 +271,7 @@ void SimulationState::InitTopGUI()
 
 	auto def_obj_itr = m_object_icons.end();
 
-
-	//int i = 0;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/ProximaCentauri_icon.png", "Textures/ObjectTextures/ProximaCentauri.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Proxima Centauri: M - type star (red dwarf)", 2.446e+29, 107'280'000, STAR, 100, sf::Vector3f(1.0, 0.0, 0.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/EpsilonEridani_icon.png", "Textures/ObjectTextures/EpsilonEridani.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Epsilon Eridani: K - type star (orange dwarf)", 1.631e+30, 511'340'000, STAR, 500, sf::Vector3f(1.0, 1.5, 0.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/Sun_icon.png", "Textures/ObjectTextures/Sun.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Sun: G - type star (yellow dwarf)", 1.98847e+30, 696'340'000, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/UpsilonAndromedae_icon.png", "Textures/ObjectTextures/UpsilonAndromedae.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Upsilon Andromedae / Titawin: F - type star", 2.54e+30, 1'019'993'875, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/Sirius_icon.png", "Textures/ObjectTextures/Sirius.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Sirius: A - type star", 4.24e+30, 1'475'520'000, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/UpsilonOrionis_icon.png", "Textures/ObjectTextures/UpsilonOrionis.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Upsilon Orionis / Thabit: B - type star", 4e+31, 5'011'200'000, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/IconTextures/ZetaOphiuchi_icon.png", "Textures/ObjectTextures/ZetaOphiuchi.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Zeta Ophiuchi: O - type star", 4e+31, 5'916'000'000, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/ObjectTextures/Gliese229B.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Gliese 229 B: brown dwarf (T - type)", 6e+28, 35'077'375, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Van Maanen 2: white dwarf", 1.34e+30, 9'604'800, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Crab Pulsar: neutron star", 2.8e+30, 10'000, STAR, 1000, sf::Vector3f(1.0, 0.5, 0.5))); i++;
-	//
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Earth", 5.972e+24, 6'371'000, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Moon", 7.3477e+22, 1'737'100, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Mars", 6.4191e+23, 3'397'000, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Jupiter", 1.8987e+27, 71'492'680, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "Neptune", 1.0244e+26, 24'766'360, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-	//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), "International Space Station", 419'725, 109, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0))); i++;
-
 	m_objIconPanel.assign(&m_iconUI, &m_object_icons, &m_ObjectLibraryOverlay);
-
-
-	//ke::FileStream gstream;
-	//gstream.createFile("Data/recentlyUsedIcons.glo");
-	//gstream.open("Data/recentlyUsedIcons.glo", std::ios::binary | std::ios::out);
-
-	//for (auto itr = m_object_icons.begin(), eoi = m_object_icons.begin() + m_object_icons.size() / 2; itr != eoi; ++itr)
-	//{
-	//	gstream.binWrite((*itr)->object_name());
-	//	gstream.binWrite((*itr)->type());
-	//	gstream.binWrite((*itr)->mass());
-	//	gstream.binWrite((*itr)->radius());
-	//	gstream.binWrite((*itr)->filename());
-
-	//	gstream.binWrite((*itr)->icon.getTexturePath());
-	//}
-
-	//gstream.binWrite((std::string)"Default");
-
-	//ke::FileStream fstream;
-	////fstream.createFile("Data/IconLayouts/Default.slo");
-	//fstream.open("Data/IconLayouts/Default.slo", std::ios::binary | std::ios::out | std::ios::trunc);
-	//
-	//for (auto itr = m_object_icons.begin() + m_object_icons.size() / 2 + 1, eoi = m_object_icons.end(); itr != eoi; ++itr)
-	//{
-	//	fstream.binWrite((*itr)->object_name());
-	//	fstream.binWrite((*itr)->type());
-	//	fstream.binWrite((*itr)->mass());
-	//	fstream.binWrite((*itr)->radius());
-	//	fstream.binWrite((*itr)->filename());
-
-	//	fstream.binWrite((*itr)->iconFilename());
-	//}
-
-
-	// default
-	//for (int i = 0; i < icon_count * 0.5; i++)
-		//m_object_icons.emplace_back(std::make_unique<ObjectIcon>("Textures/AudioIcon.png", "Textures/AudioIcon.png", sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f((5 + i) * winSize.y / 16, 3 * winSize.y / 32), L"Pu55yLand", 5.972 * std::pow(10, 24), 6370000, PLANET));
-
-
 
 	m_icon_inv_iterator = m_object_icons.begin();
 	m_icon_iterator = m_object_icons.begin();
@@ -593,10 +523,13 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	if (m_running)
 	{
-		m_deltaTime = dt;
+		if (AppSettings::CustomDt())
+			m_deltaTime = dt;
+		else
+			m_deltaTime = AppSettings::CustomTimeStep();
 
 		// FEATURE: centering view to object position
-		
+
 		if (m_selected_object != m_objects.begin())
 			view->setCenter((*m_selected_object)->object.getPosition());
 		else
@@ -633,7 +566,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		m_view_holding.update(mousePosition.byWindow * (view->getSize().x / winSize.x), sf::Mouse::Right);
 	}
 
-	
+
 
 	// FEATURE: filtering objects on screen
 
@@ -748,12 +681,12 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 void SimulationState::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
-	//	FEATURE: turning off poll events when overlay is active
+	//	FEATURE: turning off poll events when overlays are active
 
 	if (m_quitOverlay != nullptr)
 	{
 		m_quitOverlay->updatePollEvents(mousePosition, dt, event);
-		
+
 		switch (m_quitOverlay->quitStatus())
 		{
 		case OverlayQuitCode::QUITTING:
@@ -775,8 +708,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 
 		return;
-
 	}
+
 
 	if (m_ObjectLibraryOverlay.active())
 	{
@@ -829,6 +762,55 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 			m_placed_object.setActiveStatus(true);
 			m_object_buffer_ready = true;
+		}
+	}
+
+
+
+	// FEATURE: getting settings form overlay
+
+	if (!m_SettingsOverlay.active())
+	{
+		if (m_SettingsOverlay.quitStatus() == OverlayQuitCode::CHANGING_SETTINGS)
+		{
+			m_star_scale = m_SettingsOverlay.output().star_size;
+			m_planet_scale = m_SettingsOverlay.output().planet_size;
+
+			for (auto& itr : m_objects)
+			{
+				if (itr->type() == STAR)
+				{
+					itr->object.setRadius(itr->data.radius * m_space_scale * m_star_scale);
+				}
+				else if (itr->type() == PLANET)
+				{
+					itr->object.setRadius(itr->data.radius * m_space_scale * m_planet_scale);
+				}
+			}
+
+			m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
+
+			m_SettingsOverlay.resetQuitStatus();
+
+
+			for (auto& itr : m_objects)
+			{
+				itr->clickRange()->setOutlineThickness(view->getSize().x / winSize.x * 2);
+				itr->clickRange()->setRadius(view->getSize().x / winSize.x * 16);
+
+
+				// shader scaling
+
+				itr->getObjectShader()->setUniform("basic_a", 1.f - itr->object.getSize().y / view->getSize().y);
+				itr->getGlowShader()->setUniform("size", itr->object.getSize().y / view->getSize().y * winSize.y * 2.f * m_brightness_scale);
+
+
+				if (view->getSize().y / itr->object.getSize().y > itr->data.brightness)
+				{
+					float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;
+					itr->getObjectShader()->setUniform("size", (shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
+				}
+			}
 		}
 	}
 
@@ -1166,24 +1148,60 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		m_objects.front()->object.setOutlineThickness(view->getSize().x / winSize.x);
 
 
-		long double distance = position_to_destance((*m_selected_object)->object.getPosition(), m_placed_object.getPosition()) / m_space_scale;
+		long double distance = position_to_distance((*m_selected_object)->object.getPosition(), m_placed_object.getPosition()) / m_space_scale;
+
+		if (isnan(distance))
+			distance = 0;
+
 		std::wstringstream dist_buffer;
 
 		if (m_objects.size() == 1)
 			dist_buffer << std::fixed << std::setprecision(2) << " ";
 		else if (distance > ly)
-			dist_buffer << std::fixed << std::setprecision(2) << distance / ly << " light years";
+			dist_buffer << std::fixed << std::setprecision(3) << distance / ly << " light years";
 		else if (distance > au)
 			dist_buffer << std::fixed << std::setprecision(2) << distance / au << " au";
-		else
+		else if (distance > 1000)
+			dist_buffer << std::fixed << std::setprecision(2) << distance / 1000 << " km";
+		else 
 			dist_buffer << std::fixed << std::setprecision(2) << distance << " m";
+
+
+		// adding spaces to numbers (e.g. 1234567.89 -> 1 234 567.89)
+
+		std::wstring strbuffer = dist_buffer.str();
+
+		if (strbuffer.size() > 6)
+		{
+			size_t ipos = strbuffer.find(L'.');
+
+			if (ipos != std::string::npos)
+			{
+				short counter = 0;
+
+				while (ipos != 0)
+				{
+					if (counter % 3 == 0 && counter)
+					{
+						strbuffer.insert(strbuffer.begin() + ipos, ' ');
+						counter = 1;
+					}
+					else
+					{
+						counter++;
+					}
+
+					ipos--;
+				}
+			}
+		}
 
 		m_orbit_preview.setPosition((*m_selected_object)->object.getPosition());
 		m_orbit_preview.setRadius(distance * m_space_scale);
 
 		m_distance_preview.setPosition(mousePosition.byWindow);
 		m_distance_preview.setTextPosition(ke::Origin::LEFT_MIDDLE, { winSize.x / 32 + winSize.x * m_placed_object.getRadius() / view->getSize().x, 0 });
-		m_distance_preview.setText(dist_buffer.str());
+		m_distance_preview.setText(strbuffer);
 
 		for (auto& itr : m_objects)
 		{
@@ -1202,7 +1220,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			if (view->getSize().y / itr->object.getSize().y > itr->data.brightness)
 			{
 				float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;
-				itr->getObjectShader()->setUniform("size",  (shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
+				itr->getObjectShader()->setUniform("size", (shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
 				//std::cout << "size: " << itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y << '\n';
 			}
 		}
@@ -1319,11 +1337,6 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left && !sth_clicked && m_icon_iterator == m_object_icons.begin())
 		{
 			m_selected_object = m_objects.begin();
-
-			//m_object_name.setText(L"");
-			//m_object_name.setEPS(false);
-			//m_object_name.setCharacterSize(winSize.y / 48);
-
 			m_VDController.setEmpty();
 		}
 	}
@@ -1415,7 +1428,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 
 	}
-	
+
 
 	// FEATURE: setting object name on object's name preview panel (background_3)
 
@@ -1443,35 +1456,26 @@ void SimulationState::renderBackground()
 {
 	//window->draw(*m_stateBackground.getShape(), &m_test_shader);
 
-	for (auto& itr : m_objects)
-	{
-		window->draw(*m_shaderMask.getShape(), itr->getObjectShader());
-		window->draw(*m_shaderMask.getShape(), itr->getGlowShader());
-	}
+	if (AppSettings::GlowShader())
+		for (auto& itr : m_objects)
+			window->draw(*m_shaderMask.getShape(), itr->getGlowShader());
+
+	if (AppSettings::StarShader())
+		for (auto& itr : m_objects)
+			window->draw(*m_shaderMask.getShape(), itr->getObjectShader());
 }
 
 
 void SimulationState::renderByView()
 {
-	//for (auto itr = m_test_orbits.rbegin(), eoi = m_test_orbits.rend(); itr != eoi; ++itr)
-		//(*itr)->render(window);
-
 	m_orbit_preview.render(window);
 	m_placed_object.render(window);
-
-
 
 
 	//if (m_running)
 	for (auto& itr : m_onScreen)
 		itr->render(window);
 
-
-	/*else
-		for (auto itr = m_objects.rbegin(), eoi = m_objects.rend(); itr != eoi; ++itr)
-			(*itr)->render(window);*/
-
-	//m_objects.front()->render(window);
 }
 
 
@@ -1525,7 +1529,7 @@ void SimulationState::renderByWindow()
 
 	m_ObjectLibraryOverlay.render();
 	m_SettingsOverlay.render();
-	
+
 
 	m_stateMask.render(window);
 

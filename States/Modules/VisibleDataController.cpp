@@ -54,7 +54,7 @@ void VisibleDataController::loadData(objvector::iterator selected_object, const 
 
 	std::wstringstream data_stream;
 
-	double speedbuff = position_to_destance((*selected_object)->object.physics()->getSpeed(), sf::Vector2f(0, 0));
+	double speedbuff = position_to_distance((*selected_object)->object.physics()->getSpeed(), sf::Vector2f(0, 0));
 	float anglebuff = std::atan(-(*selected_object)->object.physics()->getSpeed().y / (*selected_object)->object.physics()->getSpeed().x) * TO_DEG;
 
 	if ((*selected_object)->object.physics()->getSpeed().x < 0)
@@ -490,7 +490,7 @@ void VisibleDataController::updateDynamicData(objvector::iterator selected_objec
 {
 	std::wstringstream data_stream;
 
-	double speedbuff = position_to_destance((*selected_object)->object.physics()->getSpeed(), sf::Vector2f(0, 0));
+	double speedbuff = position_to_distance((*selected_object)->object.physics()->getSpeed(), sf::Vector2f(0, 0));
 	float anglebuff = std::atan(-(*selected_object)->object.physics()->getSpeed().y / (*selected_object)->object.physics()->getSpeed().x) * TO_DEG;
 
 	if ((*selected_object)->object.physics()->getSpeed().x < 0)
@@ -579,7 +579,7 @@ void VisibleDataController::updateDistanceBlocks(objvector::iterator selected_ob
 		else
 			nearest_object = selected_object + 1;
 
-		min_obj_dist = position_to_destance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
+		min_obj_dist = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
 
 		for (auto itr = m_objects->begin(), eoi = m_objects->end(); itr != eoi; ++itr)
 		{
@@ -587,16 +587,16 @@ void VisibleDataController::updateDistanceBlocks(objvector::iterator selected_ob
 			{
 				if ((*itr)->type() == STAR)
 				{
-					if (position_to_destance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_star_dist)
+					if (position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_star_dist)
 					{
 						nearest_star = itr;
-						min_star_dist = position_to_destance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
+						min_star_dist = position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
 					}
 				}
-				if (position_to_destance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_obj_dist)
+				if (position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_obj_dist)
 				{
 					nearest_object = itr;
-					min_obj_dist = position_to_destance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
+					min_obj_dist = position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
 				}
 			}
 		}

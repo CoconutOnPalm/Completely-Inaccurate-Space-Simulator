@@ -50,7 +50,13 @@ void StateControlPanel::updatePollEvents(const MousePosition& mousePosition, flo
 
 void StateControlPanel::updateColors(const sf::Vector2f& mousePosition, const float dt)
 {
+	auto color_itr = m_colors.begin();
 
+	for (auto& itr : *m_controllers)
+	{
+		ke::SmoothColorChange(itr.get(), itr->isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 64), *color_itr, 256, dt);
+		++color_itr;
+	}
 }
 
 void StateControlPanel::renderBackground(sf::RenderWindow* window)

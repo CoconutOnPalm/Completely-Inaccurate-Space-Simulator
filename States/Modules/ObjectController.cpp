@@ -14,7 +14,7 @@ ObjectController::ObjectController()
 ObjectController::~ObjectController() {}
 
 
-void ObjectController::assing(objvector* objects, ke::Circle* orbit_preview, ke::Rectangle* distance_preview, ke::Circle* placed_object)
+void ObjectController::assign(objvector* objects, ke::Circle* orbit_preview, ke::Rectangle* distance_preview, ke::Circle* placed_object)
 {
 	m_objects = objects;
 	m_orbit_preview = orbit_preview;
@@ -122,7 +122,22 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 
 
 		m_objects->back()->object.physics()->setSpeed(round_orbit_velocity((*selected_object)->object.physics()->getMass(),
-			position_to_destance((*selected_object)->object.getPosition(), m_objects->back()->object.getPosition()) / m_space_scale), angle - 90);
+			position_to_distance((*selected_object)->object.getPosition(), m_objects->back()->object.getPosition()) / m_space_scale), angle - 90);
+
+		if (isnan(m_objects->back()->object.physics()->getSpeed().x) || isnan(m_objects->back()->object.physics()->getSpeed().y))
+			m_objects->back()->object.physics()->setSpeed(sf::Vector2<double>(0, 0));
+
+
+
+		if (selected_object != m_objects->begin())
+		{
+			ke::debug::printVector2(m_objects->back()->object.physics()->getSpeed(), "orbiting object");
+			ke::debug::printVector2((*selected_object)->object.physics()->getSpeed(), "orbited object");
+			ke::debug::printVector2(m_objects->back()->object.physics()->getSpeed() + (*selected_object)->object.physics()->getSpeed(), "combined");
+		}
+
+		if (selected_object != m_objects->begin())
+			m_objects->back()->object.physics()->setSpeed(sf::Vector2<double>(m_objects->back()->object.physics()->getSpeed() + (*selected_object)->object.physics()->getSpeed()));
 	}
 }
 
@@ -256,17 +271,49 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 
 void ObjectController::updateObjectPreview(objvector::iterator selected_object, const MousePosition& mousePosition, const sf::Vector2f& viewSize, const sf::Vector2f& winSize)
 {
-	long double distance = position_to_destance((*selected_object)->object.getPosition(), m_placed_object->getPosition()) / m_space_scale;
+	long double distance = position_to_distance((*selected_object)->object.getPosition(), m_placed_object->getPosition()) / m_space_scale;
 	std::wstringstream dist_buffer;
 
 	if (m_objects->size() == 1 || sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift) || selected_object == m_objects->begin())
 		dist_buffer << std::fixed << std::setprecision(2) << "";
 	else if (distance > ly)
-		dist_buffer << std::fixed << std::setprecision(2) << distance / ly << " light years";
+		dist_buffer << std::fixed << std::setprecision(3) << distance / ly << " light years";
 	else if (distance > au)
 		dist_buffer << std::fixed << std::setprecision(2) << distance / au << " au";
+	else if (distance > 1000)
+		dist_buffer << std::fixed << std::setprecision(2) << distance / 1000 << " km";
 	else
 		dist_buffer << std::fixed << std::setprecision(2) << distance << " m";
+
+
+	// adding spaces to numbers (e.g. 1234567.89 -> 1 234 567.89)
+
+	std::wstring strbuffer = dist_buffer.str();
+
+	if (strbuffer.size() > 6)
+	{
+		size_t ipos = strbuffer.find(L'.');
+
+		if (ipos != std::string::npos)
+		{
+			short counter = 0;
+
+			while (ipos != 0)
+			{
+				if (counter % 3 == 0 && counter)
+				{
+					strbuffer.insert(strbuffer.begin() + ipos, ' ');
+					counter = 1;
+				}
+				else
+				{
+					counter++;
+				}
+
+				ipos--;
+			}
+		}
+	}
 
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
@@ -286,7 +333,7 @@ void ObjectController::updateObjectPreview(objvector::iterator selected_object, 
 
 	m_distance_preview->setPosition(mousePosition.byWindow);
 	m_distance_preview->setTextPosition(ke::Origin::LEFT_MIDDLE, { winSize.x / 32 + winSize.x * m_placed_object->getRadius() / viewSize.x, 0 });
-	m_distance_preview->setText(dist_buffer.str());
+	m_distance_preview->setText(strbuffer);
 }
 
 

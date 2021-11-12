@@ -114,7 +114,7 @@ private:
     ke::Colorf m_sm_color; // state mask color
 
     ke::Rectangle m_overlayMask;
-    ke::Colorf m_om_color; // overlay mas color
+    ke::Colorf m_om_color; // overlay mask color
 
     ke::Rectangle m_shaderMask;
 
@@ -171,14 +171,6 @@ private:
 
     // shaders
 
-    //std::vector<sf::Shader> m_starShaders;
-
-
-    // tests
-
-    std::vector<std::unique_ptr<ke::Circle>> m_test_orbits;
-
-    sf::Shader m_test_shader;
-    sf::RectangleShape test;
+    // tests;
 };
 

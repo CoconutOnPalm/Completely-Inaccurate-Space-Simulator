@@ -51,7 +51,7 @@ inline long double schwarzschild_radius(long double M, long double r)
 
 
 template <typename T1, typename T2>
-inline long double position_to_destance(const sf::Vector2<T1>& vector1, const sf::Vector2<T2>& vector2)
+inline long double position_to_distance(const sf::Vector2<T1>& vector1, const sf::Vector2<T2>& vector2)
 {
 	return std::sqrt(std::pow(vector2.x - vector1.x, 2) + std::pow(vector2.y - vector1.y, 2));
 }

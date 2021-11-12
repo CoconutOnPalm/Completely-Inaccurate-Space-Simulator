@@ -5,16 +5,16 @@
 
 struct QuickSettings
 {
-	QuickSettings() : planet_size(500), star_size(100), star_shader(true), glow_shader(true), default_dt(true), dt(0.0001) {};
+	QuickSettings() : planet_size(500), star_size(100), star_shader(true), glow_shader(true), custom_dt(true), custom_timestep(0.0001) {};
 
-	double planet_size;
 	double star_size;
+	double planet_size;
 
 	bool star_shader;
 	bool glow_shader;
 
-	bool default_dt;
-	float dt;
+	bool custom_dt;
+	float custom_timestep;
 };
 
 
@@ -34,6 +34,9 @@ public:
 	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event);
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
+
+	OverlayQuitCode quitStatus() const;
+	void resetQuitStatus();
 
 	QuickSettings& output();
 

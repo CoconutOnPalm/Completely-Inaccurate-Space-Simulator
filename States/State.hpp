@@ -38,6 +38,8 @@ enum class OverlayQuitCode
 
 	QUITTING_AND_SAVING,
 	CLOSING_OVRL,
+
+	CHANGING_SETTINGS
 };
 
 

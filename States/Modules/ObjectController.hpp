@@ -22,7 +22,7 @@ public:
 	ObjectController();
 	virtual ~ObjectController();
 
-	void assing(objvector* objects, ke::Circle* orbit_preview, ke::Rectangle* distance_preview, ke::Circle* placed_object);
+	void assign(objvector* objects, ke::Circle* orbit_preview, ke::Rectangle* distance_preview, ke::Circle* placed_object);
 
 	void assignScale(long double space_scale, long double planet_scale, long double star_scale, float shader_scale, float brightness_scale);
 

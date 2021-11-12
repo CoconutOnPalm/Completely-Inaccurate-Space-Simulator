@@ -198,11 +198,15 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	
 	if (m_apply.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		m_quitCode = OverlayQuitCode::CHANGING_SETTINGS;
+
 		this->saveSettings();
 		this->deactivate();
 	}
 	else if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		m_quitCode = OverlayQuitCode::QUITTING;
+
 		this->restoreSettings();
 		this->deactivate();
 	}
@@ -241,6 +245,16 @@ void SettingsOverlay::updateColors(const sf::Vector2f& mousePosition, const floa
 	ke::SmoothTextColorChange(&m_apply, m_apply.isInvaded(mousePosition), sf::Color::White, sf::Color(255, 255, 255, 128), *itr, 255, dt); ++itr;
 	ke::SmoothColorChange(&m_cancel, m_cancel.isInvaded(mousePosition), sf::Color(255, 32, 32, 255), sf::Color(255, 32, 32, 128), *itr, 255, dt); ++itr;
 	ke::SmoothTextColorChange(&m_cancel, m_cancel.isInvaded(mousePosition), sf::Color::White, sf::Color(255, 255, 255, 128), *itr, 255, dt); ++itr;
+}
+
+OverlayQuitCode SettingsOverlay::quitStatus() const
+{
+	return m_quitCode;
+}
+
+void SettingsOverlay::resetQuitStatus()
+{
+	m_quitCode = OverlayQuitCode::NOT_QUITTING;
 }
 
 QuickSettings& SettingsOverlay::output()
@@ -284,6 +298,8 @@ bool SettingsOverlay::active() const
 
 void SettingsOverlay::activate()
 {
+	m_quitCode = OverlayQuitCode::NOT_QUITTING;
+
 	m_active = true;
 	this->restoreSettings();
 }
@@ -306,10 +322,26 @@ void SettingsOverlay::saveSettings()
 	wstream << m_custom_timestep.getText();
 	wstream >> buffer;
 	AppSettings::setCustomTimeStep(buffer);
+
+
+	m_output.planet_size = AppSettings::PlanetSize();
+	m_output.star_size = AppSettings::StarSize();
+	m_output.star_shader = AppSettings::StarShader();
+	m_output.glow_shader = AppSettings::GlowShader();
+	m_output.custom_dt = AppSettings::CustomDt();
+	m_output.custom_timestep = AppSettings::CustomTimeStep();
 }
 
 void SettingsOverlay::restoreSettings()
 {
+	m_output.planet_size = AppSettings::PlanetSize();
+	m_output.star_size = AppSettings::StarSize();
+	m_output.star_shader = AppSettings::StarShader();
+	m_output.glow_shader = AppSettings::GlowShader();
+	m_output.custom_dt = AppSettings::CustomDt();
+	m_output.custom_timestep = AppSettings::CustomTimeStep();
+
+
 	m_star_scale.setPointCount(AppSettings::StarSize());
 	m_planet_scale.setPointCount(AppSettings::PlanetSize());
 	m_star_shader.setSignal(AppSettings::StarShader());

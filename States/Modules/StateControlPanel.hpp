@@ -50,6 +50,8 @@ private:
 	std::unique_ptr<QuitOverlay>* m_quitOverlay;
 	SettingsOverlay* m_settingsOverlay;
 
+	std::array<ke::Colorf, 3> m_colors;
+
 	bool m_quitting;
 
 };

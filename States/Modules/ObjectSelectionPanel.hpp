@@ -51,6 +51,7 @@ private:
 	std::string m_layout_name; // bottom icons "layout"
 
 	std::array<ke::Colorf, 33> m_icon_colors;
+	std::array<ke::Colorf, 3> m_UI_colors;
 
 	iconvector::iterator fbegin;
 	iconvector::iterator fend;

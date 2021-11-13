@@ -52,6 +52,10 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 
 		break;
 	default:
+		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+			object_data->radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
+		m_objects->back()->data.radius = object_data->radius();
+		ke::throw_error("ObjectController::addObject(...)", "incorrect object type", "ERROR");
 		break;
 	}
 
@@ -69,16 +73,20 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 
 	// TODO: dodaæ strulture ze skalami;
 
+		//m_objects->back()->getObjectShader()->setUniform("basic_a", 1.f - m_objects->back()->object.getSize().y / viewSize.y);
+
+	
 	m_objects->back()->getObjectShader()->setUniform("basic_a", 1.f - m_objects->back()->object.getSize().y / viewSize.y);
-	//itr->getGlowShader()->setUniform("basic_a", (itr->object.getSize().y / view->getSize().y * 0.75f <= 1) ? itr->object.getSize().y / view->getSize().y * 0.75f : 1.0f);
+
+
 	m_objects->back()->getGlowShader()->setUniform("size", m_objects->back()->object.getSize().y / viewSize.y * winSize.y * 2.f * m_brightness_scale);
 
 
 	if (viewSize.y / m_objects->back()->object.getSize().y > m_objects->back()->data.brightness)
 	{
 		float shader_size = m_objects->back()->data.brightness - viewSize.y / m_objects->back()->object.getSize().y / winSize.y;
-		m_objects->back()->getObjectShader()->setUniform("size", (shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
-		//std::cout << "size: " << itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y << '\n';
+
+		m_objects->back()->getObjectShader()->setUniform("size", (shader_size * shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
 	}
 
 
@@ -129,12 +137,12 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 
 
 
-		if (selected_object != m_objects->begin())
+		/*if (selected_object != m_objects->begin())
 		{
 			ke::debug::printVector2(m_objects->back()->object.physics()->getSpeed(), "orbiting object");
 			ke::debug::printVector2((*selected_object)->object.physics()->getSpeed(), "orbited object");
 			ke::debug::printVector2(m_objects->back()->object.physics()->getSpeed() + (*selected_object)->object.physics()->getSpeed(), "combined");
-		}
+		}*/
 
 		if (selected_object != m_objects->begin())
 			m_objects->back()->object.physics()->setSpeed(sf::Vector2<double>(m_objects->back()->object.physics()->getSpeed() + (*selected_object)->object.physics()->getSpeed()));
@@ -143,19 +151,19 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 
 void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon)
 {
-	object_data->load(*selected_icon->get());
+	//object_data->load(*selected_icon->get());
 
 	switch (object_data->type())
 	{
 	case PLANET:
 		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_planet_scale);
 		//(*selected_object)->data.radius = object_data->radius();
-		//(*selected_object)->updatePhysicalData(); ???
+		//(*selected_object)->updatePhysicalData();
 		break;
 	case STAR:
 		m_placed_object->setRadius(object_data->radius() * m_space_scale * m_star_scale);
 		//(*selected_object)->data.radius = object_data->radius();
-		//(*selected_object)->updatePhysicalData(); ???
+		//(*selected_object)->updatePhysicalData();
 		break;
 	default:
 		ke::throw_error("ObjectController::createObjectPreview(...) - 1", "incorrect object type", "ERROR");

@@ -132,7 +132,10 @@ void ObjectIcon::load(const ObjectBuffer& buffer)
 
 	m_obj_type = buffer.type();
 	m_obj_class = buffer.objectClass();
-	m_obj_type = buffer.subtype();
+	m_obj_subtype = buffer.subtype();
+
+
+	std::cout << "type: " << buffer.type() << '\n';
 
 	m_obj_mass = buffer.mass();
 	m_obj_radius = buffer.radius();

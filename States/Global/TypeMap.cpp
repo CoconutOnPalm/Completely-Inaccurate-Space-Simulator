@@ -104,7 +104,7 @@ void TypeTranslator::loadSubtypeMap()
 	m_subtypes[30] = "Metal Planet";
 	m_subtypes[31] = "Water Planet";
 	m_subtypes[32] = "Lava Planet";
-	m_subtypes[33] = "Terresial/Rocky Planet";
+	m_subtypes[33] = "Terrestrial/Rocky Planet";
 	m_subtypes[34] = "Other Planet Type";
 
 	m_subtypes[35] = "Space Station";

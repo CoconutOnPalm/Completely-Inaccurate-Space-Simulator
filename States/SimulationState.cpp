@@ -76,29 +76,29 @@ void SimulationState::InitState()
 		itr->setOutlineThickness(1);
 	}
 
-	for (auto& itr : m_state_controllers)
-	{
-		itr->setOutlineColor(sf::Color::White);
-		itr->setOutlineThickness(1);
-	}
+	//for (auto& itr : m_state_controllers)
+	//{
+	//	itr->setOutlineColor(sf::Color::White);
+	//	itr->setOutlineThickness(1);
+	//}
 
-	/*for (auto& itr : m_time_menagers)
-	{
-		itr->setOutlineColor(sf::Color::White);
-		itr->setOutlineThickness(1);
-	}*/
+	///*for (auto& itr : m_time_menagers)
+	//{
+	//	itr->setOutlineColor(sf::Color::White);
+	//	itr->setOutlineThickness(1);
+	//}*/
 
-	for (auto& itr : m_tools)
-	{
-		itr->setOutlineColor(sf::Color::White);
-		itr->setOutlineThickness(1);
-	}
+	//for (auto& itr : m_tools)
+	//{
+	//	itr->setOutlineColor(sf::Color::White);
+	//	itr->setOutlineThickness(1);
+	//}
 
-	for (auto& itr : m_iconUI)
-	{
-		itr->setOutlineColor(sf::Color::White);
-		itr->setOutlineThickness(1);
-	}
+	//for (auto& itr : m_iconUI)
+	//{
+	//	itr->setOutlineColor(sf::Color::White);
+	//	itr->setOutlineThickness(1);
+	//}
 }
 
 void SimulationState::InitSpaceObjects()
@@ -107,7 +107,7 @@ void SimulationState::InitSpaceObjects()
 
 	double v = std::sqrt(G * 1.989 * std::pow(10, 30) / (au * 0.3));
 
-	
+
 	//m_objects.push_back(std::make_unique<Planet>(sf::Vector2f(au * m_space_scale * 0.9, 1), L"Earth1", "Textures/AudioIcon.png", 3.972 * std::pow(10, 24), 5370000 * m_space_scale * m_planet_scale, 24));
 	//m_objects.push_back(std::make_unique<Planet>(sf::Vector2f(au * m_space_scale * 1.2, 1), L"Earth2", "Textures/AudioIcon.png", 6.972 * std::pow(10, 24), 7370000 * m_space_scale * m_planet_scale, 24));
 	//m_objects.push_back(std::make_unique<Star>(sf::Vector2f(10, 10), "Sun", "Textures/AudioIcon.png", 1.989 * std::pow(10, 30), 6.957 * std::pow(10, 8) * m_space_scale * m_star_scale, 24));
@@ -197,28 +197,8 @@ void SimulationState::InitSpaceObjects()
 		(*itr)->object.physics()->setSpeed(round_orbit_velocity((*m_selected_object)->object.physics()->getMass() - (*itr)->data.mass,
 			position_to_distance((*m_selected_object)->object.getPosition(), (*itr)->object.getPosition() / static_cast<float>(m_space_scale))), angle - 90);
 
-		//std::cout << angle - 90 << '\n';
-
 		ke::debug::printVector2((*itr)->object.physics()->getSpeed());
 	}
-
-	//ke::debug::printVector2(m_objects.at(1)->object.physics()->getSpeed());
-	//std::cout << position_to_destance((*m_selected_object)->object.getPosition(), m_objects.at(1)->object.getPosition() / static_cast<float>(m_space_scale)) << '\n';
-
-
-	//sf::Vector2<double> _mr(0, 0);
-	//long double _m = 0;
-
-	//for (auto& itr : m_objects)
-	//{
-	//	_mr.x += itr->data.mass * itr->object.getPosition().x;
-	//	_mr.y += itr->data.mass * itr->object.getPosition().y;
-
-	//	_m += itr->data.mass;
-	//}
-
-	//m_mass_center.create(winSize.y, sf::Vector2f(_mr.x / _m, _mr.y / _m), ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color::Transparent, winSize.y / 8, sf::Color(128, 128, 128, 192));
-
 }
 
 
@@ -241,8 +221,8 @@ void SimulationState::InitTopGUI()
 
 
 	m_state_controllers.reserve(3); // Quit to menu | settings | clear
-	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuitButton.png"));
-	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuickSettingsIcon.png"));
+	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuitIcon.png"));
+	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuickSettingsIcon2.png"));
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, nullptr));
 
 
@@ -855,6 +835,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 					// adding object by module
 
+					std::cout << "type in .addObject(...): " << m_objectBuffer.type() << '\n';
+
 					m_ObjController.addObject(m_selected_object, &m_objectBuffer, mousePosition, view->getSize(), winSize, name);
 
 
@@ -1212,16 +1194,16 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 			// shader scaling
 
+			//if (itr->objectClass() != ObjectClass::CLASS_NEUTRON_STAR)
 			itr->getObjectShader()->setUniform("basic_a", 1.f - itr->object.getSize().y / view->getSize().y);
-			//itr->getGlowShader()->setUniform("basic_a", (itr->object.getSize().y / view->getSize().y * 0.75f <= 1) ? itr->object.getSize().y / view->getSize().y * 0.75f : 1.0f);
+
 			itr->getGlowShader()->setUniform("size", itr->object.getSize().y / view->getSize().y * winSize.y * 2.f * m_brightness_scale);
 
 
 			if (view->getSize().y / itr->object.getSize().y > itr->data.brightness)
 			{
-				float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;
-				itr->getObjectShader()->setUniform("size", (shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
-				//std::cout << "size: " << itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y << '\n';
+				float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;	
+				itr->getObjectShader()->setUniform("size", (shader_size * shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
 			}
 		}
 	}
@@ -1256,13 +1238,18 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 
 		for (auto itr = m_object_icons.begin() + 1, eoi = m_object_icons.end(); itr != eoi; ++itr)
+		{
 			if ((*itr)->icon.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 			{
-				m_ObjController.createObjectPreview(&m_objectBuffer, m_selected_object, itr);
+				// WARNING
 				m_icon_iterator = itr;
+				m_objectBuffer.load(*(m_icon_iterator->get()));
+
+				m_ObjController.createObjectPreview(&m_objectBuffer, m_selected_object, itr);
 				m_placed_object.setActiveStatus(true);
 				break;
 			}
+		}
 	}
 	if (m_backgrounds.at(1)->isInvaded(mousePosition.byWindow)) // data panel
 	{

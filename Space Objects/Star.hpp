@@ -29,5 +29,9 @@ public:
     void updatePhysicalData() override;
 
 private:
+
+    static sf::Clock s_clock;
+    static float s_time;
+
 };
 

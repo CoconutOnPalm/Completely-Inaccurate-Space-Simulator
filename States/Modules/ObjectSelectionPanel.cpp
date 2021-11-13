@@ -42,11 +42,11 @@ void ObjectSelectionPanel::assign(iconUIvector* UI, iconvector* icons, ObjectLib
 
 void ObjectSelectionPanel::loadFromFile()
 {
-	ke::FileStream loadstr("Data/recentlyUsedIcons.glo", std::ios::binary | std::ios::in);
+	ke::FileStream loadstr("Data/recentlyUsedObjects.glo", std::ios::binary | std::ios::in);
 
 	if (!loadstr.loaded())
 	{
-		ke::throw_error("ObjectSelectionPanel::saveToFile()", "Unable to open Data/recentlyUsedIcons.glo", "FILE ERROR");
+		ke::throw_error("ObjectSelectionPanel::saveToFile()", "Unable to open Data/recentlyUsedObjects.glo", "FILE ERROR");
 		this->setDefaultLayout();
 	}
 
@@ -90,11 +90,11 @@ void ObjectSelectionPanel::loadFromFile()
 
 void ObjectSelectionPanel::saveToFile()
 {
-	ke::FileStream savestr("Data/recentlyUsedIcons.glo", std::ios::binary | std::ios::out | std::ios::trunc); // glo = general layout
+	ke::FileStream savestr("Data/recentlyUsedObjects.glo", std::ios::binary | std::ios::out | std::ios::trunc); // glo = general layout
 
 	if (!savestr.loaded())
 	{
-		ke::throw_error("ObjectSelectionPanel::saveToFile()", "Unable to open Data/recentlyUsedIcons.glo", "FILE ERROR");
+		ke::throw_error("ObjectSelectionPanel::saveToFile()", "Unable to open Data/recentlyUsedObjects.glo", "FILE ERROR");
 		//this->setDefaultLayout();
 		return;
 	}
@@ -148,31 +148,6 @@ void ObjectSelectionPanel::loadStaticIcons(const std::string& layout_name)
 	float brightness = 0;
 	sf::Vector3f color(1.0, 1.0, 1.0);
 
-	//std::cout << (sbegin == send);
-
-
-
-	//// debug ! ! ! 
-
-	//const int del = 0;
-	//for (int i = 0; i < del; i++)
-	//{
-	//	loadstr.binRead(obj_name);
-	//	loadstr.binRead(type);
-	//	loadstr.binRead(mass);
-	//	loadstr.binRead(radius);
-
-	//	loadstr.binRead(filename);
-	//	loadstr.binRead(texture_path);
-
-	//	loadstr.binRead(brightness);
-	//	loadstr.binRead(color.x);
-	//	loadstr.binRead(color.y);
-	//	loadstr.binRead(color.z);
-
-	//}
-
-	//// debug ! ! !
 
 
 	for (auto itr = sbegin; itr != send; ++itr)
@@ -196,15 +171,12 @@ void ObjectSelectionPanel::loadStaticIcons(const std::string& layout_name)
 
 		(*itr)->load(texture_path, filename, obj_name, type, obj_class, subtype, mass, radius, brightness, color);
 	}
-
-	//std::cout << "Loaded: " << layout_name << " from: " << FileStorage::Get().linked_icon_layouts_files[layout_name] << '\n';
 }
 
 
 void ObjectSelectionPanel::setDefaultLayout()
 {
-	//for (auto& itr : *m_object_icons)
-		//itr->load(ke::Settings::EmptyTexturePath(), ke::Settings::EmptyTexturePath(), "UNDEFINED", 1, 1, PLANET, 0, sf::Vector3f(1.0, 1.0, 1.0));
+	
 }
 
 

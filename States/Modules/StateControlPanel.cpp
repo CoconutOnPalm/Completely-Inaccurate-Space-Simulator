@@ -15,12 +15,12 @@ StateControlPanel::~StateControlPanel()
 
 }
 
-void StateControlPanel::assign(PanelUI* controllers, std::unique_ptr<State>* upperStates, std::unique_ptr<QuitOverlay>* QuitOverlay, SettingsOverlay* settingsOverlay)
+void StateControlPanel::assign(PanelUI* controllers, std::unique_ptr<State>* upperStates, std::unique_ptr<QuitOverlay>* QuitOverlay, SimParamsOverlay* settingsOverlay)
 {
 	m_controllers = controllers;
 	m_upperState = upperStates;
 	m_quitOverlay = QuitOverlay;
-	m_settingsOverlay = settingsOverlay;
+	m_simParamsOverlay = settingsOverlay;
 }
 
 bool StateControlPanel::quittingRequestStatus() const
@@ -40,7 +40,7 @@ void StateControlPanel::updatePollEvents(const MousePosition& mousePosition, flo
 		(*m_quitOverlay) = std::make_unique<QuitOverlay>(sf::Vector2f(window->getSize()));
 	else if (m_controllers->at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		m_settingsOverlay->activate();
+		m_simParamsOverlay->activate();
 		std::cout << "quack\n";
 	}
 		//m_upperState_ptr = std::make_unique<SettingsState>(window, view);

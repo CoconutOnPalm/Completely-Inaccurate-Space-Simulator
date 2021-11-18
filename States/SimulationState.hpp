@@ -16,7 +16,7 @@
 #include "Modules/StateControlPanel.hpp"
 
 #include "Overlays/ObjectLibraryOverlay.hpp"
-#include "Overlays/SettingsOverlay.hpp"
+#include "Overlays/SimParamsOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -166,7 +166,7 @@ private:
     std::unique_ptr<State> m_upperState;
     std::unique_ptr<QuitOverlay> m_quitOverlay;
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
-    SettingsOverlay m_SettingsOverlay;
+    SimParamsOverlay m_SettingsOverlay;
 
 
     // shaders

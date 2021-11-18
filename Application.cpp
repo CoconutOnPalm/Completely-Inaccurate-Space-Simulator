@@ -27,7 +27,7 @@ void Application::InitWindow()
 	window.setFramerateLimit(AppSettings::MaxMenuFPS());
 
 	sf::Image window_icon;
-	window_icon.loadFromFile("Textures/CISS_icon.png");
+	window_icon.loadFromFile("res/CISS_winicon.png");
 	window.setIcon(window_icon.getSize().x, window_icon.getSize().y, window_icon.getPixelsPtr());
 
 

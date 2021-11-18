@@ -10,7 +10,9 @@ IntroState::IntroState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	p_quitCode = StateQuitCode::NOT_QUITTING;
 
 	sf::Texture logo;
-	logo.loadFromFile("KEngine/Sources/Logos/ReversedKEngineLogo.png");
+	//logo.loadFromFile("KEngine/Sources/Logos/ReversedKEngineLogo.png");
+	logo.loadFromFile("res/CISS_Logo.png");
+
 	logo.setSmooth(true);
 
 	m_state_mask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black);

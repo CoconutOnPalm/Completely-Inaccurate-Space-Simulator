@@ -26,6 +26,10 @@ void Application::InitWindow()
 	window.create(sf::VideoMode(AppSettings::DefaultWindowSize().x, AppSettings::DefaultWindowSize().y), "Completely Inaccurate Space Simulator", (AppSettings::WindowStyle() != sf::Style::Fullscreen) ? (sf::Style::None) : (sf::Style::Fullscreen));
 	window.setFramerateLimit(AppSettings::MaxMenuFPS());
 
+	sf::Image window_icon;
+	window_icon.loadFromFile("Textures/CISS_icon.png");
+	window.setIcon(window_icon.getSize().x, window_icon.getSize().y, window_icon.getPixelsPtr());
+
 
 	view.setSize(sf::Vector2f(window.getSize()));
 	view.setCenter(view.getSize() / 2.f);

@@ -39,6 +39,13 @@ void SettingsOverlay::initUI()
 	m_vsync.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 40, sf::Vector2f(m_music_volume.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Neptune_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	
 	m_simulationFPS.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), nullptr, AppSettings::MaxSimulationFPS(), 120.0, 960.0, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
+	m_FPS_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::MaxSimulationFPS()), m_simulationFPS.getSize().y / 2,
+		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_simulationFPS.getSize().x / 128, 0));
+	
+
+	m_background_brightness.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Jupiter_icon.png",
+		std::string(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_background_brightness.setPercent(AppSettings::BackgroundBrightness());
 
 
 	const float box_size = winsize.x / 30;
@@ -55,6 +62,15 @@ void SettingsOverlay::initUI()
 	m_background_images.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(box_size, box_size), box_position, ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/BackgroundIcons/Whirlpool_Galaxy_icon.png",	std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(0, 0, 0, 32)));		box_position.x += box_size;												// black
 	m_background_images.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(box_size, box_size), box_position, ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/BackgroundIcons/NGC-1300_icon.png",			std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(0, 0, 0, 32)));		box_position.x += box_size;												// black
 	m_background_images.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(box_size, box_size), box_position, ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/BackgroundIcons/Lagoon_Nebula_icon.png",		std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(0, 0, 0, 32)));		box_position.x += box_size;												// black
+
+
+	for (auto& itr : m_background_images)
+	{
+		itr->setPosition(itr->getShapeCenter());
+		itr->setOrigin(ke::Origin::MIDDLE_MIDDLE);
+		itr->setSize(itr->getSize() * 0.8f);
+	}
+
 
 	m_selected_image = m_background_images.begin() + AppSettings::SimulationBackgroundImage();
 
@@ -90,7 +106,31 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	}
 
 
-	m_vsync.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left);
+	if (m_vsync.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left))
+	{
+		AppSettings::setVSync(m_vsync.signal());
+	}
+
+
+	if (m_simulationFPS.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_simulationFPS.addPoints(120);
+
+		if (m_simulationFPS.getPointCount() < 960)
+			m_FPS_text.setText(std::to_wstring(m_simulationFPS.getPointCount()));
+		else
+			m_FPS_text.setText(L"Unlimited");
+
+		AppSettings::setMaxSimulationFPS(m_simulationFPS.getPointCount());
+	}
+	else if (m_simulationFPS.isClicked(sf::Mouse::Right, mousePosition.byWindow, event))
+	{
+		m_simulationFPS.subtractPoints(120);
+
+		m_FPS_text.setText(std::to_wstring(m_simulationFPS.getPointCount()));
+
+		AppSettings::setMaxSimulationFPS(m_simulationFPS.getPointCount());
+	}
 
 
 	for (auto itr = m_background_images.begin(); itr != m_background_images.end(); ++itr)
@@ -113,8 +153,17 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 			if (AppSettings::SimulationBackgroundImage() == 1)
 				simulation_background->setFillColor(sf::Color(0, 0, 4));
 			else
-				simulation_background->setFillColor(sf::Color::Transparent);
+				simulation_background->setFillColor(sf::Color(0, 0, 0, 255.f - 255.f * AppSettings::BackgroundBrightness() * 0.01f));
 		}
+	}
+
+
+	if (m_background_brightness.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr))
+	{
+		AppSettings::setBackgroundBrightness(m_background_brightness.getPercent());
+
+		if (AppSettings::SimulationBackgroundImage() != 0 && AppSettings::SimulationBackgroundImage() != 1)
+			simulation_background->setFillColor(sf::Color(0, 0, 0, 255.f - 255.f * AppSettings::BackgroundBrightness() * 0.01f));
 	}
 }
 
@@ -146,12 +195,15 @@ void SettingsOverlay::render()
 	m_sfx_volume.render(m_window);
 	m_vsync.render(m_window);
 	m_simulationFPS.render(m_window);
+	m_FPS_text.render(m_window);
 
 	for (auto itr = m_background_images.begin(); itr != m_background_images.end(); ++itr)
 		if (itr != m_selected_image)
 			(*itr)->render(m_window);
 
 	(*m_selected_image)->render(m_window);
+
+	m_background_brightness.render(m_window);
 }
 
 bool SettingsOverlay::active() const
@@ -168,6 +220,9 @@ void SettingsOverlay::activate()
 void SettingsOverlay::deactivate()
 {
 	m_active = false;
+
+	m_window->setFramerateLimit(AppSettings::MaxSimulationFPS());
+	m_window->setVerticalSyncEnabled(AppSettings::vSync());
 }
 
 std::string SettingsOverlay::index_to_background_texture()

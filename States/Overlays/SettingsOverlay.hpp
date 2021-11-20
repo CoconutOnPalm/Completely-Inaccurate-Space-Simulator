@@ -40,7 +40,7 @@ private:
 	bool m_active;
 
 	ke::Rectangle m_background;
-	ke::Button * simulation_background;
+	ke::Button* simulation_background;
 
 
 	ke::PercentageBar m_music_volume;
@@ -52,4 +52,7 @@ private:
 
 	ke::Switch m_vsync;
 	ke::PointBar m_simulationFPS;
+	ke::Rectangle m_FPS_text;
+
+	ke::PercentageBar m_background_brightness;
 };

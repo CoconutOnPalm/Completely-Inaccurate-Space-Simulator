@@ -35,6 +35,8 @@ public:
 
 	void loadObjects();
 
+	void performPreLauchUpdates(const MousePosition& mousePosition, float dt);
+
 	void updateEvents(const MousePosition& mousePosition, float dt);
 	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event);
 

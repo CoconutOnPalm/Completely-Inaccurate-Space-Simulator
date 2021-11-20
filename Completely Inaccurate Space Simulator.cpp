@@ -10,8 +10,6 @@ int main()
 
     KEngine::Init();
 
-    ke::Settings::setDefaultFontPath("KEngine/Sources/Data/fontpaths.txt");
-
     Application CISS;
 
     CISS.Run();

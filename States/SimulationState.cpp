@@ -16,6 +16,8 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_text_entered(false)
 	, m_object_buffer_ready(false)
 {
+	m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, ke::Settings::EmptyFHDTexturePath(), {}, {}, {}, sf::Color::Black);
+
 	m_stateMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Black);
 	m_sm_color.setColor(sf::Color::Black);
 
@@ -36,14 +38,17 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
 	m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
 
-	m_StateControlPanel.assign(&m_state_controllers, &m_upperState, &m_quitOverlay, &m_SettingsOverlay);
+	m_StateControlPanel.assign(&m_state_controllers, &m_quitOverlay, &m_SimParamsOverlay, &m_SettingsOverlay);
 
 	//m_ObjectLibraryOverlay = std::make_unique<ObjectLibraryOverlay>();
 	m_ObjectLibraryOverlay.assign(window);
 	m_ObjectLibraryOverlay.initUI();
 	m_ObjectLibraryOverlay.loadObjects();
 
-	m_SettingsOverlay.assign(window);
+	m_SimParamsOverlay.assign(window);
+	m_SimParamsOverlay.initUI();
+
+	m_SettingsOverlay.assign(window, &m_stateBackground);
 	m_SettingsOverlay.initUI();
 
 
@@ -220,10 +225,10 @@ void SimulationState::InitTopGUI()
 	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 8, winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
 
 
-	m_state_controllers.reserve(3); // Quit to menu | settings | clear
+	m_state_controllers.reserve(3); // Quit to menu | settings | simulation params
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuitIcon.png"));
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuickSettingsIcon2.png"));
-	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, nullptr));
+	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, nullptr));
 
 
 	m_tools.reserve(5); // select | select field | delete | soom in | zoom out
@@ -479,7 +484,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	{
 		m_outro_clock.restart();
 		if (ke::SmoothColorChange(&m_stateMask, true, sf::Color::Transparent, sf::Color::Black, m_sm_color, 256, dt))
-			m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
+			m_ObjectLibraryOverlay.performPreLauchUpdates(mousePosition, dt);
 	}
 
 
@@ -492,6 +497,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	m_StateControlPanel.updateEvents(mousePosition, dt);
 	m_ObjectLibraryOverlay.updateEvents(mousePosition, dt);
+	m_SimParamsOverlay.updateEvents(mousePosition, dt);
 	m_SettingsOverlay.updateEvents(mousePosition, dt);
 
 
@@ -637,16 +643,16 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SettingsOverlay.active(), sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active(), sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
 
-	if (m_ObjectLibraryOverlay.active())
-		m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
+	m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 
-	if (m_SettingsOverlay.active())
-		m_SettingsOverlay.updateColors(mousePosition.byWindow, dt);
+	m_SimParamsOverlay.updateColors(mousePosition.byWindow, dt);
+
+	m_SettingsOverlay.updateColors(mousePosition.byWindow, dt);
 }
 
 
@@ -697,6 +703,12 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		return;
 	}
 
+
+	if (m_SimParamsOverlay.active())
+	{
+		m_SimParamsOverlay.updatePollEvents(mousePosition, dt, event);
+		return;
+	}
 
 	if (m_SettingsOverlay.active())
 	{
@@ -749,12 +761,12 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	// FEATURE: getting settings form overlay
 
-	if (!m_SettingsOverlay.active())
+	if (!m_SimParamsOverlay.active())
 	{
-		if (m_SettingsOverlay.quitStatus() == OverlayQuitCode::CHANGING_SETTINGS)
+		if (m_SimParamsOverlay.quitStatus() == OverlayQuitCode::CHANGING_SETTINGS)
 		{
-			m_star_scale = m_SettingsOverlay.output().star_size;
-			m_planet_scale = m_SettingsOverlay.output().planet_size;
+			m_star_scale = m_SimParamsOverlay.output().star_size;
+			m_planet_scale = m_SimParamsOverlay.output().planet_size;
 
 			for (auto& itr : m_objects)
 			{
@@ -770,7 +782,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 			m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
 
-			m_SettingsOverlay.resetQuitStatus();
+			m_SimParamsOverlay.resetQuitStatus();
 
 
 			for (auto& itr : m_objects)
@@ -1443,6 +1455,8 @@ void SimulationState::renderBackground()
 {
 	//window->draw(*m_stateBackground.getShape(), &m_test_shader);
 
+	m_stateBackground.render(window);
+
 	if (AppSettings::GlowShader())
 		for (auto& itr : m_objects)
 			window->draw(*m_shaderMask.getShape(), itr->getGlowShader());
@@ -1515,6 +1529,7 @@ void SimulationState::renderByWindow()
 		m_quitOverlay->render(window);
 
 	m_ObjectLibraryOverlay.render();
+	m_SimParamsOverlay.render();
 	m_SettingsOverlay.render();
 
 

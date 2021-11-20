@@ -1,9 +1,6 @@
 #include "StateControlPanel.hpp"
 
 
-#define m_upperState_ptr (*m_upperState)
-
-
 StateControlPanel::StateControlPanel()
 	: m_quitting(false)
 {
@@ -15,12 +12,12 @@ StateControlPanel::~StateControlPanel()
 
 }
 
-void StateControlPanel::assign(PanelUI* controllers, std::unique_ptr<State>* upperStates, std::unique_ptr<QuitOverlay>* QuitOverlay, SimParamsOverlay* settingsOverlay)
+void StateControlPanel::assign(PanelUI* controllers, std::unique_ptr<QuitOverlay>* QuitOverlay, SimParamsOverlay* simParamsOverlay, SettingsOverlay* settingsOverlay)
 {
 	m_controllers = controllers;
-	m_upperState = upperStates;
 	m_quitOverlay = QuitOverlay;
-	m_simParamsOverlay = settingsOverlay;
+	m_simParamsOverlay = simParamsOverlay;
+	m_settingsOverlay = settingsOverlay;
 }
 
 bool StateControlPanel::quittingRequestStatus() const
@@ -35,17 +32,12 @@ void StateControlPanel::updateEvents(const MousePosition& mousePosition, float d
 
 void StateControlPanel::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, sf::RenderWindow* window, sf::View* view)
 {
-
 	if (m_controllers->at(0)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		(*m_quitOverlay) = std::make_unique<QuitOverlay>(sf::Vector2f(window->getSize()));
 	else if (m_controllers->at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
-	{
+		m_settingsOverlay->activate();
+	else if (m_controllers->at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		m_simParamsOverlay->activate();
-		std::cout << "quack\n";
-	}
-		//m_upperState_ptr = std::make_unique<SettingsState>(window, view);
-	//else if (m_controllers->at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
-		// do sth
 }
 
 void StateControlPanel::updateColors(const sf::Vector2f& mousePosition, const float dt)
@@ -73,5 +65,3 @@ void StateControlPanel::renderWindow(sf::RenderWindow* window)
 {
 	
 }
-
-#undef m_upperState_ptr

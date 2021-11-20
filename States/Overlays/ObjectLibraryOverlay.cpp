@@ -42,9 +42,9 @@ void ObjectLibraryOverlay::initUI()
 
 	// | favourite | by systems |    A-Z    |    Z-A    |
 	//m_filtering_options[0].create(sf::Vector2f(winsize.x / 64, winsize.x / 64), sf::Vector2f(winsize.x * 0.53, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/EmptyStar.png");
-	m_filtering_options[0].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.03125, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingBySystemsIcon.png");
-	m_filtering_options[1].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.06250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingByAZIcon.png");
-	m_filtering_options[2].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.09375, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SortingByZAIcon.png");
+	m_filtering_options[0].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.03125, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/ObjectLibraryOverlay/SortingBySystemsIcon.png");
+	m_filtering_options[1].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.06250, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/ObjectLibraryOverlay/SortingByAZIcon.png");
+	m_filtering_options[2].create(sf::Vector2f(winsize.x / 60, winsize.x / 60), sf::Vector2f(winsize.x * 0.53 + winsize.x * 0.09375, winsize.y / 18), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/ObjectLibraryOverlay/SortingByZAIcon.png");
 
 	m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
 
@@ -202,21 +202,64 @@ void ObjectLibraryOverlay::loadObjects()
 	}
 }
 
-void ObjectLibraryOverlay::updateEvents(const MousePosition& mousePosition, float dt)
+void ObjectLibraryOverlay::performPreLauchUpdates(const MousePosition& mousePosition, float dt)
 {
 	m_search_box.updateCursor();
 	m_slider.updateSliderPosition(&m_obj_view);
+	m_view_barrier.update(mousePosition.byWindow, sf::Mouse::Right);
 
+	auto GUI_color_itr = m_GUI_colors.begin();
+
+	for (auto& itr : m_object_info)
+	{
+		ke::SmoothTextColorChange(&itr, itr.isInvaded(mousePosition.byWindow), sf::Color::White, sf::Color(255, 255, 255, 192), *GUI_color_itr, 511, dt);
+		++GUI_color_itr;
+	}
+
+	ke::SmoothColorChange(&m_add_button, m_add_button.isInvaded(mousePosition.byWindow), sf::Color(32, 255, 32, 128), sf::Color(32, 192, 32, 128), *GUI_color_itr, 512, dt); ++GUI_color_itr;
+	ke::SmoothTextColorChange(&m_add_button, m_add_button.isInvaded(mousePosition.byWindow), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(&m_close_button, m_close_button.isInvaded(mousePosition.byWindow), sf::Color(255, 32, 32, 128), sf::Color(192, 32, 32, 128), *GUI_color_itr, 512, dt); ++GUI_color_itr;
+	ke::SmoothTextColorChange(&m_close_button, m_close_button.isInvaded(mousePosition.byWindow), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
+
+	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition.byWindow) || m_slider.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 2048, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition.byWindow) || m_slider.isHolded(), sf::Color(48, 48, 48, 48), sf::Color(32, 32, 32, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
+
+	ke::SmoothColorChange(&m_search_box, m_search_box.isInvaded(mousePosition.byWindow) || m_search_box.getEPS(), sf::Color(40, 40, 40, 255), sf::Color(32, 32, 32, 255), *GUI_color_itr, 64, dt); ++GUI_color_itr;
+
+
+	for (auto& itr : m_filtering_options)
+	{
+		ke::SmoothColorChange(&itr, itr.isInvaded(mousePosition.byWindow), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *GUI_color_itr, 511, dt);
+		++GUI_color_itr;
+	}
+
+
+	auto obj_color_itr = m_obj_colors.begin();
+
+	for (auto itr = m_on_screen.begin(); itr != m_on_screen.end(); ++itr)
+	{
+		ke::SmoothColorChange(&(**itr)->Icon().icon, (**itr)->Icon().icon.isInvaded(mPosView), sf::Color::Transparent, sf::Color(0, 0, 0, 96), *obj_color_itr, 511, dt);
+		++obj_color_itr;
+	}
+}
+
+
+void ObjectLibraryOverlay::updateEvents(const MousePosition& mousePosition, float dt)
+{
+	if (!m_active)
+		return;
+
+	m_search_box.updateCursor();
+	m_slider.updateSliderPosition(&m_obj_view);
 
 	m_view_barrier.update(mousePosition.byWindow, sf::Mouse::Right);
 
-	if (!sf::Mouse::isButtonPressed(sf::Mouse::Right))
-		m_slider.updateSliderPosition(&m_obj_view);
+	//if (!sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	//	m_slider.updateSliderPosition(&m_obj_view);
 }
 
 void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
-
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 	{
 		m_quitCode = OverlayQuitCode::QUITTING_WITHOUT_OBJECT;
@@ -386,6 +429,9 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 void ObjectLibraryOverlay::updateColors(const sf::Vector2f& mousePosition, const float dt)
 {
+	if (!m_active)
+		return;
+
 	auto GUI_color_itr = m_GUI_colors.begin();
 
 	for (auto& itr : m_object_info)

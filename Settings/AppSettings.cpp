@@ -34,6 +34,7 @@ bool AppSettings::Init()
 	Get().m_glowShader = true;
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
+	Get().m_simulationBackgroundImage = 0;
 
 	ke::FileStream settings("Data/settings.bin", std::ios::in | std::ios::binary);
 
@@ -54,6 +55,7 @@ bool AppSettings::Init()
 	settings.binRead(Get().m_glowShader);
 	settings.binRead(Get().m_custom_dt);
 	settings.binRead(Get().m_custom_timestep);
+	settings.binRead(Get().m_simulationBackgroundImage);
 
 	return true;
 }
@@ -80,6 +82,7 @@ bool AppSettings::Save()
 	settings.binWrite(Get().m_glowShader);
 	settings.binWrite(Get().m_custom_dt);
 	settings.binWrite(Get().m_custom_timestep);
+	settings.binWrite(Get().m_simulationBackgroundImage);
 
 	return success;
 }
@@ -102,6 +105,7 @@ void AppSettings::RestoreDefaults()
 	Get().m_glowShader = true;
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
+	Get().m_simulationBackgroundImage = 0;
 }
 
 void AppSettings::setDefaultWindowSize(const sf::Vector2f window_size)
@@ -242,4 +246,14 @@ void AppSettings::setCustomTimeStep(float custom_timestep)
 float AppSettings::CustomTimeStep()
 {
 	return Get().m_custom_timestep;
+}
+
+void AppSettings::setSimulationBackgroundImage(int index)
+{
+	Get().m_simulationBackgroundImage = index;
+}
+
+int AppSettings::SimulationBackgroundImage()
+{
+	return Get().m_simulationBackgroundImage;
 }

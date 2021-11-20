@@ -24,6 +24,7 @@ namespace ke
 		if (!filestream.binWrite(Get().m_min_abs_mass))						success = false;
 		if (!filestream.binWrite(Get().m_default_font_path))				success = false;
 		if (!filestream.binWrite(Get().m_empty_texture_path))				success = false;
+		if (!filestream.binWrite(Get().m_empty_FHD_texture_path))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.r))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.g))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.b))			success = false;
@@ -48,6 +49,7 @@ namespace ke
 		Get().m_min_abs_mass = 0.0001;
 		Get().m_default_font_path = "KEngine/Sources/Data/fontpaths.txt";
 		Get().m_empty_texture_path = "KEngine/Sources/empty_texture.png";
+		Get().m_empty_FHD_texture_path = "KEngine/Sources/empty_texture_FullHD.png";
 		Get().m_default_texture_color = sf::Color::Black;
 		Get().m_unknown_texture_path_name = "KE_UNKNOWN";
 		
@@ -68,6 +70,7 @@ namespace ke
 		if (!filestream.binRead(Get().m_min_abs_mass))						success = false;
 		if (!filestream.binRead(Get().m_default_font_path))					success = false;
 		if (!filestream.binRead(Get().m_empty_texture_path))				success = false;
+		if (!filestream.binRead(Get().m_empty_FHD_texture_path))			success = false;
 		if (!filestream.binRead(Get().m_default_texture_color.r))			success = false;
 		if (!filestream.binRead(Get().m_default_texture_color.g))			success = false;
 		if (!filestream.binRead(Get().m_default_texture_color.b))			success = false;
@@ -102,6 +105,7 @@ namespace ke
 		if (!filestream.binWrite(Get().m_min_abs_mass))						success = false;
 		if (!filestream.binWrite(Get().m_default_font_path))				success = false;
 		if (!filestream.binWrite(Get().m_empty_texture_path))				success = false;
+		if (!filestream.binWrite(Get().m_empty_FHD_texture_path))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.r))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.g))			success = false;
 		if (!filestream.binWrite(Get().m_default_texture_color.b))			success = false;
@@ -127,8 +131,9 @@ namespace ke
 		Get().m_physics_accuracy = 0.0001;
 		Get().m_min_abs_mass = 0.0001;
 		Get().m_default_font_path = "KEngine/Sources/Data/fontpaths.txt";
-		Get().m_empty_texture_path = "KEngine/Sources/empty_rtexture.txt";
-		Get().m_default_texture_color = sf::Color::Black;
+		Get().m_empty_texture_path = "KEngine/Sources/empty_texture.png";
+		Get().m_empty_FHD_texture_path = "KEngine/Sources/empty_texture_FullHD.png";
+		Get().m_default_texture_color = sf::Color::White;
 		Get().m_unknown_texture_path_name = "KE_UNKNOWN";
 	}
 
@@ -232,6 +237,16 @@ namespace ke
 	std::string Settings::EmptyTexturePath()
 	{
 		return Get().m_empty_texture_path;
+	}
+
+	void Settings::setEmptyFHDTexturePath(const std::string& filename)
+	{
+		Get().m_empty_FHD_texture_path = filename;
+	}
+
+	std::string Settings::EmptyFHDTexturePath()
+	{
+		return Get().m_empty_FHD_texture_path;
 	}
 
 

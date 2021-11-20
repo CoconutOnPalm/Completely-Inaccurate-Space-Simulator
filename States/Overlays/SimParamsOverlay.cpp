@@ -76,10 +76,10 @@ void SimParamsOverlay::initUI()
 	m_planet_scale_text.setTextPosition(ke::Origin::RIGHT_MIDDLE, sf::Vector2f(-winsize.x / 128, 0));
 
 
-	m_star_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/IconTextures/Default/Sun_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
-	m_glow_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 4 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/IconTextures/Default/EpsilonEridani_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_star_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/Sun_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_glow_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 4 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/EpsilonEridani_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 
-	m_custom_dt.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 5 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/IconTextures/Default/ProximaCentauri_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_custom_dt.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 5 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/ProximaCentauri_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_custom_timestep.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 6 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, nullptr, L"timestep in ms", ke::TextScope::Numbers, 20, 1, winsize.x / 100, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color::White, sf::Color(96, 96, 96, 255), {}, {}, {}, sf::Vector2f(winsize.x / 100, 0));
 
 
@@ -127,9 +127,6 @@ void SimParamsOverlay::updateEvents(const MousePosition& mousePosition, float dt
 
 void SimParamsOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
-	if (!m_active)
-		return;
-
 	if (m_star_scale.isClicked(sf::Mouse::Left, mousePosition.byWindow, event) && m_sScale_itr != m_sScales.end() - 1)
 	{
 		std::wstringstream wstr;
@@ -214,6 +211,9 @@ void SimParamsOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 
 void SimParamsOverlay::updateColors(const sf::Vector2f& mousePosition, const float dt)
 {
+	if (!m_active)
+		return;
+
 	auto itr = m_colors.begin();
 
 	ke::SmoothColorChange(m_star_scale.getObject(), m_star_scale.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;

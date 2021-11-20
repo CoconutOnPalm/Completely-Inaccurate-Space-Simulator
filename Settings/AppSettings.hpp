@@ -63,6 +63,8 @@ public:
 	static void setCustomTimeStep(float custom_timestep);
 	static float CustomTimeStep();
 
+	static void setSimulationBackgroundImage(int index);
+	static int SimulationBackgroundImage();
 
 
 private:
@@ -88,4 +90,5 @@ private:
 	bool m_glowShader;
 	bool m_custom_dt;
 	float m_custom_timestep;
+	int m_simulationBackgroundImage;
 };

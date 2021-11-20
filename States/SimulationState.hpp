@@ -17,6 +17,7 @@
 
 #include "Overlays/ObjectLibraryOverlay.hpp"
 #include "Overlays/SimParamsOverlay.hpp"
+#include "Overlays/SettingsOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -108,7 +109,7 @@ private:
 
     // background and masks
 
-    ke::Rectangle m_stateBackground;
+    ke::Button m_stateBackground;
     ke::Rectangle m_backgroundMask;
     ke::Rectangle m_stateMask;
     ke::Colorf m_sm_color; // state mask color
@@ -162,12 +163,11 @@ private:
 
 
     // state holders & overlays
-    
-    std::unique_ptr<State> m_upperState;
+
     std::unique_ptr<QuitOverlay> m_quitOverlay;
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
-    SimParamsOverlay m_SettingsOverlay;
-
+    SimParamsOverlay m_SimParamsOverlay;
+    SettingsOverlay m_SettingsOverlay;
 
     // shaders
 

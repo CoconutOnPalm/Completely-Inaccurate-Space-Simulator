@@ -16,6 +16,14 @@ void SettingsOverlay::assign(sf::RenderWindow* window, ke::Button* background)
 {
 	m_window = window;
 	simulation_background = background;
+
+	background->setTexture(this->index_to_background_texture());
+	if (AppSettings::SimulationBackgroundImage() == 0)
+		background->setFillColor(sf::Color::Black);
+	if (AppSettings::SimulationBackgroundImage() == 1)
+		background->setFillColor(sf::Color(0, 0, 4));
+	else
+		background->setFillColor(sf::Color(0, 0, 0, 255.f - 255.f * AppSettings::BackgroundBrightness() * 0.01f));
 }
 
 void SettingsOverlay::initUI()
@@ -28,28 +36,30 @@ void SettingsOverlay::initUI()
 	m_background.create(sf::Vector2f(winsize.x / 2, winsize.y * 0.8), winsize / 2.f, ke::Origin::MIDDLE_MIDDLE, std::wstring(), 0, 0, sf::Color(8, 8, 8, 255));
 
 	m_music_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 1 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Mars_icon.png",
-		std::string(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_music_volume.setPercent(AppSettings::MusicVolume());
 
 	m_sfx_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 2 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Moon_icon.png",
-		std::string(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_sfx_volume.setPercent(AppSettings::MusicVolume());
 
 
 	m_vsync.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 40, sf::Vector2f(m_music_volume.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Neptune_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	
 	m_simulationFPS.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), nullptr, AppSettings::MaxSimulationFPS(), 120.0, 960.0, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
+
 	m_FPS_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::MaxSimulationFPS()), m_simulationFPS.getSize().y / 2,
 		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_simulationFPS.getSize().x / 128, 0));
 	
 
 	m_background_brightness.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Jupiter_icon.png",
-		std::string(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_background_brightness.setPercent(AppSettings::BackgroundBrightness());
 
 
 	const float box_size = winsize.x / 30;
 	sf::Vector2f box_position(winsize.x / 2 + xShift, yShift + 5 * winsize.y / 10);
+
 
 	m_background_images.reserve(10);
 	m_background_images.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(box_size, box_size), box_position, ke::Origin::LEFT_TOP, ke::Settings::EmptyTexturePath(),												std::wstring(), 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black));			box_position.x += box_size;												// black

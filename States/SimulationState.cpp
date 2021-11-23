@@ -53,6 +53,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 
 
 	m_placed_object.create(100, { 1000, 1000 }, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
+
 }
 
 

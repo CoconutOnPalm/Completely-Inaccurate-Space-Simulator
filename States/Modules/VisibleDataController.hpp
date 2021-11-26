@@ -8,6 +8,7 @@
 #include "Space Objects/ObjectIcon.hpp"
 #include "Equasions/Equasions.hpp"
 #include "Equasions/Constants.hpp"
+#include "States/Global/TypeMap.hpp"
 
 #define objvector std::vector<std::unique_ptr<SpaceObject>>
 

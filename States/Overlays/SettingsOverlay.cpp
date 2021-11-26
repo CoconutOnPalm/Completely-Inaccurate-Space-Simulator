@@ -49,7 +49,7 @@ void SettingsOverlay::initUI()
 	m_simulationFPS.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), nullptr, AppSettings::MaxSimulationFPS(), 120.0, 960.0, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
 
 	m_FPS_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::MaxSimulationFPS()), m_simulationFPS.getSize().y / 2,
-		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_simulationFPS.getSize().x / 128, 0));
+		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_simulationFPS.getSize().x / 256, 0));
 	
 
 	m_background_brightness.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Jupiter_icon.png",
@@ -86,6 +86,14 @@ void SettingsOverlay::initUI()
 
 	(*m_selected_image)->setOutlineColor(sf::Color::Cyan);
 	(*m_selected_image)->setOutlineThickness(winsize.x / 512);
+
+
+	m_descriptions[0].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 1 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"music volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[1].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 2 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"SFX volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"background image", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"vertical synchronization", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5.5 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"max FPS in simulation", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 7 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 }
 
 void SettingsOverlay::updateEvents(const MousePosition& mousePosition, float dt)
@@ -126,8 +134,11 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		m_simulationFPS.addPoints(120);
 
+		std::wstringstream wstr;
+		wstr << std::fixed << std::setprecision(0) << m_simulationFPS.getPointCount();
+
 		if (m_simulationFPS.getPointCount() < 960)
-			m_FPS_text.setText(std::to_wstring(m_simulationFPS.getPointCount()));
+			m_FPS_text.setText(wstr.str());
 		else
 			m_FPS_text.setText(L"Unlimited");
 
@@ -137,7 +148,10 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		m_simulationFPS.subtractPoints(120);
 
-		m_FPS_text.setText(std::to_wstring(m_simulationFPS.getPointCount()));
+		std::wstringstream wstr;
+		wstr << std::fixed << std::setprecision(0) << m_simulationFPS.getPointCount();
+
+		m_FPS_text.setText(wstr.str());
 
 		AppSettings::setMaxSimulationFPS(m_simulationFPS.getPointCount());
 	}
@@ -181,6 +195,29 @@ void SettingsOverlay::updateColors(const sf::Vector2f& mousePosition, const floa
 {
 	if (!m_active)
 		return;
+
+	auto color_itr = m_colors.begin();
+
+	ke::SmoothColorChange(m_music_volume.getColorButton(), m_music_volume.isInvaded(mousePosition) || m_music_volume.isHolded(), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_music_volume.getObject(), m_music_volume.isInvaded(mousePosition) || m_music_volume.isHolded(), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_sfx_volume.getColorButton(), m_sfx_volume.isInvaded(mousePosition) || m_sfx_volume.isHolded(), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_sfx_volume.getObject(), m_sfx_volume.isInvaded(mousePosition) || m_sfx_volume.isHolded(), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *color_itr, 256, dt); ++color_itr;
+
+	for (auto itr = m_background_images.begin() + 2; itr != m_background_images.end(); ++itr)
+	{
+		ke::SmoothColorChange(itr->get(), (*itr)->isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *color_itr, 256, dt);
+		++color_itr;
+	}
+
+	ke::SmoothColorChange(m_vsync.getColorButton(), m_vsync.isInvaded(mousePosition), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_vsync.getObject(), m_vsync.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *color_itr, 256, dt); ++color_itr;
+	
+	ke::SmoothColorChange(m_simulationFPS.getObject(), m_simulationFPS.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_simulationFPS.getBar(), m_simulationFPS.isInvaded(mousePosition), sf::Color(128, 128, 128, 255), sf::Color(64, 64, 64, 255), *color_itr, 512, dt); ++color_itr;
+	ke::SmoothTextColorChange(&m_FPS_text, m_simulationFPS.isInvaded(mousePosition), sf::Color::White, sf::Color(223, 223, 223, 225), *color_itr, 256, dt);
+
+	ke::SmoothColorChange(m_background_brightness.getColorButton(), m_background_brightness.isInvaded(mousePosition) || m_background_brightness.isHolded(), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(m_background_brightness.getObject(), m_background_brightness.isInvaded(mousePosition) || m_background_brightness.isHolded(), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *color_itr, 256, dt); ++color_itr;
 }
 
 
@@ -200,6 +237,9 @@ void SettingsOverlay::render()
 		return;
 
 	m_background.render(m_window);
+
+	for (auto& itr : m_descriptions)
+		itr.render(m_window);
 
 	m_music_volume.render(m_window);
 	m_sfx_volume.render(m_window);

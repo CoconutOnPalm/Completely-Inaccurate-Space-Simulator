@@ -110,21 +110,8 @@ void VisibleDataController::loadData(objvector::iterator selected_object, const 
 	data_stream << std::fixed << std::setprecision(3) << (*selected_object)->data.radius;
 	(*m_values)["RADIUS"]->setText(data_stream.str());
 
-
-	data_stream.str(std::wstring());
-	data_stream << std::fixed << std::setprecision(3) << surface_gravity((*selected_object)->object.physics()->getMass(), (*selected_object)->data.radius);
-	(*m_values)["SURFACE_G"]->setText(data_stream.str());
-
-
-	data_stream.str(std::wstring());
-	data_stream << std::fixed << std::setprecision(3) << std::scientific << ((*selected_object)->object.physics()->getMass() / Volume((*selected_object)->data.radius));
-	(*m_values)["DENSITY"]->setText(data_stream.str());
-
-
-	data_stream.str(std::wstring());
-	data_stream << std::fixed << std::setprecision(3) << second_space_speed((*selected_object)->object.physics()->getMass(), (*selected_object)->data.radius);
-	(*m_values)["ESCAPE_VEL"]->setText(data_stream.str());
-
+	(*m_values)["CLASS"]->setText(ke::fixed::stow(TypeTranslator::getClassName((*selected_object)->objectClass())));
+	(*m_values)["SUBTYPE"]->setText(ke::fixed::stow(TypeTranslator::getSubtypeName((*selected_object)->subtype())));
 
 	this->updateDistanceBlocks(selected_object);
 }
@@ -213,14 +200,12 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 			astream.str(temp);
 			astream >> abuff;
 		}
-		//std::wcout << "temp: " << temp << L'\n' << "abuff: " << abuff << '\n';
 
 		(*selected_object)->object.physics()->setSpeed(vbuff, abuff);
 
 
 		std::wstringstream wstr;
 
-		//conversion.str(std::wstring());
 		if (vbuff == 0 || abuff == 0)
 			wstr << 0;
 		else wstr << std::fixed << std::setprecision(3) << vbuff;
@@ -254,7 +239,6 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		conversion >> vbuff.x;
 
 		std::wstringstream wc;
-		//conversion.str(std::wstring());
 		wc << (*m_values)["VECTOR_VEL_Y"]->getText();
 		wc >> vbuff.y;
 
@@ -307,23 +291,8 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		(*selected_object)->updatePhysicalData();
 
 
-		std::wstringstream corr_stream;
-
-		corr_stream << std::fixed << std::setprecision(3) << surface_gravity((*selected_object)->object.physics()->getMass(), (*selected_object)->data.radius);
-		(*m_values)["SURFACE_G"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << (*selected_object)->object.physics()->getMass() / Volume((*selected_object)->data.radius);
-		(*m_values)["DENSITY"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << second_space_speed((*selected_object)->object.physics()->getMass(), (*selected_object)->data.radius);
-		(*m_values)["ESCAPE_VEL"]->setText(corr_stream.str());
-
-
 		std::wstringstream back_stream;
 
-		//data_stream.str(std::wstring());
 		back_stream << std::fixed << std::setprecision(3) << std::scientific << mass;
 		(*m_values)["MASS"]->setText(back_stream.str());
 	}
@@ -355,133 +324,10 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 			break;
 		}
 
-
-		std::wstringstream corr_stream;
-
-		corr_stream << std::fixed << std::setprecision(3) << surface_gravity((*selected_object)->object.physics()->getMass(), radius);
-		(*m_values)["SURFACE_G"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << (*selected_object)->object.physics()->getMass() / Volume(radius);
-		(*m_values)["DENSITY"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << second_space_speed((*selected_object)->object.physics()->getMass(), radius);
-		(*m_values)["ESCAPE_VEL"]->setText(corr_stream.str());
-
 		std::wstringstream back_stream;
 
 		back_stream << std::fixed << std::setprecision(3) << radius;
 		(*m_values)["RADIUS"]->setText(back_stream.str());
-	}
-
-
-	if ((*m_values)["SURFACE_G"]->getEPS())
-	{
-		if ((*m_values)["SURFACE_G"]->getText() == std::wstring())
-			return;
-
-		std::wstringstream data_stream;
-		long double surfg;
-		data_stream << (*m_values)["SURFACE_G"]->getText();
-		data_stream >> surfg;
-
-		long double new_mass = surfg * (*selected_object)->data.radius * (*selected_object)->data.radius / G;
-		(*selected_object)->object.physics()->setMass(new_mass);
-		(*selected_object)->data.mass = new_mass;
-		(*selected_object)->updatePhysicalData();
-
-		// TODO: schwardshild radius and black hole convertion
-
-
-		std::wstringstream corr_stream;
-
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << new_mass;
-		(*m_values)["MASS"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << new_mass / Volume((*selected_object)->data.radius);
-		(*m_values)["DENSITY"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << second_space_speed(new_mass, (*selected_object)->data.radius);
-		(*m_values)["ESCAPE_VEL"]->setText(corr_stream.str());
-
-
-		std::wstringstream back_stream;
-
-		back_stream << std::fixed << std::setprecision(3) << surfg;
-		(*m_values)["SURFACE_G"]->setText(back_stream.str());
-	}
-
-	if ((*m_values)["DENSITY"]->getEPS())
-	{
-		if ((*m_values)["DENSITY"]->getText() == std::wstring())
-			return;
-
-		std::wstringstream data_stream;
-		long double density;
-		data_stream << (*m_values)["DENSITY"]->getText();
-		data_stream >> density;
-
-		long double new_mass = density * Volume((*selected_object)->data.radius);
-		(*selected_object)->object.physics()->setMass(new_mass);
-		(*selected_object)->data.mass = new_mass;
-		(*selected_object)->updatePhysicalData();
-
-		// TODO: schwardshild radius and black hole convertion
-
-
-		std::wstringstream corr_stream;
-
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << new_mass;
-		(*m_values)["MASS"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << surface_gravity(new_mass, (*selected_object)->data.radius);
-		(*m_values)["SURFACE_G"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << second_space_speed(new_mass, (*selected_object)->data.radius);
-		(*m_values)["ESCAPE_VEL"]->setText(corr_stream.str());
-
-
-		std::wstringstream back_stream;
-
-		back_stream << std::fixed << std::setprecision(3) << density;
-		(*m_values)["DENSITY"]->setText(back_stream.str());
-	}
-
-
-	if ((*m_values)["ESCAPE_VEL"]->getEPS())
-	{
-		std::wstringstream data_stream;
-		long double escape_velocity;
-		data_stream << (*m_values)["ESCAPE_VEL"]->getText();
-		data_stream >> escape_velocity;
-
-		long double new_mass = escape_velocity * escape_velocity * (*selected_object)->data.radius / (2 * G);
-		(*selected_object)->object.physics()->setMass(new_mass);
-		(*selected_object)->data.mass = new_mass;
-		(*selected_object)->updatePhysicalData();
-
-		// TODO: schwardshild radius and black hole convertion
-
-
-		std::wstringstream corr_stream;
-
-		corr_stream << std::fixed << std::setprecision(3) << std::scientific << new_mass;
-		(*m_values)["MASS"]->setText(corr_stream.str());
-
-		corr_stream.str(std::wstring());
-		corr_stream << std::fixed << std::setprecision(3) << surface_gravity(new_mass, (*selected_object)->data.radius);
-		(*m_values)["SURFACE_G"]->setText(corr_stream.str());
-
-
-		std::wstringstream back_stream;
-
-		back_stream << std::fixed << std::setprecision(3) << escape_velocity;
-		(*m_values)["ESCAPE_VEL"]->setText(back_stream.str());
 	}
 }
 
@@ -537,9 +383,9 @@ void VisibleDataController::updateColors(const sf::Vector2f& mousePosition, cons
 	}
 
 
-	ke::SmoothColorChange((m_modifiers->begin())->get(), (*m_modifiers->begin())->isInvaded(mousePosition), sf::Color(255, 255, 255, 64), sf::Color(255, 255, 255, 32), *color_itr, 256, dt);
+	ke::SmoothColorChange((m_modifiers->begin())->get(), (*m_modifiers->begin())->isInvaded(mousePosition), sf::Color(128, 128, 128, 64), sf::Color(128, 128, 128, 32), *color_itr, 256, dt);
 	++color_itr;
-	ke::SmoothColorChange((m_modifiers->begin() + 1)->get(), (*(m_modifiers->begin() + 1))->isInvaded(mousePosition), sf::Color(255, 255, 255, 64), sf::Color(255, 255, 255, 32), *color_itr, 256, dt);
+	ke::SmoothColorChange((m_modifiers->begin() + 1)->get(), (*(m_modifiers->begin() + 1))->isInvaded(mousePosition), sf::Color(128, 128, 128, 64), sf::Color(128, 128, 128, 32), *color_itr, 256, dt);
 	++color_itr;
 	ke::SmoothColorChange((m_modifiers->begin() + 2)->get(), (*(m_modifiers->begin() + 2))->isInvaded(mousePosition), sf::Color(255, 0, 0, 64), sf::Color(255, 0, 0, 32), *color_itr, 256, dt);
 	++color_itr;
@@ -565,80 +411,102 @@ void VisibleDataController::checkInputString()
 
 void VisibleDataController::updateDistanceBlocks(objvector::iterator selected_object)
 {
-	if (m_objects->size() >= 3)
+	if (m_objects->size() >= 3) // 2 objects + center of mass
 	{
 		std::wstringstream dist_str;
 
 		auto nearest_object = m_objects->begin();
 		auto nearest_star = m_objects->begin();
-		long double min_obj_dist = 1e300;
-		long double min_star_dist = 1e300;
+		long double distance = 1e300;
 
 		if (selected_object == m_objects->end() - 1)
 			nearest_object = m_objects->end() - 2;
 		else
 			nearest_object = selected_object + 1;
 
-		min_obj_dist = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
+		distance = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
 
-		for (auto itr = m_objects->begin(), eoi = m_objects->end(); itr != eoi; ++itr)
+
+		if (isnan(distance))
+			distance = 0;
+
+
+		distance /= m_space_scale;
+
+		if (distance > ly)
 		{
-			if (itr != selected_object)
+			dist_str << std::fixed << std::setprecision(2) << distance / ly;
+			m_units->at(4)->setText(L"ly");
+		}
+		else if (distance > au)
+		{
+			dist_str << std::fixed << std::setprecision(2) << distance / au;
+			m_units->at(4)->setText(L"au");
+		}
+		else if (distance > 1000)
+		{
+			dist_str << std::fixed << std::setprecision(2) << distance / 1000;
+			m_units->at(4)->setText(L"km");
+		}
+		else
+		{
+			dist_str << std::fixed << std::setprecision(2) << distance;
+			m_units->at(4)->setText(L"m");
+		}
+
+
+		std::wstring strbuffer = dist_str.str();
+
+		if (strbuffer.size() > 6)
+		{
+			size_t ipos = strbuffer.find(L'.');
+
+			if (ipos != std::string::npos)
 			{
-				if ((*itr)->type() == STAR)
+				short counter = 0;
+
+				while (ipos != 0)
 				{
-					if (position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_star_dist)
+					if (counter % 3 == 0 && counter)
 					{
-						nearest_star = itr;
-						min_star_dist = position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
+						strbuffer.insert(strbuffer.begin() + ipos, ' ');
+						counter = 1;
 					}
-				}
-				if (position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition()) < min_obj_dist)
-				{
-					nearest_object = itr;
-					min_obj_dist = position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
+					else
+					{
+						counter++;
+					}
+
+					ipos--;
 				}
 			}
 		}
 
-
-		min_obj_dist /= m_space_scale;
-		min_star_dist /= m_space_scale;
-
+		(*m_values)["NEAREST_OBJ"]->setText(strbuffer);
 
 		//dist_str.str(std::wstring());
-		if (min_obj_dist > ly)
-			dist_str << std::fixed << std::setprecision(2) << min_obj_dist / ly << " ly";
-		else if (min_obj_dist > au)
-			dist_str << std::fixed << std::setprecision(2) << min_obj_dist / au << " au";
-		else
-			dist_str << std::fixed << std::setprecision(2) << min_obj_dist << " m";
-
-		(*m_values)["TO_NEAREST_OBJ"]->setText(dist_str.str());
-
-		dist_str.str(std::wstring());
-		if (min_star_dist > ly)
-			dist_str << std::fixed << std::setprecision(2) << min_star_dist / ly << " ly";
-		else if (min_star_dist > au)
-			dist_str << std::fixed << std::setprecision(2) << min_star_dist / au << " au";
-		else
-			dist_str << std::fixed << std::setprecision(2) << min_star_dist << " m";
+		//if (min_star_dist > ly)
+		//	dist_str << std::fixed << std::setprecision(2) << min_star_dist / ly << " ly";
+		//else if (min_star_dist > au)
+		//	dist_str << std::fixed << std::setprecision(2) << min_star_dist / au << " au";
+		//else
+		//	dist_str << std::fixed << std::setprecision(2) << min_star_dist << " m";
 
 
-		if ((*selected_object)->type() == STAR)
-			if ((*m_objects->begin())->getStarCount() <= 1)
-				(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
-			else
-				(*m_values)["TO_NEAREST_STAR"]->setText(dist_str.str());
-		else
-			if ((*m_objects->begin())->getStarCount() < 1)
-				(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
-			else
-				(*m_values)["TO_NEAREST_STAR"]->setText(dist_str.str());
+		//if ((*selected_object)->type() == STAR)
+		//	if ((*m_objects->begin())->getStarCount() <= 1)
+		//		(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
+		//	else
+		//		(*m_values)["TO_NEAREST_STAR"]->setText(dist_str.str());
+		//else
+		//	if ((*m_objects->begin())->getStarCount() < 1)
+		//		(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
+		//	else
+		//		(*m_values)["TO_NEAREST_STAR"]->setText(dist_str.str());
 	}
 	else
 	{
-		(*m_values)["TO_NEAREST_OBJ"]->setText(std::wstring());
-		(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
+		(*m_values)["NEAREST_OBJ"]->setText(std::wstring());
+		//(*m_values)["TO_NEAREST_STAR"]->setText(std::wstring());
 	}
 }

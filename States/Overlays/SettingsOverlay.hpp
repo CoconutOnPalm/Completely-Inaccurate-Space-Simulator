@@ -55,4 +55,8 @@ private:
 	ke::Rectangle m_FPS_text;
 
 	ke::PercentageBar m_background_brightness;
+
+	std::array<ke::Rectangle, 6> m_descriptions;
+
+	std::array<ke::Colorf, 20> m_colors;
 };

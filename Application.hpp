@@ -65,8 +65,5 @@ private:
 
 	std::vector<std::unique_ptr<State>> states;
 
-
-	// titlebar
-	
 };
 

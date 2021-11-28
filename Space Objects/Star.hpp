@@ -12,6 +12,7 @@ public:
         const sf::Vector2f& position,
         const std::string& name,
         const std::string& filename,
+        const std::string& icon_filename,
         int _class,
         int subtype,
         long double mass = 1.0,

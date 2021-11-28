@@ -140,7 +140,7 @@ void Application::Render()
 		(*itr)->renderByWindow();
 
 
-	window.setView(view);
+	window.setView(view); // DON'T REMOVE IT
 
 
 	window.display();
@@ -166,9 +166,4 @@ void Application::UpdateDeltaTime()
 void Application::End()
 {
 	window.close();
-
-	/*sf::Texture texture;
-	texture.create(window.getSize().x, window.getSize().y);
-	texture.update(window);
-	texture.copyToImage().saveToFile("Textures/screenshot.jpg");*/
 }

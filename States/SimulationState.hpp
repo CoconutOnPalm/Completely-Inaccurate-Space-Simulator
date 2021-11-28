@@ -100,6 +100,11 @@ private:
     StateControlPanel m_StateControlPanel;
 
 
+    // EXTERNAL WINDOWS
+
+    DetailedDataWindow detailedDataWindow;
+
+
     // simulation objects
 
     std::vector<std::unique_ptr<SpaceObject>> m_objects;

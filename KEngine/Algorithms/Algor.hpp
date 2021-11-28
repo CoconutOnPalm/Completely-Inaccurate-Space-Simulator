@@ -114,7 +114,7 @@ namespace ke
 		/// Ancient string to wstring from code::blocks era
 		/// </summary>
 		/// <param name="str">string</param>
-		/// <returns>variable changed from string</returns>
+		/// <returns>wstring made from string</returns>
 		inline std::wstring stow(const std::string& str)
 		{
 			std::wstring temp(str.begin(), str.end());

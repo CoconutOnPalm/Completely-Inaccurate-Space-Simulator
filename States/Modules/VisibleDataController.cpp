@@ -190,7 +190,6 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 			conversion << (*m_values)["VELOCITY"]->getText();
 			conversion >> vbuff;
 
-			//conversion.str(std::wstring());
 			std::wstring temp = (*m_values)["V_ANGLE"]->getText();
 			if (!temp.empty())
 				if (temp.back() == L'\u00B0')
@@ -256,7 +255,6 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 
 		std::wstringstream wstr;
 
-		//conversion.str(std::wstring());
 		wstr << std::fixed << std::setprecision(3) << std::sqrt(vbuff.x * vbuff.x + vbuff.y * vbuff.y);
 		(*m_values)["VELOCITY"]->setText(wstr.str());
 
@@ -282,14 +280,29 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		long double mass;
 		data_stream << (*m_values)["MASS"]->getText();
 		data_stream >> mass;
-		std::cout << mass << '\n';
 
 		// TODO: schwardshild radius and black hole convertion
+
 
 		(*selected_object)->object.physics()->setMass(mass);
 		(*selected_object)->data.mass = mass;
 		(*selected_object)->updatePhysicalData();
 
+		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius)) // black hole conversion
+		{
+			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
+
+			(*selected_object)->setType(ObjectType::STAR);
+
+			if (ke::ionRange(std::abs((*selected_object)->data.mass), static_cast<long double>(0), 100.0 * solar_mass))
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_STELLAR_SIZE_BH);
+			else if (ke::inRange(std::abs((*selected_object)->data.mass), 100.0 * solar_mass, 100000.0 * solar_mass))
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_INTERMEDIATE_SIZE_BH);
+			else
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_SUPERMASSIVE_BH);
+
+			(*selected_object)->object.setTexture("Textures/ObjectTextures/Universal/BlackHole.png");
+		}
 
 		std::wstringstream back_stream;
 
@@ -323,6 +336,24 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 			ke::throw_error("VisibleDataController::updateStaticData(...)", "incorrect object type", "ERROR");
 			break;
 		}
+
+
+		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius)) // black hole conversion
+		{
+			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
+
+			(*selected_object)->setType(ObjectType::STAR);
+
+			if (ke::ionRange(std::abs((*selected_object)->data.mass), static_cast<long double>(0), 100.0 * solar_mass))
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_STELLAR_SIZE_BH);
+			else if (ke::inRange(std::abs((*selected_object)->data.mass), 100.0 * solar_mass, 100000.0 * solar_mass))
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_INTERMEDIATE_SIZE_BH);
+			else
+				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_SUPERMASSIVE_BH);
+
+			(*selected_object)->object.setTexture("Textures/ObjectTextures/Universal/BlackHole.png");
+		}
+
 
 		std::wstringstream back_stream;
 
@@ -387,7 +418,9 @@ void VisibleDataController::updateColors(const sf::Vector2f& mousePosition, cons
 	++color_itr;
 	ke::SmoothColorChange((m_modifiers->begin() + 1)->get(), (*(m_modifiers->begin() + 1))->isInvaded(mousePosition), sf::Color(128, 128, 128, 64), sf::Color(128, 128, 128, 32), *color_itr, 256, dt);
 	++color_itr;
-	ke::SmoothColorChange((m_modifiers->begin() + 2)->get(), (*(m_modifiers->begin() + 2))->isInvaded(mousePosition), sf::Color(255, 0, 0, 64), sf::Color(255, 0, 0, 32), *color_itr, 256, dt);
+	ke::SmoothColorChange((m_modifiers->begin() + 2)->get(), (*(m_modifiers->begin() + 2))->isInvaded(mousePosition), sf::Color(128, 128, 128, 64), sf::Color(128, 128, 128, 32), *color_itr, 256, dt);
+	++color_itr;
+	ke::SmoothColorChange((m_modifiers->begin() + 3)->get(), (*(m_modifiers->begin() + 3))->isInvaded(mousePosition), sf::Color(255, 0, 0, 64), sf::Color(255, 0, 0, 32), *color_itr, 256, dt);
 	++color_itr;
 }
 

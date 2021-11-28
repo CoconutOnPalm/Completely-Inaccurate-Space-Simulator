@@ -40,19 +40,19 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 	switch (object_data->type())
 	{
 	case STAR:
-		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 
 		break;
 	case PLANET:
-		m_objects->push_back(std::make_unique<Planet>(mousePosition.byView, name, object_data->filename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Planet>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_planet_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 
 		break;
 	default:
-		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 		ke::throw_error("ObjectController::addObject(...)", "incorrect object type", "ERROR");

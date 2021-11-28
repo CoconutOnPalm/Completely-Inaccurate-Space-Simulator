@@ -68,6 +68,9 @@ public:
 	virtual void setBasicFilename(const std::string& filename);
 	virtual std::string filename() const;
 
+	virtual void setIconFilename(const std::string& filename);
+	virtual std::string iconFilename() const;
+
 	virtual void setType(int type);
 	virtual int type() const;
 
@@ -94,6 +97,7 @@ protected:
 
 	std::string p_name;
 	std::string p_basic_filename;
+	std::string p_icon_filename;
 
 	int p_type;
 	int p_class;

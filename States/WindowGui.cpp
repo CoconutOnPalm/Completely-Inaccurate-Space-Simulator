@@ -54,15 +54,6 @@ void WindowGui::updateEvents(const MousePosition& mousePosition, float dt)
 	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		m_windowHolded = false;
 
-	//if (mousePosition.byWindow.y <= window->getSize().y * 0.03125) // div by 32
-	//{
-	//	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-	//	{
-	//		sf::Vector2f catchDiffBuffer = mousePosition.byWindow;
-	//		window->setPosition(sf::Vector2i(mousePosition.byScreen + mousePosition.byWindow));
-	//	}
-	//}
-
 	if (m_windowHolded && !m_windowStatus)
 		window->setPosition(sf::Vector2i(mousePosition.byScreen - m_windowCatchDiff));
 }
@@ -70,7 +61,8 @@ void WindowGui::updateEvents(const MousePosition& mousePosition, float dt)
 void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LSystem) && sf::Keyboard::isKeyPressed(sf::Keyboard::M))
-		::ShowWindow(window->getSystemHandle(), SW_MINIMIZE);
+		window->setActive(false);
+		//::ShowWindow(window->getSystemHandle(), SW_MINIMIZE);
 
 
 	if (mousePosition.byWindow.y < winSize.y / 32.f)

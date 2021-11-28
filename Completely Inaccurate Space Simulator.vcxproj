@@ -155,6 +155,7 @@
     <ClCompile Include="Space Objects\Planet.cpp" />
     <ClCompile Include="Space Objects\SpaceObject.cpp" />
     <ClCompile Include="Space Objects\Star.cpp" />
+    <ClCompile Include="States\ExternalWindows\DetailedDataWindow.cpp" />
     <ClCompile Include="States\Global\FileStorage.cpp" />
     <ClCompile Include="States\Global\TypeMap.cpp" />
     <ClCompile Include="States\MainMenu.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Space Objects\Planet.hpp" />
     <ClInclude Include="Space Objects\SpaceObject.hpp" />
     <ClInclude Include="Space Objects\Star.hpp" />
+    <ClInclude Include="States\ExternalWindows\DetailedDataWindow.hpp" />
     <ClInclude Include="States\Global\FileStorage.hpp" />
     <ClInclude Include="States\Global\TypeMap.hpp" />
     <ClInclude Include="States\MainMenu.hpp" />

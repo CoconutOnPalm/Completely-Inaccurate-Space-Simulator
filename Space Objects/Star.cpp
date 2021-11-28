@@ -4,6 +4,7 @@ Star::Star(
 	const sf::Vector2f& position,
 	const std::string& name,
 	const std::string& filename,
+	const std::string& icon_filename,
 	int _class,
 	int subtype,
 	long double mass,
@@ -17,6 +18,7 @@ Star::Star(
 {
 	p_name = name; // default name
 	p_basic_filename = filename;
+	p_icon_filename = icon_filename;
 	p_star_count++;
 
 	p_type = STAR;

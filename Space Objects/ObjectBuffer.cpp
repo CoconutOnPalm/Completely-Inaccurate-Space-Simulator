@@ -77,13 +77,7 @@ void ObjectBuffer::load(objvector::iterator selected_object)
 
 	m_name = (*selected_object)->name();
 	m_filename = (*selected_object)->filename();
-
-
-	std::string buffer = (*selected_object)->filename();
-	buffer.insert(buffer.size() - 4, "_icon");
-
-	m_icon_filename = buffer;
-	std::cout << buffer << '\n';
+	m_icon_filename = (*selected_object)->iconFilename();
 }
 
 void ObjectBuffer::load(int type, int _class, int subtype, long double mass, long double radius, const std::string& name, const std::string& filename, const std::string& icon_filename, float brightness, const sf::Vector3f& color)

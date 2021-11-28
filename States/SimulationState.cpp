@@ -350,7 +350,9 @@ void SimulationState::InitObjDataGUI()
 	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 6.5f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"m", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
 
-	m_modifiers.reserve(3);
+	m_modifiers.reserve(4);
+	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - 3 * m_backgrounds.at(1)->getSize().y / 16),
+		ke::Origin::RIGHT_BOTTOM, nullptr, L"SHOW DETAILED DATA", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color::White, 0, sf::Color::White));
 	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - m_backgrounds.at(1)->getSize().y / 8),
 		ke::Origin::RIGHT_BOTTOM, nullptr, L"COPY OBJECT", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color::White, 0, sf::Color::White));
 	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - m_backgrounds.at(1)->getSize().y / 16),
@@ -470,17 +472,6 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-	// FETURE: module & overlay event update
-
-	m_StateControlPanel.updateEvents(mousePosition, dt);
-	m_ObjectLibraryOverlay.updateEvents(mousePosition, dt);
-	m_SimParamsOverlay.updateEvents(mousePosition, dt);
-	m_SettingsOverlay.updateEvents(mousePosition, dt);
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -532,6 +523,30 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 		m_view_holding.update(mousePosition.byWindow * (view->getSize().x / winSize.x), sf::Mouse::Right);
 	}
+
+
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	// FEATURE: updating external windows (put undoer simulation core)
+
+	detailedDataWindow.Update();
+
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+	// FEATURE: module & overlay event update
+
+	m_StateControlPanel.updateEvents(mousePosition, dt);
+	m_ObjectLibraryOverlay.updateEvents(mousePosition, dt);
+	m_SimParamsOverlay.updateEvents(mousePosition, dt);
+	m_SettingsOverlay.updateEvents(mousePosition, dt);
+
 
 
 
@@ -762,6 +777,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			}
 
 			m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
+			m_VDController.assignScale(m_space_scale, m_planet_scale, m_star_scale);
 
 			m_SimParamsOverlay.resetQuitStatus();
 
@@ -990,12 +1006,17 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 
 
-
 	// FEATURE: deleting object
 
 	if (m_selected_object != m_objects.begin())
 	{
-		if (m_modifiers.front()->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
+		if ((*(m_modifiers.begin()))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: OPEN EXTERNAL WINDOW
+		{
+			// opeinng external window
+
+			detailedDataWindow.Load(m_selected_object->get());
+		}
+		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
 		{
 			// duplicating object
 
@@ -1007,7 +1028,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			m_placed_object.setActiveStatus(true);
 			m_icon_iterator = m_object_icons.begin() + 1;
 		}
-		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: CHANGE POSITION
+		else if ((*(m_modifiers.begin() + 2))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: CHANGE POSITION
 		{
 			// changing object position
 
@@ -1348,7 +1369,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 
 
-	// FETURE: text entered status update
+	// FEATURE: text entered status update
 	// TODO: optimise
 
 	bool te_buffer = false; // text entered?
@@ -1399,7 +1420,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			m_VDController.checkInputString();
 			m_VDController.updateStaticData(m_selected_object, &m_object_name);
-		}
+		} 
 
 	}
 

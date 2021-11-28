@@ -9,6 +9,7 @@
 #include "Equasions/Equasions.hpp"
 #include "Equasions/Constants.hpp"
 #include "States/Global/TypeMap.hpp"
+#include "States/ExternalWindows/DetailedDataWindow.hpp"
 
 #define objvector std::vector<std::unique_ptr<SpaceObject>>
 

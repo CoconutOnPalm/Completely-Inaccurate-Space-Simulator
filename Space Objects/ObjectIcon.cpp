@@ -135,7 +135,7 @@ void ObjectIcon::load(const ObjectBuffer& buffer)
 	m_obj_subtype = buffer.subtype();
 
 
-	std::cout << "type: " << buffer.type() << '\n';
+	//std::cout << "type: " << buffer.type() << '\n';
 
 	m_obj_mass = buffer.mass();
 	m_obj_radius = buffer.radius();
@@ -158,7 +158,7 @@ void ObjectIcon::load(const ObjectBuffer& buffer)
 
 	icon.setTexture(m_icon_filename);
 
-	std::cout << "loaded\n";
+	//std::cout << "loaded\n";
 }
 
 

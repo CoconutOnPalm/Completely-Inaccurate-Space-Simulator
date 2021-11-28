@@ -30,3 +30,6 @@ constexpr long double H_m = 71000;
 
 /// Hubble constant in km
 constexpr long double H = 71;
+
+/// solar mass in kg
+constexpr long double solar_mass = 1.9891e+30;

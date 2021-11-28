@@ -70,8 +70,25 @@ std::string SpaceObject::filename() const
 	return p_basic_filename;
 }
 
+void SpaceObject::setIconFilename(const std::string& filename)
+{
+	p_icon_filename = filename;
+}
+
+std::string SpaceObject::iconFilename() const
+{
+	return p_icon_filename;
+}
+
 void SpaceObject::setType(int type)
 {
+	if (p_type == ObjectType::STAR && type == ObjectType::STAR)
+		return;
+	else if (p_type == ObjectType::STAR && type == ObjectType::PLANET)
+		p_star_count--;
+	else if (p_type == ObjectType::PLANET && type == ObjectType::STAR)
+		p_star_count++;
+
 	p_type = type;
 }
 

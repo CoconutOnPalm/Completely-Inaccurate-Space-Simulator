@@ -6,6 +6,7 @@
 #include "Space Objects/SpaceObject.hpp"
 #include "Settings/AppSettings.hpp"
 
+#include <thread>
 
 
 enum class ExternalWindowStatus

@@ -240,8 +240,36 @@ void ObjectController::deleteObject(objvector::iterator& selected_object)
 }
 
 
+static  void calculateForce(std::vector<std::unique_ptr<SpaceObject>>* m_objects, std::vector<std::unique_ptr<SpaceObject>>::iterator itr, std::vector<std::unique_ptr<SpaceObject>>::iterator eoi, long double m_space_scale)
+{
+	for (auto i = m_objects->begin() + 1; i != eoi; ++i)
+	{
+		if (itr != i)
+		{
+			float angle = std::atan(-((*itr)->object.getPosition().y - (*i)->object.getPosition().y) / ((*itr)->object.getPosition().x - (*i)->object.getPosition().x)) * TO_DEG;
+
+			if (((*itr)->object.getPosition().x > (*i)->object.getPosition().x))
+				angle += 180;
+
+			(*itr)->object.physics()->modifyForce((*i)->name(),
+				gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+					(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+				angle);
+		};
+	}
+}
+
+
 void ObjectController::updateObjects(float dt, unsigned int time_scale, float sim_speed)
 {
+
+	m_calculationThreads.clear(); // clearing threads to prevent mamory leaks
+
+#define MULTITHREADED_CALCULATIONS 1
+
+#if MULTITHREADED_CALCULATIONS == 0
+
+
 	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
 		for (auto i = m_objects->begin() + 1; i != eoi; ++i)
 			if (itr != i)
@@ -275,6 +303,39 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 	}
 
 	m_objects->front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
+
+
+#else
+
+
+	 //MULTITHREADING IMPROVEs PERFORMANCE HERE BY AROUND 10 TIMES
+
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
+	{
+		m_calculationThreads.push_back(std::async(std::launch::async, calculateForce, m_objects, itr, eoi, m_space_scale));
+	}
+
+
+	for (auto& itr : *m_objects)
+		itr->update(dt * m_space_scale * time_scale * sim_speed);
+
+
+
+	sf::Vector2<double> _mr(0, 0);	// Sum of mass * pos
+	long double _m = 0;				// total mass
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
+	{
+		_mr.x += (*itr)->data.mass * (*itr)->object.getPosition().x;
+		_mr.y += (*itr)->data.mass * (*itr)->object.getPosition().y;
+
+		_m += (*itr)->data.mass;
+	}
+
+	m_objects->front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
+
+#endif
 }
 
 void ObjectController::updateObjectPreview(objvector::iterator selected_object, const MousePosition& mousePosition, const sf::Vector2f& viewSize, const sf::Vector2f& winSize)

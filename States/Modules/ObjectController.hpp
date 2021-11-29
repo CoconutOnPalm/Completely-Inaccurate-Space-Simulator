@@ -55,4 +55,11 @@ private:
 	long double m_star_scale;
 	float m_shader_scale;
 	float m_brightness_scale;
+
+
+
+
+	// threads
+
+	std::vector<std::future<void>> m_calculationThreads;
 };

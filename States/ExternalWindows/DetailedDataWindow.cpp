@@ -19,6 +19,7 @@ void DetailedDataWindow::Init(SpaceObject* selected_object)
 
 	window.create(sf::VideoMode(1280, 720), "Detailed data: " + selected_object->name(), sf::Style::None);
 	window.setFramerateLimit(AppSettings::MaxMenuFPS());
+	window.setActive(false);
 
 	sf::Image window_icon;
 	window_icon.loadFromFile("res/CISS_winicon.png");
@@ -85,10 +86,16 @@ void DetailedDataWindow::Update()
 	if (m_status == ExternalWindowStatus::CLOSED)
 		return;
 
+	//window.setActive(false);
+
+	//std::thread renderThread(&DetailedDataWindow::Render, this);
+
 	this->UpdateMouse();
 	this->UpdateEvents();
 	this->Render();
 	this->UpdateDeltaTime();
+
+	//renderThread.join();
 }
 
 void DetailedDataWindow::UpdateMouse()

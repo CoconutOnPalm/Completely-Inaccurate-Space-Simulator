@@ -174,8 +174,9 @@ private:
     SimParamsOverlay m_SimParamsOverlay;
     SettingsOverlay m_SettingsOverlay;
 
-    // shaders
 
-    // tests;
+    // threads
+
+    std::vector<std::future<void>> m_filteringThreads; // don't use
 };
 

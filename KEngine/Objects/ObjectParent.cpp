@@ -1181,13 +1181,13 @@ namespace ke
 
 	bool isOutsideTheView(GuiObject* object, sf::View* view, const sf::Vector2f& shift)
 	{
-		if (object->getShapeCenter().x + object->getSize().x * object->getScale().x / 2 + shift.x < view->getCenter().x - view->getSize().x * 0.5)
-			return true;
-		if (object->getShapeCenter().x - object->getSize().x * object->getScale().x / 2 - shift.x > view->getCenter().x + view->getSize().x * 0.5)
-			return true;
-		if (object->getShapeCenter().y + object->getSize().y * object->getScale().y / 2 + shift.y < view->getCenter().y - view->getSize().y * 0.5)
-			return true;
-		if (object->getShapeCenter().y - object->getSize().y * object->getScale().y / 2 - shift.y > view->getCenter().y + view->getSize().y * 0.5)
+		if (object->getShapeCenter().x + object->getSize().x * object->getScale().x * 0.5f + shift.x < view->getCenter().x - view->getSize().x * 0.5f)
+			return true;															
+		if (object->getShapeCenter().x - object->getSize().x * object->getScale().x * 0.5f - shift.x > view->getCenter().x + view->getSize().x * 0.5f)
+			return true;															
+		if (object->getShapeCenter().y + object->getSize().y * object->getScale().y * 0.5f + shift.y < view->getCenter().y - view->getSize().y * 0.5f)
+			return true;															
+		if (object->getShapeCenter().y - object->getSize().y * object->getScale().y * 0.5f - shift.y > view->getCenter().y + view->getSize().y * 0.5f)
 			return true;
 		return false;
 	}

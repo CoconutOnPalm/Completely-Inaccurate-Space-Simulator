@@ -61,7 +61,7 @@ void WindowGui::updateEvents(const MousePosition& mousePosition, float dt)
 void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LSystem) && sf::Keyboard::isKeyPressed(sf::Keyboard::M))
-		window->setActive(false);
+		window->setVisible(false);
 		//::ShowWindow(window->getSystemHandle(), SW_MINIMIZE);
 
 

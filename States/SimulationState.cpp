@@ -289,7 +289,7 @@ void SimulationState::InitObjDataGUI()
 
 
 	//ke::Button::create(,,,);
-	
+
 	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 2.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"v", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White));
 	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 3.f),
@@ -415,6 +415,30 @@ void SimulationState::reloadState()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+static std::mutex s_filer_mutex;
+
+
+static void filterObject(SpaceObject* itr, std::list<SpaceObject*>* m_onScreen, sf::View* view)
+{
+	if (itr->type() == STAR)
+	{
+		if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 8, view->getSize().y / 8 }))
+		{
+			std::lock_guard<std::mutex> lock(s_filer_mutex);
+			m_onScreen->push_back(itr);
+
+		}
+	}
+	else
+	{
+		if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 16, view->getSize().y / 16 }))
+		{
+			std::lock_guard<std::mutex> lock(s_filer_mutex);
+			m_onScreen->push_back(itr);
+		}
+	}
+}
+
 
 
 
@@ -476,15 +500,14 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
 	// FEATURE: *SIMULATION CORE* - updating simulation
 
 	if (m_running)
 	{
 		if (AppSettings::CustomDt())
-			m_deltaTime = dt;
-		else
 			m_deltaTime = AppSettings::CustomTimeStep();
+		else
+			m_deltaTime = dt;
 
 		// FEATURE: centering view to object position
 
@@ -495,6 +518,8 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 		// FEATURE: updating objects with Object controller (ObjectController - menager)
+
+		//objectUpdate = std::thread{ &ObjectController::updateObjects, m_deltaTime, m_time_scale, m_simulation_speed };
 
 		m_ObjController.updateObjects(m_deltaTime, m_time_scale, m_simulation_speed);
 
@@ -526,12 +551,12 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	// FEATURE: updating external windows (put undoer simulation core)
 
+	//std::thread detailedDataWindowThread(&DetailedDataWindow::Update, &detailedDataWindow);
 	detailedDataWindow.Update();
 
 
@@ -554,6 +579,11 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	m_onScreen.clear(); // checking objects on screen
 
+
+#define MULTITHREADED_FILTERING 0
+
+#if MULTITHREADED_FILTERING == 0
+
 	for (auto& itr : m_objects)
 		if (itr->type() == STAR)
 			if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 8, view->getSize().y / 8 }))
@@ -562,6 +592,17 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 			if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 16, view->getSize().y / 16 }))
 				m_onScreen.push_back(itr.get()); else;
 
+#else
+
+	// bad performance
+
+	for (auto& itr : m_objects)
+	{
+		m_filteringThreads.push_back(std::async(std::launch::async, filterObject, itr.get(), &m_onScreen, view));
+	}
+
+
+#endif
 
 
 	// FEATURE: positionning object shaders
@@ -649,6 +690,12 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	m_SimParamsOverlay.updateColors(mousePosition.byWindow, dt);
 
 	m_SettingsOverlay.updateColors(mousePosition.byWindow, dt);
+
+
+
+	// thread joining
+
+	//detailedDataWindowThread.join();
 }
 
 
@@ -1159,7 +1206,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			dist_buffer << std::fixed << std::setprecision(2) << distance / au << " au";
 		else if (distance > 1000)
 			dist_buffer << std::fixed << std::setprecision(2) << distance / 1000 << " km";
-		else 
+		else
 			dist_buffer << std::fixed << std::setprecision(2) << distance << " m";
 
 
@@ -1216,7 +1263,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 			if (view->getSize().y / itr->object.getSize().y > itr->data.brightness)
 			{
-				float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;	
+				float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;
 				itr->getObjectShader()->setUniform("size", (shader_size * shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
 			}
 		}
@@ -1420,7 +1467,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			m_VDController.checkInputString();
 			m_VDController.updateStaticData(m_selected_object, &m_object_name);
-		} 
+		}
 
 	}
 
@@ -1449,7 +1496,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 void SimulationState::renderBackground()
 {
-	//window->draw(*m_stateBackground.getShape(), &m_test_shader);
+	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
+
 
 	m_stateBackground.render(window);
 
@@ -1465,19 +1513,23 @@ void SimulationState::renderBackground()
 
 void SimulationState::renderByView()
 {
+	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
+
+
 	m_orbit_preview.render(window);
 	m_placed_object.render(window);
 
 
-	//if (m_running)
 	for (auto& itr : m_onScreen)
 		itr->render(window);
-
 }
 
 
 void SimulationState::renderByWindow()
 {
+	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
+
+
 	m_distance_preview.render(window);
 
 
@@ -1530,5 +1582,4 @@ void SimulationState::renderByWindow()
 
 
 	m_stateMask.render(window);
-
 }

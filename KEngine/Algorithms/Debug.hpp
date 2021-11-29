@@ -64,6 +64,7 @@ namespace ke
 
 			std::chrono::time_point<std::chrono::high_resolution_clock> m_start_time;
 			std::string m_name;
+			bool m_stopped;
 		};
 
 

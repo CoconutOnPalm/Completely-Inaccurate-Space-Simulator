@@ -80,6 +80,30 @@ ObjectIcon& ObjectIcon::operator= (ObjectIcon& right)
 	return *this;
 }
 
+ObjectIcon::ObjectIcon(ObjectIcon& right)
+{
+	//sf::Vector2f posbuff = icon.getPosition();
+	icon = right.icon;
+	//icon.setPosition(posbuff);
+	//obj_texture = right.obj_texture;
+	//icon.setTexture();`
+	//icon.getTextureShape()->setFillColor(sf::Color::White);
+
+	m_filename = right.filename();
+	m_icon_filename = right.iconFilename();
+	m_name = right.object_name();
+
+	m_obj_type = right.type();
+	m_obj_class = right.object_class();
+	m_obj_subtype = right.subtype();
+
+	m_obj_radius = right.radius();
+	m_obj_mass = right.mass();
+
+	m_obj_brightness = right.brightness();
+	m_obj_color = right.color();
+}
+
 
 void ObjectIcon::load(const std::string& icon_filename,
 	const std::string& object_filename,

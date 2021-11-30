@@ -416,15 +416,18 @@ void ObjectController::checkName(std::string& name)
 			name_num++;
 
 			if (name_num == 2)
-				name += "  ";
+				name += "   ";
 
 			name.pop_back();
 
 			if (name.back() != ' ')
 				name.pop_back();
+			if (name.back() != ' ')
+				name.pop_back();
 
 			name += (std::to_string(name_num));
-			itr = m_objects->begin() + 1;
+
+			itr = m_objects->begin() + 1; // reset loop
 		}
 	}
 }

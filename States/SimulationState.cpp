@@ -16,6 +16,8 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_text_entered(false)
 	, m_object_buffer_ready(false)
 {
+	//this->InitState();
+
 	m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, ke::Settings::EmptyFHDTexturePath(), {}, {}, {}, sf::Color::Black);
 
 	m_stateMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Black);
@@ -57,24 +59,48 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 }
 
 
+static std::mutex s_endingMutex;
+
 SimulationState::~SimulationState()
 {
+	//detailedDataWindow.End();
 	view->setSize(winSize);
+
+	std::lock_guard<std::mutex> lock(s_endingMutex);
 }
 
 
 
 void SimulationState::InitState()
 {
-	//ke::Button::create(,,);
-
 	m_view_holding.setView(view);
 
-	this->InitSpaceObjects();
+
+	std::thread object_loading_thread(&SimulationState::InitSpaceObjects, this);
+
+	// don't multithread these below:
+
+	ke::debug::Benchmark objectLading("object loading");
+	//this->InitSpaceObjects();
+	objectLading.Stop();
+
+	ke::debug::Benchmark background("Background");
 	this->InitBackground();
+	background.Stop();
+
+	ke::debug::Benchmark topGUI("Top Panel GUI");
 	this->InitTopGUI();
+	topGUI.Stop();
+
+	ke::debug::Benchmark timeGUI("Time Panel GUI");
 	this->InitTimeGUI();
+	timeGUI.Stop();
+
+	ke::debug::Benchmark ObjDataGUI("object data GUI");
 	this->InitObjDataGUI();
+	ObjDataGUI.Stop();
+
+
 
 	for (auto& itr : m_project_menagers)
 	{
@@ -105,6 +131,15 @@ void SimulationState::InitState()
 	//	itr->setOutlineColor(sf::Color::White);
 	//	itr->setOutlineThickness(1);
 	//}
+
+	//ObjDataGUI_loading_thread.join(); // heaviest one
+	//background_loading_thread.join();
+	//TopPanelGUI_loading_thread.join();
+	object_loading_thread.join();
+	//TimePanel_loading_thread.join();
+
+
+	//m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow);
 }
 
 void SimulationState::InitSpaceObjects()
@@ -267,6 +302,8 @@ void SimulationState::InitTopGUI()
 
 void SimulationState::InitObjDataGUI()
 {
+	sf::Vector2f backgroundSize(winSize.x / 5, 7 * winSize.y / 8);
+
 	m_orbit_preview.create(1, { 0, 0 }, ke::Origin::MIDDLE_MIDDLE, L"", (view->getSize().x / winSize.x), ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128), view->getSize().y / 256, sf::Color(128, 128, 128, 128), 0, sf::Text::Regular, { 0, 0 });
 	m_orbit_preview.setActiveStatus(false);
 	m_orbit_preview.getShape()->setPointCount(128);
@@ -275,7 +312,7 @@ void SimulationState::InitObjDataGUI()
 	m_distance_preview.setActiveStatus(false);
 
 
-	m_object_name.create(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(m_backgrounds.at(1)->getShapeCenter().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5),
+	m_object_name.create(sf::Vector2f(backgroundSize.x, backgroundSize.y / 16), sf::Vector2f(m_backgrounds.at(1)->getShapeCenter().x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5),
 		ke::Origin::MIDDLE_TOP, nullptr, L"", ke::TextScope::ASCII_Everything, 50, 1, winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color(255, 255, 223, 225), 0, sf::Color::White);
 
 
@@ -290,19 +327,19 @@ void SimulationState::InitObjDataGUI()
 
 	//ke::Button::create(,,,);
 
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 2.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 2.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"v", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 3.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 3.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"v [ ]", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 4.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 4.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"M", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 5.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 5.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"R", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 6.5f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 6.5f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"nearest", winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White, 0, sf::Text::Regular, sf::Vector2f(winSize.x / 256, 0)));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 8.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 8.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"class", winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White, 0, sf::Text::Regular, sf::Vector2f(winSize.x / 256, 0)));
-	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 9.f),
+	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 9.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"subtype", winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White, 0, sf::Text::Regular, sf::Vector2f(winSize.x / 256, 0)));
 	sf::Event fake_event;
 	for (auto& itr : m_symbols)
@@ -314,50 +351,50 @@ void SimulationState::InitObjDataGUI()
 
 	//ke::InputButton::create()
 	// scalar velocity, angle
-	m_values["VELOCITY"] = (std::make_unique<ke::InputButton>(sf::Vector2f(4 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 7 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 2.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
-	m_values["V_ANGLE"] = (std::make_unique<ke::InputButton>(sf::Vector2f(2 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 3 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 2.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
+	m_values["VELOCITY"] = (std::make_unique<ke::InputButton>(sf::Vector2f(4 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 7 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 2.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
+	m_values["V_ANGLE"] = (std::make_unique<ke::InputButton>(sf::Vector2f(2 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 3 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 2.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
 
 	// vector velocity
-	m_values["VECTOR_VEL_X"] = (std::make_unique<ke::InputButton>(sf::Vector2f(3 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 7 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 3.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
-	m_values["VECTOR_VEL_Y"] = (std::make_unique<ke::InputButton>(sf::Vector2f(3 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 4 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 3.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
+	m_values["VECTOR_VEL_X"] = (std::make_unique<ke::InputButton>(sf::Vector2f(3 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 7 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 3.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
+	m_values["VECTOR_VEL_Y"] = (std::make_unique<ke::InputButton>(sf::Vector2f(3 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 4 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 3.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
 
-	m_values["MASS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 7 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 4.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
-	m_values["RADIUS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 7 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 5.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
+	m_values["MASS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 7 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 4.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
+	m_values["RADIUS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 7 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 5.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
 
-	m_values["NEAREST_OBJ"] = (std::make_unique<ke::InputButton>(sf::Vector2f(5 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 6.5f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
+	m_values["NEAREST_OBJ"] = (std::make_unique<ke::InputButton>(sf::Vector2f(5 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 6 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 6.5f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Math, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
 
-	m_values["CLASS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 8.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Letters, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
-	m_values["SUBTYPE"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x - 6 * m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 9.f),
-		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Letters, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * m_backgrounds.at(1)->getSize().x / 128, 0)));
+	m_values["CLASS"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 6 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 8.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Letters, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
+	m_values["SUBTYPE"] = (std::make_unique<ke::InputButton>(sf::Vector2f(6 * backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - 6 * backgroundSize.x / 8, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 9.f),
+		ke::Origin::LEFT_MIDDLE, nullptr, L"", ke::TextScope::Letters, 50, 1, winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, sf::Color::White, 0, sf::Color::Transparent, sf::Text::Regular, sf::Vector2f(6 * backgroundSize.x / 128, 0)));
 
 
-	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 2.f),
+	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 2.f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"m/s", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
-	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 3.f),
+	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 3.f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"m/s", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
-	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 4.f),
+	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 4.f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"kg", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
-	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 5.f),
+	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 5.f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"m", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
-	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x / 8, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - m_backgrounds.at(1)->getSize().y * 0.5f + m_backgrounds.at(1)->getSize().y / 16.f * 6.5f),
+	m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 6.5f),
 		ke::Origin::RIGHT_MIDDLE, nullptr, L"m", winSize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(223, 255, 255, 223), 0, sf::Color::White));
 
 	m_modifiers.reserve(4);
-	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - 3 * m_backgrounds.at(1)->getSize().y / 16),
+	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x, backgroundSize.y / 16), sf::Vector2f(winSize.x, winSize.y - 3 * backgroundSize.y / 16),
 		ke::Origin::RIGHT_BOTTOM, nullptr, L"SHOW DETAILED DATA", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color::White, 0, sf::Color::White));
-	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - m_backgrounds.at(1)->getSize().y / 8),
+	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x, backgroundSize.y / 16), sf::Vector2f(winSize.x, winSize.y - backgroundSize.y / 8),
 		ke::Origin::RIGHT_BOTTOM, nullptr, L"COPY OBJECT", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color::White, 0, sf::Color::White));
-	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y - m_backgrounds.at(1)->getSize().y / 16),
+	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x, backgroundSize.y / 16), sf::Vector2f(winSize.x, winSize.y - backgroundSize.y / 16),
 		ke::Origin::RIGHT_BOTTOM, nullptr, L"CHANGE POSITION", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color::White, 0, sf::Color::White));
-	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(m_backgrounds.at(1)->getSize().x, m_backgrounds.at(1)->getSize().y / 16), sf::Vector2f(winSize.x, winSize.y),
+	m_modifiers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x, backgroundSize.y / 16), sf::Vector2f(winSize.x, winSize.y),
 		ke::Origin::RIGHT_BOTTOM, nullptr, L"DELETE OBJECT", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(255, 0, 0, 64), sf::Color::White, 0, sf::Color::White));
 
 	for (auto& itr : m_symbols)
@@ -416,6 +453,7 @@ void SimulationState::reloadState()
 
 
 static std::mutex s_filer_mutex;
+static std::mutex s_externalWindow_mutex;
 
 
 static void filterObject(SpaceObject* itr, std::list<SpaceObject*>* m_onScreen, sf::View* view)
@@ -555,9 +593,11 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 	// FEATURE: updating external windows (put undoer simulation core)
+	
 
+	// don't multithread this
 	//std::thread detailedDataWindowThread(&DetailedDataWindow::Update, &detailedDataWindow);
-	detailedDataWindow.Update();
+	//detailedDataWindow.Update();
 
 
 
@@ -691,6 +731,11 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	m_SettingsOverlay.updateColors(mousePosition.byWindow, dt);
 
+
+
+	//detailedDataWindow.lock();
+	detailedDataWindow.UpdateDynamicData(m_objectBuffer);
+	//detailedDataWindow.unlock();
 
 
 	// thread joining
@@ -1061,7 +1106,18 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			// opeinng external window
 
-			detailedDataWindow.Load(m_selected_object->get());
+			//detailedDataWindow.End();
+			//detailedDataWindow.Init(m_selected_object->get());
+
+			if (m_selected_object->get() == nullptr)
+				std::cout << "nullptr\n";
+
+			m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get());
+
+			//detailedDataWindow.lock();
+			//detailedDataWindow.Load(m_selected_object->get());
+			//std::lock_guard<std::mutex> lock(s_externalWindow_mutex);
+			//detailedDataWindow.unlock();
 		}
 		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
 		{
@@ -1367,7 +1423,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		// FEATURE: picking / selecting object with mouse
 
 		bool sth_clicked = false;
-		for (auto itr = m_objects.begin(), eoi = m_objects.end(); itr != eoi; ++itr)
+		for (auto itr = m_objects.begin() + 1, eoi = m_objects.end(); itr != eoi; ++itr)
 			if (abs(mousePosition.byView.y - (*itr)->object.getPosition().y) < (*itr)->clickRange()->getRadius())
 				if ((*itr)->clicked(sf::Mouse::Left, mousePosition.byView, event) && m_icon_iterator == m_object_icons.begin())
 				{

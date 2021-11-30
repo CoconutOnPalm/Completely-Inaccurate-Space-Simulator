@@ -104,6 +104,7 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 				break;
 			}
 
+			ke::debug::Benchmark stateLoadingTime("State loading time");
 			states->back()->InitState();
 			return;
 		}
@@ -126,7 +127,9 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 				break;
 			}
 
+			ke::debug::Benchmark stateLoadingTime("State loading time");
 			states->back()->InitState();
+			//stateLoadingTime.Stop();
 			return;
 		}
 	}

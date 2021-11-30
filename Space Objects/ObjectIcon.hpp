@@ -30,6 +30,8 @@ public:
 
 	ObjectIcon& operator= (ObjectIcon& right);
 
+	ObjectIcon(ObjectIcon& right);
+
 	void load(const std::string& icon_filename,
 		const std::string& object_filename,
 		const std::string& obj_name,

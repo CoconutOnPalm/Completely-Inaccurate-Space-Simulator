@@ -177,6 +177,7 @@ private:
 
     // threads
 
-    std::vector<std::future<void>> m_filteringThreads; // don't use
+    std::vector<std::future<void>> m_filteringThreads; // don't use it
+    std::future<void> m_DetailedDataWindwThread;
 };
 

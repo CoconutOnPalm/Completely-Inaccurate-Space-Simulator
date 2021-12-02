@@ -17,20 +17,28 @@ DetailedDataWindow::DetailedDataWindow()
 
 DetailedDataWindow::~DetailedDataWindow()
 {
-
+	this->End();
 }
 
 
 
-void DetailedDataWindow::Run(SpaceObject* selected_object)
+void DetailedDataWindow::Run(SpaceObject* selected_object, ObjectBuffer buffer)
 {
+	m_windowHolded = false;
+	m_locked = false;
+	m_running = true;
+	m_sizing_mode = WindowSizingMode::NONE;
+	m_window_size_clicked = false;
+
 	m_selected_object = selected_object;
 
 	this->initGUI();
 	this->Init(selected_object);
-	this->loadData();
+	this->loadData(selected_object);
+	this->UpdateStaticData(buffer);
+	//this->UpdateDynamicData(buffer);
 
-	while (window.isOpen())
+	while (window.isOpen() && m_running)
 	{
 		if (m_locked)
 			continue;
@@ -47,10 +55,22 @@ static std::mutex s_endMutex;
 
 void DetailedDataWindow::End()
 {
+	this->lock();
+	window.close();
 	m_status = ExternalWindowStatus::CLOSED;
 	m_running = false;
-	window.close();
 	std::lock_guard<std::mutex> lock(s_endMutex);
+}
+
+
+static std::mutex s_ptrMutex;
+void DetailedDataWindow::updateObjectPointer(SpaceObject* selected_object)
+{
+	s_ptrMutex.lock();
+	//this->lock();
+	m_selected_object = selected_object;
+	//this->unlock();
+	s_ptrMutex.unlock();
 }
 	
 
@@ -59,6 +79,8 @@ void DetailedDataWindow::End()
 void DetailedDataWindow::Init(SpaceObject* selected_object)
 {
 	m_status = ExternalWindowStatus::OPENED;
+
+	m_selected_object = selected_object;
 
 	window.create(sf::VideoMode(m_default_windowSize.x, m_default_windowSize.y), "Detailed data: " + m_selected_object->name(), sf::Style::None);
 	window.setFramerateLimit(AppSettings::MaxMenuFPS());
@@ -82,25 +104,68 @@ void DetailedDataWindow::Init(SpaceObject* selected_object)
 
 
 
-static std::mutex s_loadMutex;
+static std::mutex s_staticLoadMutex, s_dynamicLockMutex;
 
 
-void DetailedDataWindow::UpdateDynamicData(ObjectBuffer buffer)
+void DetailedDataWindow::UpdateDynamicData(std::vector<ForceData> data)
 {
-	s_loadMutex.lock();
-
-
-
-	s_loadMutex.unlock();
+	s_dynamicLockMutex.lock();
+	m_force_data = data;
+	s_dynamicLockMutex.unlock();
 }
 
 void DetailedDataWindow::UpdateStaticData(ObjectBuffer buffer)
 {
-	s_loadMutex.lock();
+	s_staticLoadMutex.lock();
+
+	std::wstringstream datastream;
+
+	datastream << std::setprecision(10) << std::scientific << buffer.mass();
+	m_values[0]->setText(datastream.str());
 
 
+	datastream.str(std::wstring());
+	datastream << std::setprecision(10) << std::scientific << buffer.radius();
+	m_values[1]->setText(datastream.str());
+	
 
-	s_loadMutex.unlock();
+	long double density = buffer.mass() / Volume(buffer.radius());
+	if (isnan(density))
+		density = 0;
+
+	datastream.str(std::wstring());
+	datastream << std::setprecision(10) << std::scientific << density;
+	m_values[2]->setText(datastream.str());
+	
+
+	long double surface_g = surface_gravity(buffer.mass(), buffer.radius());
+	if (isnan(surface_g))
+		surface_g = 0;
+
+	datastream.str(std::wstring());
+	datastream << std::setprecision(10) << std::scientific << surface_g;
+	m_values[3]->setText(datastream.str());
+	
+
+	long double fss = first_space_speed(buffer.mass(), buffer.radius());
+	if (isnan(fss))
+		fss = 0;
+
+	datastream.str(std::wstring());
+	datastream << std::setprecision(10) << std::scientific << fss;
+	m_values[4]->setText(datastream.str());
+	
+
+	long double sss = second_space_speed(buffer.mass(), buffer.radius());
+	if (isnan(sss))
+		sss = 0;
+
+	datastream.str(std::wstring());
+	datastream << std::setprecision(10) << std::scientific << sss;
+	m_values[5]->setText(datastream.str());
+
+
+	s_staticLoadMutex.unlock();
 }
 
 
@@ -136,7 +201,7 @@ void DetailedDataWindow::initGUI()
 
 	const sf::Vector2f winsize = m_default_windowSize;
 
-	m_titlebar.create({m_maximum_windowSize.x, winsize.y / 32}, { 0,0 }, ke::Origin::LEFT_TOP, nullptr, L"Detailed data", winsize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color(8, 8, 8, 255), sf::Color(192, 192, 192, 128));
+	m_titlebar.create({ m_maximum_windowSize.x, winsize.y / 32 }, { 0,0 }, ke::Origin::LEFT_TOP, nullptr, L"Detailed data", winsize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color(8, 8, 8, 255), sf::Color(192, 192, 192, 128));
 	m_titlebar.setTextPosition(ke::Origin::LEFT_MIDDLE, { winsize.x / 256, 0 });
 
 	m_exitButton.create(winsize / 32.f, { winsize.x, 0 }, ke::Origin::RIGHT_TOP, "Textures/StateTextures/WindowGUI/close.png");
@@ -144,8 +209,15 @@ void DetailedDataWindow::initGUI()
 	m_minimizeButton.create(winsize / 32.f, { winsize.x - winsize.x / 16, 0 }, ke::Origin::RIGHT_TOP, "Textures/StateTextures/WindowGUI/minimize.png");
 
 
+
+	m_slider.create(sf::Vector2f(winsize.x / 100, 4 * winsize.y / 5), winsize, winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(16, 16, 16, 64), sf::Color(32, 32, 32, 64));
+
+
+
 	const float section = winsize.x / 32; // akapit
 
+
+	m_icon_background.create({ m_maximum_windowSize.x, winsize.y / 5 }, { 0, 0 }, ke::Origin::LEFT_TOP, L"", 0, {}, sf::Color::Black);
 
 	m_icon.create({ winsize.x / 16.f, winsize.x / 16.f }, { section, winsize.y / 18 }, ke::Origin::LEFT_TOP, "Textures/IconTextures/SolarSystem/Sun_icon.png");
 	//m_icon.setOutlineColor(sf::Color(128, 128, 128, 128));
@@ -162,7 +234,16 @@ void DetailedDataWindow::initGUI()
 
 
 	std::array<std::wstring, 6> name_order{ L"mass", L"radius", L"average density", L"Surface gravity", L"first space speed", L"second space speed" };
+	std::array<std::string, 6> unit_filenames{
+		"Textures/StateTextures/Simulation/DetailedDataWindow/kg.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/m.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/kgm3.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/ms2.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/ms.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/ms.png" };
+
 	auto name_itr = name_order.begin();
+	auto unit_itr = unit_filenames.begin();
 
 	const int COLUMN_SIZE = m_minimum_windowSize.x;
 	int columns = winsize.x / COLUMN_SIZE;
@@ -188,12 +269,21 @@ void DetailedDataWindow::initGUI()
 		m_signs.back()->setTextColor(sf::Color(223, 223, 255, 255));
 		++name_itr;
 
-		m_values.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(4.25 * winsize.x / 16, winsize.y / 18), sf::Vector2f(position.x + m_signs.front()->getSize().x, position.y), ke::Origin::LEFT_MIDDLE, nullptr, L"QUACK", winsize.y / 36, ke::Origin::LEFT_MIDDLE));
+		m_values.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(4.25 * winsize.x / 16 - winsize.y / 18, winsize.y / 18), sf::Vector2f(position.x + m_signs.front()->getSize().x, position.y), ke::Origin::LEFT_MIDDLE, nullptr, L"QUACK", winsize.y / 36, ke::Origin::LEFT_MIDDLE));
+		m_units.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winsize.y / 18, winsize.y / 18), sf::Vector2f(position.x + m_signs.front()->getSize().x + m_values.front()->getSize().x, position.y), ke::Origin::LEFT_MIDDLE, *unit_itr, L"", winsize.y / 36, ke::Origin::LEFT_MIDDLE));
+		++unit_itr;
+
+		m_signs.back()->setFillColor(sf::Color(32, 32, 32, 32));
+		m_values.back()->setFillColor(sf::Color(32, 32, 32, 32));
+		m_units.back()->setFillColor(sf::Color(32, 32, 32, 32));
 	}
 
 
 	//window.setSize(sf::Vector2u(m_default_windowSize));
 	//this->updateGUI();
+
+	m_view_holder.setView(&view);
+	m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, winsize.y));
 }
 
 void DetailedDataWindow::updateGUI()
@@ -221,7 +311,7 @@ void DetailedDataWindow::updateGUI()
 	int columns = winsize.x / COLUMN_SIZE;
 	if (columns == 0) columns = 1; // safety guard
 
-	sf::Vector2f position(section, m_default_windowSize.y / 4);
+	sf::Vector2f data_position(section, m_default_windowSize.y / 4);
 
 	constexpr int OBJECT_COUNT = 6;
 	m_signs.reserve(OBJECT_COUNT);
@@ -231,27 +321,60 @@ void DetailedDataWindow::updateGUI()
 	{
 		if (i % columns == 0)
 		{
-			position.y += m_default_windowSize.y / 16;
-			position.x = section;
+			data_position.y += m_default_windowSize.y / 16;
+			data_position.x = section;
 		}
 		else
 		{
-			position.x += COLUMN_SIZE;
+			data_position.x += COLUMN_SIZE;
 		}
 
-		m_signs[i]->setPosition(position);
-		m_values[i]->setPosition(position.x + m_signs.front()->getSize().x, position.y);
+		m_signs[i]->setPosition(data_position);
+		m_values[i]->setPosition(data_position.x + m_signs.front()->getSize().x, data_position.y);
+		m_units[i]->setPosition(data_position.x + m_signs.front()->getSize().x + m_values.front()->getSize().x, data_position.y);
 	}
+
+
+	sf::Vector2f force_data_position(section, m_values.back()->getPosition().y + winsize.y / 16);
+
+	for (int i = 0; i < m_force_data.size(); i++)
+	{
+		m_force_data_blocks[i]->updatePosition(force_data_position, winsize);
+
+		if (winsize.x < m_default_windowSize.x - 0.01) // -0.01 for safety
+			force_data_position.y += winsize.x / 4;
+		else 
+			force_data_position.y += winsize.x / 8;
+	}
+
+
+	//m_slider.setSize(winsize.x / 100, 4 * winsize.y / 5);
+	//m_slider.setPosition(winsize);
+	//m_slider.setFieldHeight(m_force_data_blocks.back()->getPosition().y + winsize.y / 16);
+
+	m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, m_force_data_blocks.back()->getPosition().y + winsize.y / 16));
 }
 
-void DetailedDataWindow::loadData()
+void DetailedDataWindow::loadData(SpaceObject* selected_object)
 {
-	s_loadMutex.lock();
-	m_icon.setTexture(m_selected_object->iconFilename());
-	m_name.setText(ke::fixed::stow(m_selected_object->name()));
+	if (selected_object == nullptr)
+	{
+		s_staticLoadMutex.lock();
+		m_icon.setTexture(ke::Settings::EmptyTexturePath());
+		m_name.setText(std::wstring());
+		s_staticLoadMutex.unlock();
+		return;
+	}
 
-	//std::lock_guard<std::mutex> lock(s_loadMutex);
-	s_loadMutex.unlock();
+	m_selected_object = selected_object;
+	
+	s_staticLoadMutex.lock();
+	this->lock();
+	m_icon.setTexture(selected_object->iconFilename());
+	m_name.setText(ke::fixed::stow(selected_object->name()));
+
+	this->unlock();
+	s_staticLoadMutex.unlock();
 }
 
 
@@ -268,6 +391,8 @@ void DetailedDataWindow::UpdateMouse()
 	mPosWindow = sf::Vector2f(sf::Mouse::getPosition(window));
 	mPosView = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 }
+
+
 
 void DetailedDataWindow::UpdateEvents()
 {
@@ -407,6 +532,18 @@ void DetailedDataWindow::UpdateEvents()
 			m_window_size_clicked = false;
 			m_sizing_mode = WindowSizingMode::NONE;
 		}
+
+
+
+		if (event.type == sf::Event::MouseWheelScrolled)
+			if (event.mouseWheelScroll.delta < 0)
+				view.move(0, window.getSize().y *  0.1f);
+			else if (event.mouseWheelScroll.delta > 0)
+				view.move(0, window.getSize().y * -0.1f);
+
+
+		//m_slider.update(mPosWindow, event, sf::Mouse::Left, &view);
+		//m_slider.updateSliderPosition(&view);
 	}
 
 	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -414,6 +551,60 @@ void DetailedDataWindow::UpdateEvents()
 
 	if (m_windowHolded)
 		window.setPosition(sf::Vector2i(mPosScreen - m_windowCatchDiff));
+
+
+	if ((m_force_data_blocks.size() > 1 && window.getSize().x < m_default_windowSize.x) || (m_force_data.size() > 4 && window.getSize().x >= m_default_windowSize.x))
+	{
+		if (view.getCenter().y - view.getSize().y / 2 < -1)
+		{
+			view.setCenter(sf::Vector2f(window.getSize() / 2u));
+		}
+		else if (view.getCenter().y + view.getSize().y / 2 >= m_force_data_blocks.back()->getPosition().y + window.getSize().y / 8)
+		{
+			view.setCenter(sf::Vector2f(window.getSize().x / 2, m_force_data_blocks.back()->getPosition().y + window.getSize().y / 8 - view.getSize().y / 2));
+		}
+	}
+	else
+	{
+		view.setCenter(sf::Vector2f(window.getSize() / 2u));
+	}
+		
+	if (m_selected_object == nullptr)
+	{
+		std::cout << "nullptr\n"; 
+		return;
+	}
+
+	sf::Vector2f force_data_position(m_default_windowSize.x / 32, m_values.back()->getPosition().y + window.getSize().y / 16);
+
+	for (int i = 0; i < m_force_data_blocks.size(); i++)
+	{
+		m_force_data_blocks[i]->updatePosition(force_data_position, sf::Vector2f(window.getSize()));
+
+		if (window.getSize().x < m_default_windowSize.x - 0.01) // -0.01 for safety
+			force_data_position.y += window.getSize().y / 4;
+		else
+			force_data_position.y += window.getSize().y / 8;
+	}
+
+
+
+	if (m_force_data.size() == 0)
+		return;
+
+
+	if (m_force_data_blocks.size() < m_force_data.size())
+	{
+		m_force_data_blocks.clear();
+
+		for (int i = 0; i < m_force_data.size(); i++)
+			m_force_data_blocks.push_back(std::make_unique<DistanceBlock>(sf::Vector2f(), m_default_windowSize));
+	}
+
+	for (int i = 0; i < m_force_data_blocks.size(); i++)
+	{
+		m_force_data_blocks[i]->update(m_selected_object, m_force_data[i]);
+	}
 }
 
 
@@ -437,15 +628,25 @@ void DetailedDataWindow::Render()
 	// view-depend objects
 	window.setView(view);
 
+
+	for (auto& itr : m_force_data_blocks)
+		itr->render(&window);
+
+
 	for (auto& itr : m_signs)
 		itr->render(&window);
 
 	for (auto& itr : m_values)
 		itr->render(&window);
 
+	for (auto& itr : m_units)
+		itr->render(&window);
+
 
 	// top layer
 	window.setView(topView);
+
+	m_icon_background.render(&window);
 
 	m_titlebar.render(&window);
 	m_exitButton.render(&window);
@@ -454,9 +655,10 @@ void DetailedDataWindow::Render()
 
 	m_compartmentBar.render(&window);
 
-
 	m_icon.render(&window);
 	m_name.render(&window);
+
+	//m_slider.render(&window);
 
 	window.setView(view); // DON'T REMOVE IT
 
@@ -494,4 +696,130 @@ void DetailedDataWindow::Close()
 ExternalWindowStatus DetailedDataWindow::status() const
 {
 	return m_status;
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+DistanceBlock::DistanceBlock(const sf::Vector2f& position, const sf::Vector2f& winsize)
+	: m_active(true)
+{
+	m_objectName.create({ 1920.f, winsize.y / 16 }, position, ke::Origin::LEFT_TOP, nullptr, L" -> ", winsize.y / 27, ke::Origin::LEFT_MIDDLE, sf::Color(64, 64, 64, 32));
+
+	sf::Vector2f block_position(position.x, position.y + winsize.y / 16);
+
+	m_distance_sign.create({ 2.f * winsize.x / 16, winsize.y / 18.f }, block_position, ke::Origin::LEFT_TOP, nullptr, L"distance", winsize.y / 36, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 32));
+	m_distance.create({ 5.25f * winsize.x / 16, winsize.y / 18.f }, { block_position.x + m_distance_sign.getSize().x, block_position.y }, ke::Origin::LEFT_TOP, nullptr, L"QUACK", winsize.y / 36, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 32));
+
+
+	if (winsize.x >= 1280)
+		block_position.x += winsize.x / 2;
+	else
+		block_position.y += winsize.y / 18;
+
+
+	m_force_sign.create({ 2 * winsize.x / 16, winsize.y / 18 }, block_position, ke::Origin::LEFT_TOP, nullptr, L"force", winsize.y / 36, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 32));
+	m_force.create({ 5.25f * winsize.x / 16, winsize.y / 18 }, { block_position.x + m_force_sign.getSize().x, block_position.y }, ke::Origin::LEFT_TOP, nullptr, L"QUACK", winsize.y / 36, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 32));
+}
+
+DistanceBlock::~DistanceBlock()
+{
+
+}
+
+void DistanceBlock::updatePosition(const sf::Vector2f& position, const sf::Vector2f& winsize)
+{
+	m_objectName.setPosition(position);
+
+	sf::Vector2f block_position(position.x, position.y + winsize.y / 16);
+
+
+	m_distance_sign.setPosition(block_position);
+	m_distance.setPosition(block_position.x + m_distance_sign.getSize().x, block_position.y);
+
+	if (winsize.x >= 1280 - 0.01) // -0.01 for safety
+		block_position.x += m_distance_sign.getSize().x + m_distance.getSize().x;
+	else
+		block_position.y += winsize.y / 18;
+
+	m_force_sign.setPosition(block_position);
+	m_force.setPosition(block_position.x + m_force_sign.getSize().x, block_position.y);
+}
+
+sf::Vector2f DistanceBlock::getPosition() const
+{
+	return m_objectName.getPosition();
+}
+
+void DistanceBlock::update(const SpaceObject* selected_object, const ForceData& refered_object)
+{
+	if (!m_active)
+		return;
+
+	m_objectName.setText(ke::fixed::stow(refered_object.name));
+
+
+	long double distance = position_to_distance(selected_object->object.getPosition(), refered_object.position) * 1'000'000;
+
+	//std::cout << "distance: " << distance << '\n';
+
+	if (isnan(distance))
+		distance = 0;
+
+	std::wstringstream dist_buffer;
+
+	if (distance > ly)
+		dist_buffer << std::fixed << std::setprecision(3) << distance / ly << " ly";
+	else if (distance > au)
+		dist_buffer << std::fixed << std::setprecision(2) << distance / au << " au";
+	else if (distance > 1000)
+		dist_buffer << std::fixed << std::setprecision(2) << distance / 1000 << " km";
+	else
+		dist_buffer << std::fixed << std::setprecision(2) << distance << " m";
+
+	m_distance.setText(dist_buffer.str());
+
+
+	std::wstringstream datastream;
+
+	datastream << std::setprecision(5) << std::scientific << gravitational_force(selected_object->data.mass, refered_object.mass, distance) << L" N";
+
+	m_force.setText(datastream.str());
+}
+
+void DistanceBlock::setActive(bool active)
+{
+	m_active = active;
+}
+
+bool DistanceBlock::active() const
+{
+	return m_active;
+}
+
+void DistanceBlock::render(sf::RenderWindow* window)
+{
+	if (!m_active)
+		return;
+
+	m_objectName.render(window);
+	m_distance_sign.render(window);
+	m_distance.render(window);
+	m_force_sign.render(window);
+	m_force.render(window);
 }

@@ -40,6 +40,9 @@ struct PhysicalData
 };
 
 
+struct ForceData;
+
+
 
 class SpaceObject
 {
@@ -115,3 +118,21 @@ private:
 	
 };
 
+
+
+
+
+struct ForceData
+{
+	ForceData() {};
+	ForceData(const SpaceObject* object)
+	{
+		name = object->name();
+		position = object->object.getPosition();
+		mass = object->data.mass;
+	}
+
+	std::string name;
+	sf::Vector2f position;
+	long double mass;
+};

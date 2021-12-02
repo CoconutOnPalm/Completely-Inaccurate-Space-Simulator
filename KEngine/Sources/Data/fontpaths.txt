@@ -1,4 +1,4 @@
-KEngine/Sources/Fonts/arial.ttf
+KEngine/Sources/Fonts/OpenSans-Regular.ttf
 KEngine/Sources/Fonts/arialUNI.ttf
 KEngine/Sources/Fonts/calibri.ttf
 KEngine/Sources/Fonts/comic.ttf

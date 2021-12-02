@@ -28,6 +28,9 @@ enum class WindowSizingMode
 };
 
 
+class DistanceBlock;
+
+
 
 class DetailedDataWindow
 {
@@ -37,13 +40,17 @@ public:
 	~DetailedDataWindow();
 
 
-	void Run(SpaceObject* selected_object);
+	void Run(SpaceObject* selected_object, ObjectBuffer buffer);
 
 	void End();
 
+	void updateObjectPointer(SpaceObject* selected_object);
+
 	void Init(SpaceObject* selected_object);
-	void UpdateDynamicData(ObjectBuffer buffer);
 	void UpdateStaticData(ObjectBuffer buffer);
+	void UpdateDynamicData(std::vector<ForceData> data);
+
+	void loadData(SpaceObject* selected_object);
 
 	void lock();
 	void unlock();
@@ -64,7 +71,6 @@ private:
 
 	void Close();
 
-	void loadData();
 
 	void initGUI();
 	void updateGUI();
@@ -116,6 +122,11 @@ private:
 	
 	////////   G U I   ///////
 
+
+	ke::Slider m_slider;
+	ke::HoldView m_view_holder;
+
+
 	ke::Button m_titlebar;
 	ke::Button m_exitButton;
 	ke::Button m_maximizeButton;
@@ -125,6 +136,8 @@ private:
 	ke::Button m_icon;
 	ke::Button m_name;
 
+	ke::Rectangle m_icon_background;
+
 	ke::Rectangle m_compartmentBar;
 
 
@@ -132,6 +145,11 @@ private:
 
 	std::vector<std::unique_ptr<ke::Button>> m_signs;
 	std::vector<std::unique_ptr<ke::Button>> m_values;
+	std::vector<std::unique_ptr<ke::Button>> m_units;
+
+	std::vector<std::unique_ptr<DistanceBlock>> m_force_data_blocks;
+
+	std::vector<ForceData> m_force_data;
 
 	//ke::Button m_mass;
 	//ke::Button m_mass_sign;
@@ -145,4 +163,34 @@ private:
 	//ke::Button m_firts_space_speed_sign;
 	//ke::Button m_second_space_speed;
 	//ke::Button m_second_space_speed_sign;
+};
+
+
+
+
+
+class DistanceBlock
+{
+public:
+	DistanceBlock(const sf::Vector2f& position, const sf::Vector2f& winsize);
+	~DistanceBlock();
+
+	void updatePosition(const sf::Vector2f& position, const sf::Vector2f& winsize);
+	sf::Vector2f getPosition() const;
+	void update(const SpaceObject* selected_object, const ForceData& refered_object);
+
+	void setActive(bool active);
+	bool active() const;
+
+	void render(sf::RenderWindow* window);
+
+private:
+
+	bool m_active;
+
+	ke::Button m_objectName;
+	ke::Button m_distance_sign;
+	ke::Button m_distance;
+	ke::Button m_force_sign;
+	ke::Button m_force;
 };

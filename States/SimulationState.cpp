@@ -578,6 +578,25 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		if (m_selected_object != m_objects.begin())
 		{
 			m_VDController.updateDynamicData(m_selected_object);
+
+			if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+			{
+				s_externalWindow_mutex.lock();
+
+				detailedDataWindow.lock();
+
+				std::vector<ForceData> buffer;
+				buffer.reserve(m_objects.size() - 1);
+				for (int i = 1; i < m_objects.size(); i++)
+					if ((*m_selected_object)->name() != m_objects[i]->name())
+						buffer.push_back(ForceData(m_objects[i].get()));
+
+				detailedDataWindow.UpdateDynamicData(buffer);
+
+				detailedDataWindow.unlock();
+
+				s_externalWindow_mutex.unlock();
+			}
 		}
 	}
 	else
@@ -593,7 +612,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 	// FEATURE: updating external windows (put undoer simulation core)
-	
+
 
 	// don't multithread this
 	//std::thread detailedDataWindowThread(&DetailedDataWindow::Update, &detailedDataWindow);
@@ -734,7 +753,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 	//detailedDataWindow.lock();
-	detailedDataWindow.UpdateDynamicData(m_objectBuffer);
+	//detailedDataWindow.UpdateDynamicData(m_objectBuffer);
 	//detailedDataWindow.unlock();
 
 
@@ -936,9 +955,11 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 					// adding object by module
 
-					std::cout << "type in .addObject(...): " << m_objectBuffer.type() << '\n';
+					//std::cout << "type in .addObject(...): " << m_objectBuffer.type() << '\n';
 
 					m_ObjController.addObject(m_selected_object, &m_objectBuffer, mousePosition, view->getSize(), winSize, name);
+					detailedDataWindow.updateObjectPointer(m_selected_object->get());
+
 
 
 					// pushing icon to history panel
@@ -1038,6 +1059,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 					// adding object by module
 
 					m_ObjController.addObject(m_selected_object, &m_objectBuffer, mousePosition, view->getSize(), winSize, name);
+					detailedDataWindow.updateObjectPointer(m_selected_object->get());
 
 
 					// pushing icon to history panel
@@ -1104,20 +1126,29 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		if ((*(m_modifiers.begin()))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: OPEN EXTERNAL WINDOW
 		{
-			// opeinng external window
+			if (detailedDataWindow.status() == ExternalWindowStatus::CLOSED)
+			{
+				if (detailedDataWindow.status() == ExternalWindowStatus::CLOSED)
+				{
+					m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer);
 
-			//detailedDataWindow.End();
-			//detailedDataWindow.Init(m_selected_object->get());
+				}
+				else
+				{
+					m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer);
+					//ObjectBuffer buffer;
+					//buffer.load(m_selected_object);
+					//
+					////detailedDataWindow.Init(m_selected_object->get());
+					//detailedDataWindow.loadData(m_selected_object->get());
+					//detailedDataWindow.UpdateStaticData(m_objectBuffer);
+				}
 
-			if (m_selected_object->get() == nullptr)
-				std::cout << "nullptr\n";
-
-			m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get());
-
-			//detailedDataWindow.lock();
-			//detailedDataWindow.Load(m_selected_object->get());
-			//std::lock_guard<std::mutex> lock(s_externalWindow_mutex);
-			//detailedDataWindow.unlock();
+				//detailedDataWindow.lock();
+				//detailedDataWindow.Load(m_selected_object->get());
+				//std::lock_guard<std::mutex> lock(s_externalWindow_mutex);
+				//detailedDataWindow.unlock();
+			}
 		}
 		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
 		{
@@ -1151,6 +1182,39 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 			m_ObjController.deleteObject(m_selected_object);
 			m_VDController.setEmpty();
+
+			auto selected_buffer = m_selected_object;
+
+			if (m_objects.size() > 1)
+			{
+				++selected_buffer; // setting to first object that isn't center of mass
+
+				detailedDataWindow.updateObjectPointer(selected_buffer->get());
+
+				if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+				{
+					ObjectBuffer buffer;
+					buffer.load(selected_buffer);
+
+					detailedDataWindow.loadData(selected_buffer->get());
+					detailedDataWindow.UpdateStaticData(buffer);
+				}
+			}
+			else
+			{
+				detailedDataWindow.updateObjectPointer(selected_buffer->get());
+
+				if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+				{
+					ObjectBuffer buffer;
+					buffer.load(ObjectType::CENTER_OF_MASS, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0, 0, "Center Of Mass", ke::Settings::EmptyFHDTexturePath(), ke::Settings::EmptyTexturePath(), 0, sf::Vector3f(0, 0, 0));
+
+					detailedDataWindow.loadData(nullptr);
+					detailedDataWindow.UpdateStaticData(buffer);
+				}
+			}
+
+
 		}
 
 
@@ -1204,6 +1268,15 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			m_selected_object = m_objects.end() - 1;
 
 		m_VDController.loadData(m_selected_object, winSize);
+
+		if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+		{
+			ObjectBuffer buffer;
+			buffer.load(m_selected_object);
+
+			detailedDataWindow.loadData(m_selected_object->get());
+			detailedDataWindow.UpdateStaticData(buffer);
+		}
 	}
 	else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Tab && !m_text_entered)
 	{
@@ -1217,6 +1290,15 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		else
 		{
 			m_VDController.loadData(m_selected_object, winSize);
+
+			if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+			{
+				ObjectBuffer buffer;
+				buffer.load(m_selected_object);
+
+				detailedDataWindow.loadData(m_selected_object->get());
+				detailedDataWindow.UpdateStaticData(buffer);
+			}
 		}
 	}
 
@@ -1432,7 +1514,19 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 					(*m_selected_object)->clickRange()->setOutlineColor(sf::Color(128, 128, 128, 192));
 					sth_clicked = true;
 
+					// WARNING  ! ! !
+					//m_objectBuffer.load(m_selected_object);
+
 					m_VDController.loadData(m_selected_object, winSize);
+
+					if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+					{
+						ObjectBuffer buffer;
+						buffer.load(m_selected_object);
+
+						detailedDataWindow.loadData(m_selected_object->get());
+						detailedDataWindow.UpdateStaticData(buffer);
+					}
 
 					break;
 				}
@@ -1523,6 +1617,9 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			m_VDController.checkInputString();
 			m_VDController.updateStaticData(m_selected_object, &m_object_name);
+
+			if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+				detailedDataWindow.UpdateStaticData(m_objectBuffer);
 		}
 
 	}

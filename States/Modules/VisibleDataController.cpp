@@ -288,7 +288,7 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		(*selected_object)->data.mass = mass;
 		(*selected_object)->updatePhysicalData();
 
-		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius)) // black hole conversion
+		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius) >= (*selected_object)->data.radius) // black hole conversion
 		{
 			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
 
@@ -338,7 +338,7 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		}
 
 
-		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius)) // black hole conversion
+		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius) >= (*selected_object)->data.radius) // black hole conversion
 		{
 			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
 

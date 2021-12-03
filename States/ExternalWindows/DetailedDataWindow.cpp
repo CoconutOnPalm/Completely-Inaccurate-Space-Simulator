@@ -214,7 +214,7 @@ void DetailedDataWindow::initGUI()
 
 
 
-	m_slider.create(sf::Vector2f(winsize.x / 100, 4 * winsize.y / 5), winsize, winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(16, 16, 16, 64), sf::Color(32, 32, 32, 64));
+	//m_slider.create(sf::Vector2f(winsize.x / 100, 4 * winsize.y / 5), winsize, winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(16, 16, 16, 64), sf::Color(32, 32, 32, 64));
 
 
 
@@ -286,8 +286,8 @@ void DetailedDataWindow::initGUI()
 	//window.setSize(sf::Vector2u(m_default_windowSize));
 	//this->updateGUI();
 
-	m_view_holder.setView(&view);
-	m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, winsize.y));
+	//m_view_holder.setView(&view);
+	//m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, winsize.y));
 }
 
 void DetailedDataWindow::updateGUI()
@@ -339,16 +339,19 @@ void DetailedDataWindow::updateGUI()
 	}
 
 
-	sf::Vector2f force_data_position(section, m_values.back()->getPosition().y + winsize.y / 16);
-
-	for (int i = 0; i < m_force_data.size(); i++)
+	if (m_force_data_blocks.size() > 0)
 	{
-		m_force_data_blocks[i]->updatePosition(force_data_position, winsize);
+		sf::Vector2f force_data_position(section, m_values.back()->getPosition().y + winsize.y / 16);
 
-		if (winsize.x < m_default_windowSize.x - 0.01) // -0.01 for safety
-			force_data_position.y += winsize.x / 4;
-		else
-			force_data_position.y += winsize.x / 8;
+		for (int i = 0; i < m_force_data.size(); i++)
+		{
+			m_force_data_blocks[i]->updatePosition(force_data_position, winsize);
+
+			if (winsize.x < m_default_windowSize.x - 0.01) // -0.01 for safety
+				force_data_position.y += winsize.x / 4;
+			else
+				force_data_position.y += winsize.x / 8;
+		}
 	}
 
 
@@ -356,7 +359,7 @@ void DetailedDataWindow::updateGUI()
 	//m_slider.setPosition(winsize);
 	//m_slider.setFieldHeight(m_force_data_blocks.back()->getPosition().y + winsize.y / 16);
 
-	m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, m_force_data_blocks.back()->getPosition().y + winsize.y / 16));
+	//m_view_holder.setBorders(ke::Vector4f(0.f, 0.f, winsize.x, m_force_data_blocks.back()->getPosition().y + winsize.y / 16));
 }
 
 void DetailedDataWindow::loadData(SpaceObject* selected_object)
@@ -557,8 +560,9 @@ void DetailedDataWindow::UpdateEvents()
 		window.setPosition(sf::Vector2i(mPosScreen - m_windowCatchDiff));
 
 
-	if ((m_force_data_blocks.size() > 1 && window.getSize().x < m_default_windowSize.x) || (m_force_data.size() > 4 && window.getSize().x >= m_default_windowSize.x))
+	if ((m_force_data_blocks.size() > 1 && window.getSize().x < m_default_windowSize.x) || (m_force_data_blocks.size() > 4 && window.getSize().x >= m_default_windowSize.x))
 	{
+		//if (m_force_data_blocks.size() > 1)
 		if (view.getCenter().y - view.getSize().y / 2 < -1)
 		{
 			view.setCenter(sf::Vector2f(window.getSize() / 2u));

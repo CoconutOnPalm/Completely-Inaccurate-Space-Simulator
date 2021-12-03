@@ -38,6 +38,7 @@ bool AppSettings::Init()
 
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
+	Get().m_trails = true;
 
 	ke::FileStream settings("Data/settings.bin", std::ios::in | std::ios::binary);
 
@@ -62,6 +63,7 @@ bool AppSettings::Init()
 
 	settings.binRead(Get().m_starShader);
 	settings.binRead(Get().m_glowShader);
+	settings.binRead(Get().m_trails);
 
 	return true;
 }
@@ -92,6 +94,7 @@ bool AppSettings::Save()
 
 	settings.binWrite(Get().m_starShader);
 	settings.binWrite(Get().m_glowShader);
+	settings.binWrite(Get().m_trails);
 
 	return success;
 }
@@ -118,6 +121,7 @@ void AppSettings::RestoreDefaults()
 
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
+	Get().m_trails = true;
 }
 
 void AppSettings::setDefaultWindowSize(const sf::Vector2f window_size)

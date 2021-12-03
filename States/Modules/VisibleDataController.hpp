@@ -11,6 +11,8 @@
 #include "States/Global/TypeMap.hpp"
 #include "States/ExternalWindows/DetailedDataWindow.hpp"
 
+#include <numeric>
+
 #define objvector std::vector<std::unique_ptr<SpaceObject>>
 
 

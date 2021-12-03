@@ -121,10 +121,6 @@ private:
 	////////   G U I   ///////
 
 
-	ke::Slider m_slider;
-	ke::HoldView m_view_holder;
-
-
 	ke::Button m_titlebar;
 	ke::Button m_exitButton;
 	ke::Button m_maximizeButton;

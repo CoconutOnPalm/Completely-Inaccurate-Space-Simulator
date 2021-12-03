@@ -448,16 +448,37 @@ void VisibleDataController::updateDistanceBlocks(objvector::iterator selected_ob
 	{
 		std::wstringstream dist_str;
 
-		auto nearest_object = m_objects->begin();
-		auto nearest_star = m_objects->begin();
-		long double distance = 1e300;
+		auto nearest_object = m_objects->begin() + 1;
 
-		if (selected_object == m_objects->end() - 1)
+		if (selected_object == m_objects->begin() + 1)
+			nearest_object++;
+
+		long double distance = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
+
+		//long double distance = std::numeric_limits<long double>().max();
+
+
+		for (auto itr = m_objects->begin() + 1; itr != m_objects->end(); ++itr)
+		{
+			if (itr != selected_object)
+			{
+				long double distance_buffer = position_to_distance((*selected_object)->object.getPosition(), (*itr)->object.getPosition());
+				if (distance_buffer < distance)
+				{
+					nearest_object = itr;
+					distance = distance_buffer;
+				}
+			}
+		}
+
+
+
+		/*if (selected_object == m_objects->end() - 1) ?????
 			nearest_object = m_objects->end() - 2;
 		else
-			nearest_object = selected_object + 1;
+			nearest_object = selected_object + 1;*/
 
-		distance = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
+		//distance = position_to_distance((*selected_object)->object.getPosition(), (*nearest_object)->object.getPosition());
 
 
 		if (isnan(distance))

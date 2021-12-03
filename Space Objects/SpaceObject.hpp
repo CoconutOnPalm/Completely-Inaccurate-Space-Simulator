@@ -6,6 +6,8 @@
 #include "Equasions/Constants.hpp"
 #include "Equasions/Equasions.hpp"
 
+#include "Settings/AppSettings.hpp"
+
 
 struct PhysicalData
 {
@@ -57,6 +59,8 @@ public:
 	virtual void updatePhysicalData() = 0;
 	virtual void updateClickRadius();
 
+	virtual void updateTrails(float dt, float simulation_speed);
+
 	virtual bool invaded(const sf::Vector2f& mousePosition);
 	virtual bool clicked(sf::Mouse::Button button, const sf::Vector2f& mousePosition,  sf::Event& event);
 
@@ -97,7 +101,6 @@ public:
 
 protected:
 
-
 	std::string p_name;
 	std::string p_basic_filename;
 	std::string p_icon_filename;
@@ -112,6 +115,10 @@ protected:
 
 	sf::Shader p_shader;
 	sf::Shader p_glow_shader;
+
+	sf::Clock p_trail_timer;
+	float p_trail_time;
+	sf::VertexArray p_trail;
 
 private:
 

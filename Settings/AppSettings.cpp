@@ -30,11 +30,14 @@ bool AppSettings::Init()
 
 	Get().m_planetSize = 500.;
 	Get().m_starSize = 100.;
-	Get().m_starShader = true;
-	Get().m_glowShader = true;
+	Get().m_multithreading_allowed = true;
+	Get().m_less_calculations_mode = false;
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
 	Get().m_simulationBackgroundImage = 0;
+
+	Get().m_glowShader = true;
+	Get().m_starShader = true;
 
 	ke::FileStream settings("Data/settings.bin", std::ios::in | std::ios::binary);
 
@@ -51,11 +54,14 @@ bool AppSettings::Init()
 
 	settings.binRead(Get().m_planetSize);
 	settings.binRead(Get().m_starSize);
-	settings.binRead(Get().m_starShader);
-	settings.binRead(Get().m_glowShader);
+	settings.binRead(Get().m_multithreading_allowed);
+	settings.binRead(Get().m_less_calculations_mode);
 	settings.binRead(Get().m_custom_dt);
 	settings.binRead(Get().m_custom_timestep);
 	settings.binRead(Get().m_simulationBackgroundImage);
+
+	settings.binRead(Get().m_starShader);
+	settings.binRead(Get().m_glowShader);
 
 	return true;
 }
@@ -78,11 +84,14 @@ bool AppSettings::Save()
 
 	settings.binWrite(Get().m_planetSize);
 	settings.binWrite(Get().m_starSize);
-	settings.binWrite(Get().m_starShader);
-	settings.binWrite(Get().m_glowShader);
+	settings.binWrite(Get().m_multithreading_allowed);
+	settings.binWrite(Get().m_less_calculations_mode);
 	settings.binWrite(Get().m_custom_dt);
 	settings.binWrite(Get().m_custom_timestep);
 	settings.binWrite(Get().m_simulationBackgroundImage);
+
+	settings.binWrite(Get().m_starShader);
+	settings.binWrite(Get().m_glowShader);
 
 	return success;
 }
@@ -101,11 +110,14 @@ void AppSettings::RestoreDefaults()
 
 	Get().m_planetSize = 500.;
 	Get().m_starSize = 100.;
-	Get().m_starShader = true;
-	Get().m_glowShader = true;
+	Get().m_multithreading_allowed = true;
+	Get().m_less_calculations_mode = false;
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
 	Get().m_simulationBackgroundImage = 0;
+
+	Get().m_glowShader = true;
+	Get().m_starShader = true;
 }
 
 void AppSettings::setDefaultWindowSize(const sf::Vector2f window_size)
@@ -218,6 +230,26 @@ bool AppSettings::StarShader()
 	return Get().m_starShader;
 }
 
+void AppSettings::setMultithreadingStatus(bool status)
+{
+	Get().m_multithreading_allowed = status;
+}
+
+bool AppSettings::MultithreadingAllowed()
+{
+	return Get().m_multithreading_allowed;
+}
+
+void AppSettings::setCalculationMode(bool onoff)
+{
+	Get().m_less_calculations_mode = onoff;
+}
+
+bool AppSettings::LessCalculationsMode()
+{
+	return Get().m_less_calculations_mode;
+}
+
 void AppSettings::setGlowShader(bool glow_shader)
 {
 	Get().m_glowShader = glow_shader;
@@ -236,6 +268,16 @@ void AppSettings::setCustomDt(bool custom_dt)
 bool AppSettings::CustomDt()
 {
 	return Get().m_custom_dt;
+}
+
+void AppSettings::setTrailsEnabled(bool trails)
+{
+	Get().m_trails = trails;
+}
+
+bool AppSettings::TrailsEnabled()
+{
+	return Get().m_trails;
 }
 
 void AppSettings::setCustomTimeStep(float custom_timestep)

@@ -5,13 +5,13 @@
 
 struct QuickSettings
 {
-	QuickSettings() : planet_size(500), star_size(100), star_shader(true), glow_shader(true), custom_dt(true), custom_timestep(0.0001) {};
+	QuickSettings() : planet_size(500), star_size(100), multithreading_on(true), less_calculations_mode(false), custom_dt(true), custom_timestep(0.0001) {};
 
 	double star_size;
 	double planet_size;
 
-	bool star_shader;
-	bool glow_shader;
+	bool multithreading_on;
+	bool less_calculations_mode;
 
 	bool custom_dt;
 	float custom_timestep;
@@ -76,8 +76,8 @@ private:
 	std::array<int, 8>::iterator m_pSscale_itr;	// planet scales itr
 
 
-	ke::Switch m_star_shader;
-	ke::Switch m_glow_shader;
+	ke::Switch m_allow_multithreading;
+	ke::Switch m_less_calculations_mode;
 
 	ke::Switch m_custom_dt;
 	ke::InputButton m_custom_timestep;

@@ -83,6 +83,13 @@ Star::Star(
 	p_glow_shader.setUniform("size", 0.f);
 	p_glow_shader.setUniform("color", sf::Glsl::Vec3(color));
 	p_glow_shader.setUniform("basic_a", 0.4f);
+
+
+	for (int i = 0; i < p_trail.getVertexCount(); ++i)
+	{
+		p_trail[i].color = sf::Color(64, 255, 64, 255 - i);
+		p_trail[i].position = position;
+	}
 }
 
 Star::~Star()
@@ -110,6 +117,7 @@ bool Star::update(float dt)
 
 	//if (p_click_radius.isActive())
 	p_click_radius.setPosition(object.getPosition());
+
 
 	return false;
 }

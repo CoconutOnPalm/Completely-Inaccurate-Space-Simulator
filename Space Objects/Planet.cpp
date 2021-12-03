@@ -50,6 +50,13 @@ Planet::Planet(
 
     p_click_radius.getShape()->setPointCount(64);
     //p_click_radius.setActiveStatus(false);
+
+
+    for (int i = 0; i < p_trail.getVertexCount(); ++i)
+    {
+        p_trail[i].color = sf::Color(64, 64, 255, 255 - i);
+        p_trail[i].position = position;
+    }
 }
 
 Planet::~Planet()

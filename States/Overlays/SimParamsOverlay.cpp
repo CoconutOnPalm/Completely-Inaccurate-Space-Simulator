@@ -76,8 +76,8 @@ void SimParamsOverlay::initUI()
 	m_planet_scale_text.setTextPosition(ke::Origin::RIGHT_MIDDLE, sf::Vector2f(-winsize.x / 128, 0));
 
 
-	m_star_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/Sun_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
-	m_glow_shader.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 4 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/EpsilonEridani_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_allow_multithreading.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/Sun_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_less_calculations_mode.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 4 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/EpsilonEridani_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 
 	m_custom_dt.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 42, sf::Vector2f(m_star_scale.getShapeCenter().x, yShift + 5 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SimParamsOverlay/ProximaCentauri_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_custom_timestep.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 6 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, nullptr, L"timestep in ms", ke::TextScope::Numbers, 20, 1, winsize.x / 100, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color::White, sf::Color(96, 96, 96, 255), {}, {}, {}, sf::Vector2f(winsize.x / 100, 0));
@@ -85,10 +85,10 @@ void SimParamsOverlay::initUI()
 
 	m_descriptions[0].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 1 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Star scale", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 	m_descriptions[1].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 2 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Planet scale", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Star Shine effect", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Star glowing effect", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"custom timestep", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 6 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"custom timestep value", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Allow multithreading", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Use less calculations", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Custom timestep", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 6 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"Custom timestep value", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 
 
 	m_apply.create(sf::Vector2f(winsize.x / 8, winsize.y / 18), sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 10), ke::Origin::LEFT_TOP, nullptr, L"APPLY", winsize.x / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 255, 32, 64), sf::Color(255, 255, 255, 128));
@@ -97,9 +97,9 @@ void SimParamsOverlay::initUI()
 	this->restoreSettings();
 
 
-	m_shaders[0].setUniform("position", sf::Glsl::Vec2(m_star_shader.getButtonCenter().x, m_window->getSize().y - m_star_shader.getButtonCenter().y));
+	m_shaders[0].setUniform("position", sf::Glsl::Vec2(m_allow_multithreading.getButtonCenter().x, m_window->getSize().y - m_allow_multithreading.getButtonCenter().y));
 	m_shaders[0].setUniform("color", sf::Glsl::Vec3(0.8, 0.7, 0.0));
-	m_shaders[1].setUniform("position", sf::Glsl::Vec2(m_glow_shader.getButtonCenter().x, m_window->getSize().y - m_glow_shader.getButtonCenter().y));
+	m_shaders[1].setUniform("position", sf::Glsl::Vec2(m_less_calculations_mode.getButtonCenter().x, m_window->getSize().y - m_less_calculations_mode.getButtonCenter().y));
 	m_shaders[1].setUniform("color", sf::Glsl::Vec3(0.8, 0.5, 0.0));
 	m_shaders[2].setUniform("position", sf::Glsl::Vec2(m_custom_dt.getButtonCenter().x, m_window->getSize().y - m_custom_dt.getButtonCenter().y));
 	m_shaders[2].setUniform("color", sf::Glsl::Vec3(1.0, 0.2, 0.0));
@@ -111,11 +111,11 @@ void SimParamsOverlay::updateEvents(const MousePosition& mousePosition, float dt
 	if (!m_active)
 		return;
 
-	if (m_star_shader.SmoothSignalChange(m_window->getSize().x, dt))
-		m_shaders[0].setUniform("position", sf::Glsl::Vec2(m_star_shader.getButtonCenter().x, m_window->getSize().y - m_star_shader.getButtonCenter().y));
+	if (m_allow_multithreading.SmoothSignalChange(m_window->getSize().x, dt))
+		m_shaders[0].setUniform("position", sf::Glsl::Vec2(m_allow_multithreading.getButtonCenter().x, m_window->getSize().y - m_allow_multithreading.getButtonCenter().y));
 
-	if (m_glow_shader.SmoothSignalChange(m_window->getSize().x, dt))
-		m_shaders[1].setUniform("position", sf::Glsl::Vec2(m_glow_shader.getButtonCenter().x, m_window->getSize().y - m_glow_shader.getButtonCenter().y));
+	if (m_less_calculations_mode.SmoothSignalChange(m_window->getSize().x, dt))
+		m_shaders[1].setUniform("position", sf::Glsl::Vec2(m_less_calculations_mode.getButtonCenter().x, m_window->getSize().y - m_less_calculations_mode.getButtonCenter().y));
 
 	if (m_custom_dt.SmoothSignalChange(m_window->getSize().x, dt))
 		m_shaders[2].setUniform("position", sf::Glsl::Vec2(m_custom_dt.getButtonCenter().x, m_window->getSize().y - m_custom_dt.getButtonCenter().y));
@@ -165,14 +165,14 @@ void SimParamsOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 	}
 
 
-	if (m_star_shader.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left))
+	if (m_allow_multithreading.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left))
 	{
 
 	}
 
-	if (m_glow_shader.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left))
+	if (m_less_calculations_mode.SSC_click_update(mousePosition.byWindow, event, sf::Mouse::Left))
 	{
-		m_shader_background.setActiveStatus(m_glow_shader.getSignal());
+		//m_shader_background.setActiveStatus(m_less_calculations_mode.getSignal());
 	}
 
 
@@ -224,8 +224,8 @@ void SimParamsOverlay::updateColors(const sf::Vector2f& mousePosition, const flo
 	ke::SmoothColorChange(m_planet_scale.getBar(), m_planet_scale.isInvaded(mousePosition), sf::Color(128, 128, 128, 255), sf::Color(64, 64, 64, 255), *itr, 256, dt); ++itr;
 	ke::SmoothTextColorChange(&m_planet_scale_text, m_planet_scale.isInvaded(mousePosition), sf::Color::White, sf::Color(192, 192, 192, 192), *itr, 255, dt); ++itr;
 
-	ke::SmoothColorChange(&m_star_shader, m_star_shader.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;
-	ke::SmoothColorChange(&m_glow_shader, m_glow_shader.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;
+	ke::SmoothColorChange(&m_allow_multithreading, m_allow_multithreading.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;
+	ke::SmoothColorChange(&m_less_calculations_mode, m_less_calculations_mode.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;
 
 	ke::SmoothColorChange(&m_custom_dt, m_custom_dt.isInvaded(mousePosition), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *itr, 128, dt); ++itr;
 
@@ -274,8 +274,8 @@ void SimParamsOverlay::render()
 	m_planet_scale.render(m_window);
 	m_planet_scale_text.render(m_window);
 
-	m_star_shader.render(m_window);
-	m_glow_shader.render(m_window);
+	m_allow_multithreading.render(m_window);
+	m_less_calculations_mode.render(m_window);
 
 	m_custom_dt.render(m_window);
 	m_custom_timestep.render(m_window);
@@ -314,8 +314,8 @@ void SimParamsOverlay::saveSettings()
 {
 	AppSettings::setStarSize(static_cast<long double>(m_star_scale.getPointCount()));
 	AppSettings::setPlanetSize(static_cast<long double>(m_planet_scale.getPointCount()));
-	AppSettings::setStarShader(m_star_shader.getSignal());
-	AppSettings::setGlowShader(m_glow_shader.getSignal());
+	AppSettings::setMultithreadingStatus(m_allow_multithreading.getSignal());
+	AppSettings::setCalculationMode(m_less_calculations_mode.getSignal());
 	AppSettings::setCustomDt(m_custom_dt.getSignal());
 
 	std::wstringstream wstream; float buffer;
@@ -326,8 +326,8 @@ void SimParamsOverlay::saveSettings()
 
 	m_output.planet_size = AppSettings::PlanetSize();
 	m_output.star_size = AppSettings::StarSize();
-	m_output.star_shader = AppSettings::StarShader();
-	m_output.glow_shader = AppSettings::GlowShader();
+	m_output.multithreading_on = AppSettings::MultithreadingAllowed();
+	m_output.less_calculations_mode = AppSettings::LessCalculationsMode();
 	m_output.custom_dt = AppSettings::CustomDt();
 	m_output.custom_timestep = AppSettings::CustomTimeStep();
 }
@@ -336,16 +336,16 @@ void SimParamsOverlay::restoreSettings()
 {
 	m_output.planet_size = AppSettings::PlanetSize();
 	m_output.star_size = AppSettings::StarSize();
-	m_output.star_shader = AppSettings::StarShader();
-	m_output.glow_shader = AppSettings::GlowShader();
+	m_output.multithreading_on = AppSettings::MultithreadingAllowed();
+	m_output.less_calculations_mode = AppSettings::LessCalculationsMode();
 	m_output.custom_dt = AppSettings::CustomDt();
 	m_output.custom_timestep = AppSettings::CustomTimeStep();
 
 
 	m_star_scale.setPointCount(AppSettings::StarSize());
 	m_planet_scale.setPointCount(AppSettings::PlanetSize());
-	m_star_shader.setSignal(AppSettings::StarShader());
-	m_glow_shader.setSignal(AppSettings::GlowShader());
+	m_allow_multithreading.setSignal(AppSettings::MultithreadingAllowed());
+	m_less_calculations_mode.setSignal(AppSettings::LessCalculationsMode());
 	m_custom_dt.setSignal(AppSettings::CustomDt());
 	m_custom_timestep.setText(std::to_wstring(AppSettings::CustomTimeStep()));
 

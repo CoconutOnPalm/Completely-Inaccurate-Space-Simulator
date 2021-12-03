@@ -54,17 +54,27 @@ public:
 	static void setStarShader(bool star_shader);
 	static bool StarShader();
 
-	static void setGlowShader(bool glow_shader);
-	static bool GlowShader();
+	static void setMultithreadingStatus(bool status);
+	static bool MultithreadingAllowed();
 
-	static void setCustomDt(bool custom_dt);
-	static bool CustomDt();
+	static void setCalculationMode(bool onoff);
+	static bool LessCalculationsMode();
 
 	static void setCustomTimeStep(float custom_timestep);
 	static float CustomTimeStep();
 
 	static void setSimulationBackgroundImage(int index);
 	static int SimulationBackgroundImage();
+
+
+	static void setGlowShader(bool glow_shader);
+	static bool GlowShader();
+
+	static void setCustomDt(bool custom_dt);
+	static bool CustomDt();
+
+	static void setTrailsEnabled(bool trails);
+	static bool TrailsEnabled();
 
 
 private:
@@ -86,9 +96,14 @@ private:
 	// simulation
 	long double m_planetSize;
 	long double m_starSize;
-	bool m_starShader;
-	bool m_glowShader;
+	bool m_multithreading_allowed;
+	bool m_less_calculations_mode;
 	bool m_custom_dt;
 	float m_custom_timestep;
 	int m_simulationBackgroundImage;
+
+	bool m_starShader;
+	bool m_glowShader;
+	bool m_trails;
+
 };

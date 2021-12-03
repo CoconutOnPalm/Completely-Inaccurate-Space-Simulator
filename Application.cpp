@@ -4,6 +4,7 @@ Application::Application()
 	: dt(0.f)
 {
 	AppSettings::Init();
+	//AppSettings::RestoreDefaults();
 
 	this->InitWindow();
 	this->InitStates();

@@ -1128,26 +1128,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			if (detailedDataWindow.status() == ExternalWindowStatus::CLOSED)
 			{
-				if (detailedDataWindow.status() == ExternalWindowStatus::CLOSED)
-				{
-					m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer);
-
-				}
-				else
-				{
-					m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer);
-					//ObjectBuffer buffer;
-					//buffer.load(m_selected_object);
-					//
-					////detailedDataWindow.Init(m_selected_object->get());
-					//detailedDataWindow.loadData(m_selected_object->get());
-					//detailedDataWindow.UpdateStaticData(m_objectBuffer);
-				}
-
-				//detailedDataWindow.lock();
-				//detailedDataWindow.Load(m_selected_object->get());
-				//std::lock_guard<std::mutex> lock(s_externalWindow_mutex);
-				//detailedDataWindow.unlock();
+				m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer, m_space_scale);
 			}
 		}
 		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
@@ -1226,6 +1207,37 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			{
 				m_ObjController.deleteObject(m_selected_object);
 				m_VDController.setEmpty();
+
+				auto selected_buffer = m_selected_object;
+
+				if (m_objects.size() > 1)
+				{
+					++selected_buffer; // setting to first object that isn't center of mass
+
+					detailedDataWindow.updateObjectPointer(selected_buffer->get());
+
+					if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+					{
+						ObjectBuffer buffer;
+						buffer.load(selected_buffer);
+
+						detailedDataWindow.loadData(selected_buffer->get());
+						detailedDataWindow.UpdateStaticData(buffer);
+					}
+				}
+				else
+				{
+					detailedDataWindow.updateObjectPointer(selected_buffer->get());
+
+					if (detailedDataWindow.status() == ExternalWindowStatus::OPENED)
+					{
+						ObjectBuffer buffer;
+						buffer.load(ObjectType::CENTER_OF_MASS, ObjectClass::CLASS_UNDEFINED, ObjectSubtype::SUBTYPE_UNDEFINED, 0, 0, "Center Of Mass", ke::Settings::EmptyFHDTexturePath(), ke::Settings::EmptyTexturePath(), 0, sf::Vector3f(0, 0, 0));
+
+						detailedDataWindow.loadData(nullptr);
+						detailedDataWindow.UpdateStaticData(buffer);
+					}
+				}
 			}
 		}
 	}

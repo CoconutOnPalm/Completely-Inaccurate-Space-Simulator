@@ -21,9 +21,13 @@ DetailedDataWindow::~DetailedDataWindow()
 }
 
 
+static long double s_space_scale = 0.000001;
 
-void DetailedDataWindow::Run(SpaceObject* selected_object, ObjectBuffer buffer)
+
+void DetailedDataWindow::Run(SpaceObject* selected_object, ObjectBuffer buffer, long double space_scale)
 {
+	s_space_scale = space_scale;
+
 	m_windowHolded = false;
 	m_locked = false;
 	m_running = true;
@@ -72,7 +76,7 @@ void DetailedDataWindow::updateObjectPointer(SpaceObject* selected_object)
 	//this->unlock();
 	s_ptrMutex.unlock();
 }
-	
+
 
 
 
@@ -92,7 +96,7 @@ void DetailedDataWindow::Init(SpaceObject* selected_object)
 
 	view.setSize(sf::Vector2f(window.getSize()));
 	view.setCenter(view.getSize() / 2.f);
-	
+
 	topView.setSize(m_default_windowSize);
 	topView.setCenter(topView.getSize() / 2.f);
 
@@ -127,7 +131,7 @@ void DetailedDataWindow::UpdateStaticData(ObjectBuffer buffer)
 	datastream.str(std::wstring());
 	datastream << std::setprecision(10) << std::scientific << buffer.radius();
 	m_values[1]->setText(datastream.str());
-	
+
 
 	long double density = buffer.mass() / Volume(buffer.radius());
 	if (isnan(density))
@@ -136,7 +140,7 @@ void DetailedDataWindow::UpdateStaticData(ObjectBuffer buffer)
 	datastream.str(std::wstring());
 	datastream << std::setprecision(10) << std::scientific << density;
 	m_values[2]->setText(datastream.str());
-	
+
 
 	long double surface_g = surface_gravity(buffer.mass(), buffer.radius());
 	if (isnan(surface_g))
@@ -145,7 +149,7 @@ void DetailedDataWindow::UpdateStaticData(ObjectBuffer buffer)
 	datastream.str(std::wstring());
 	datastream << std::setprecision(10) << std::scientific << surface_g;
 	m_values[3]->setText(datastream.str());
-	
+
 
 	long double fss = first_space_speed(buffer.mass(), buffer.radius());
 	if (isnan(fss))
@@ -154,7 +158,7 @@ void DetailedDataWindow::UpdateStaticData(ObjectBuffer buffer)
 	datastream.str(std::wstring());
 	datastream << std::setprecision(10) << std::scientific << fss;
 	m_values[4]->setText(datastream.str());
-	
+
 
 	long double sss = second_space_speed(buffer.mass(), buffer.radius());
 	if (isnan(sss))
@@ -235,11 +239,11 @@ void DetailedDataWindow::initGUI()
 
 	std::array<std::wstring, 6> name_order{ L"mass", L"radius", L"average density", L"Surface gravity", L"first space speed", L"second space speed" };
 	std::array<std::string, 6> unit_filenames{
-		"Textures/StateTextures/Simulation/DetailedDataWindow/kg.png", 
-		"Textures/StateTextures/Simulation/DetailedDataWindow/m.png", 
-		"Textures/StateTextures/Simulation/DetailedDataWindow/kgm3.png", 
-		"Textures/StateTextures/Simulation/DetailedDataWindow/ms2.png", 
-		"Textures/StateTextures/Simulation/DetailedDataWindow/ms.png", 
+		"Textures/StateTextures/Simulation/DetailedDataWindow/kg.png",
+		"Textures/StateTextures/Simulation/DetailedDataWindow/m.png",
+		"Textures/StateTextures/Simulation/DetailedDataWindow/kgm3.png",
+		"Textures/StateTextures/Simulation/DetailedDataWindow/ms2.png",
+		"Textures/StateTextures/Simulation/DetailedDataWindow/ms.png",
 		"Textures/StateTextures/Simulation/DetailedDataWindow/ms.png" };
 
 	auto name_itr = name_order.begin();
@@ -343,7 +347,7 @@ void DetailedDataWindow::updateGUI()
 
 		if (winsize.x < m_default_windowSize.x - 0.01) // -0.01 for safety
 			force_data_position.y += winsize.x / 4;
-		else 
+		else
 			force_data_position.y += winsize.x / 8;
 	}
 
@@ -367,7 +371,7 @@ void DetailedDataWindow::loadData(SpaceObject* selected_object)
 	}
 
 	m_selected_object = selected_object;
-	
+
 	s_staticLoadMutex.lock();
 	this->lock();
 	m_icon.setTexture(selected_object->iconFilename());
@@ -516,7 +520,7 @@ void DetailedDataWindow::UpdateEvents()
 				case WindowSizingMode::ALLATONCE:
 
 					if (ke::inRange(std::abs(mPosScreen.x - window.getPosition().x), m_minimum_windowSize.x, m_maximum_windowSize.x) &&
-						ke::inRange(std::abs(mPosScreen.y - window.getPosition().y), m_minimum_windowSize.y, m_maximum_windowSize.y)) 
+						ke::inRange(std::abs(mPosScreen.y - window.getPosition().y), m_minimum_windowSize.y, m_maximum_windowSize.y))
 					{
 						window.setSize(sf::Vector2u(std::abs(mPosScreen.x - window.getPosition().x), std::abs(mPosScreen.y - window.getPosition().y)));
 						this->updateGUI();
@@ -537,7 +541,7 @@ void DetailedDataWindow::UpdateEvents()
 
 		if (event.type == sf::Event::MouseWheelScrolled)
 			if (event.mouseWheelScroll.delta < 0)
-				view.move(0, window.getSize().y *  0.1f);
+				view.move(0, window.getSize().y * 0.1f);
 			else if (event.mouseWheelScroll.delta > 0)
 				view.move(0, window.getSize().y * -0.1f);
 
@@ -568,10 +572,10 @@ void DetailedDataWindow::UpdateEvents()
 	{
 		view.setCenter(sf::Vector2f(window.getSize() / 2u));
 	}
-		
+
 	if (m_selected_object == nullptr)
 	{
-		std::cout << "nullptr\n"; 
+		std::cout << "nullptr\n";
 		return;
 	}
 
@@ -589,22 +593,70 @@ void DetailedDataWindow::UpdateEvents()
 
 
 
-	if (m_force_data.size() == 0)
-		return;
-
-
-	if (m_force_data_blocks.size() < m_force_data.size())
+	if (m_force_data.size() > 0)
 	{
-		m_force_data_blocks.clear();
+		if (m_force_data_blocks.size() > m_force_data.size())
+			m_force_data_blocks.clear();
 
-		for (int i = 0; i < m_force_data.size(); i++)
-			m_force_data_blocks.push_back(std::make_unique<DistanceBlock>(sf::Vector2f(), m_default_windowSize));
+
+		if (m_force_data_blocks.size() < m_force_data.size())
+		{
+			m_force_data_blocks.clear();
+
+			for (int i = 0; i < m_force_data.size(); i++)
+				m_force_data_blocks.push_back(std::make_unique<DistanceBlock>(sf::Vector2f(), m_default_windowSize));
+		}
+
+		for (int i = 0; i < m_force_data_blocks.size(); i++)
+		{
+			m_force_data_blocks[i]->update(m_selected_object, m_force_data[i]);
+		}
 	}
 
-	for (int i = 0; i < m_force_data_blocks.size(); i++)
+
+	// color update
+
+	auto color_itr = m_colors.begin();
+
+	ke::SmoothColorChange(&m_exitButton, m_exitButton.isInvaded(mPosWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(&m_minimizeButton, m_minimizeButton.isInvaded(mPosWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(&m_maximizeButton, m_maximizeButton.isInvaded(mPosWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), *color_itr, 256, dt); ++color_itr;
+
+
+	for (int i = 0; i < m_signs.size(); i++)
 	{
-		m_force_data_blocks[i]->update(m_selected_object, m_force_data[i]);
+		if (m_signs[i]->isInvaded(mPosView) || m_values[i]->isInvaded(mPosView) || m_units[i]->isInvaded(mPosView))
+		{
+			ke::SmoothColorChange(m_signs[i].get(), true, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+			ke::SmoothColorChange(m_values[i].get(), true, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+			ke::SmoothColorChange(m_units[i].get(), true, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+		}
+		else
+		{
+			ke::SmoothColorChange(m_signs[i].get(), false, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+			ke::SmoothColorChange(m_values[i].get(), false, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+			ke::SmoothColorChange(m_units[i].get(), false, sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *color_itr, 256, dt); ++color_itr;
+		}
 	}
+
+
+	//for (auto& itr : m_signs)
+	//{
+	//	ke::SmoothColorChange(itr.get(), itr->isInvaded(mPosView), sf::Color(32, 32, 32, 64), sf::Color(32, 32, 32, 32), *color_itr, 255, dt);
+	//	++color_itr;
+	//}
+
+	//for (auto& itr : m_values)
+	//{
+	//	ke::SmoothColorChange(itr.get(), itr->isInvaded(mPosView), sf::Color(32, 32, 32, 64), sf::Color(32, 32, 32, 32), *color_itr, 255, dt);
+	//	++color_itr;
+	//}
+
+	//for (auto& itr : m_units)
+	//{
+	//	ke::SmoothColorChange(itr.get(), itr->isInvaded(mPosView), sf::Color(32, 32, 32, 64), sf::Color(32, 32, 32, 32), *color_itr, 255, dt);
+	//	++color_itr;
+	//}
 }
 
 
@@ -774,7 +826,7 @@ void DistanceBlock::update(const SpaceObject* selected_object, const ForceData& 
 	m_objectName.setText(ke::fixed::stow(refered_object.name));
 
 
-	long double distance = position_to_distance(selected_object->object.getPosition(), refered_object.position) * 1'000'000;
+	long double distance = position_to_distance(selected_object->object.getPosition(), refered_object.position) / s_space_scale;
 
 	//std::cout << "distance: " << distance << '\n';
 

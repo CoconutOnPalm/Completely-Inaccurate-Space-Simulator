@@ -40,7 +40,7 @@ public:
 	~DetailedDataWindow();
 
 
-	void Run(SpaceObject* selected_object, ObjectBuffer buffer);
+	void Run(SpaceObject* selected_object, ObjectBuffer buffer, long double space_scale);
 
 	void End();
 
@@ -115,8 +115,6 @@ private:
 	bool m_fullscreen_on;
 
 
-	// refered object
-
 	SpaceObject* m_selected_object;
 
 	
@@ -151,18 +149,8 @@ private:
 
 	std::vector<ForceData> m_force_data;
 
-	//ke::Button m_mass;
-	//ke::Button m_mass_sign;
-	//ke::Button m_radius;
-	//ke::Button m_radius_sign;
-	//ke::Button m_density;
-	//ke::Button m_density_sign;
-	//ke::Button m_surface_g;
-	//ke::Button m_surface_g_sign;
-	//ke::Button m_firts_space_speed;
-	//ke::Button m_firts_space_speed_sign;
-	//ke::Button m_second_space_speed;
-	//ke::Button m_second_space_speed_sign;
+
+	std::array<ke::Colorf, 24> m_colors;
 };
 
 
@@ -193,4 +181,6 @@ private:
 	ke::Button m_distance;
 	ke::Button m_force_sign;
 	ke::Button m_force;
+
+	//std::array<ke::Colorf, 5> m_colors;
 };

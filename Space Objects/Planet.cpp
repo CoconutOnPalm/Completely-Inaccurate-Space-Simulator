@@ -57,6 +57,9 @@ Planet::Planet(
         p_trail[i].color = sf::Color(64, 64, 255, 255 - i);
         p_trail[i].position = position;
     }
+
+
+    p_name_tag.create({ 10, 10 }, position, ke::Origin::LEFT_BOTTOM, ke::fixed::stow(p_name), 8, ke::Origin::LEFT_BOTTOM, sf::Color::Transparent, sf::Color(128, 128, 255, 255));
 }
 
 Planet::~Planet()

@@ -76,6 +76,9 @@ public:
 	static void setTrailsEnabled(bool trails);
 	static bool TrailsEnabled();
 
+	static void setObjectNameDisplayed(bool display);
+	static bool displayObjectName();
+
 
 private:
 
@@ -105,5 +108,6 @@ private:
 	bool m_starShader;
 	bool m_glowShader;
 	bool m_trails;
+	bool m_displayObjectName;
 
 };

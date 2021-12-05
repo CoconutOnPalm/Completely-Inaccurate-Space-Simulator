@@ -18,6 +18,8 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 {
 	//this->InitState();
 
+	AppSettings::setObjectNameDisplayed(true);
+
 	m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, ke::Settings::EmptyFHDTexturePath(), {}, {}, {}, sf::Color::Black);
 
 	m_stateMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Black);
@@ -267,12 +269,14 @@ void SimulationState::InitTopGUI()
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 16),  sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/SimParamsIcon.png"));
 
 
-	m_tools.reserve(3); // enable star shader | enable glow shader | enable trails
+	m_tools.reserve(4); // enable star shader | enable glow shader | enable trails
 	//m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(1 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, nullptr));
 	//m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(3 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, nullptr));
-	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(5 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/StarShaderIcon.png"));
-	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(7 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/GlowShaderIcon.png"));
-	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(9 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/TrailsIcon.png"));
+	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(4  * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/StarShaderIcon.png"));
+	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(6  * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/GlowShaderIcon.png"));
+	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(8  * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/TrailsIcon.png"));
+	m_tools.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 32, winSize.y / 32), sf::Vector2f(10 * winSize.y / 64, 7 * winSize.y / 64), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/DisplayObjectNameIcon.png"));
+
 
 	if (AppSettings::StarShader())
 		m_tools[0]->setFillColor(sf::Color(0, 255, 0, 64));
@@ -288,6 +292,12 @@ void SimulationState::InitTopGUI()
 		m_tools[2]->setFillColor(sf::Color(0, 255, 0, 64));
 	else
 		m_tools[2]->setFillColor(sf::Color(255, 0, 0, 64));
+
+	if (AppSettings::displayObjectName())
+		m_tools[3]->setFillColor(sf::Color(0, 255, 0, 64));
+	else
+		m_tools[3]->setFillColor(sf::Color(255, 0, 0, 64));
+
 
 
 	m_iconUI.reserve(3); // recently used | main objects | object library
@@ -698,13 +708,21 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 
 
+	// FEATURE: updating object visuals
+
+	for (auto& itr : m_objects)
+		itr->updateVisualAdditives(sf::Vector2f(window->getSize()), window);
+
+
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 	// FEATURE: updating space objects clicking properties
 
-	for (auto& itr : m_objects)
+	for (auto& itr : m_onScreen)
 	{
 		itr->updateClickRadius();
 		if (abs(mousePosition.byView.y - itr->object.getPosition().y) < itr->clickRange()->getRadius())
@@ -1510,6 +1528,15 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			else
 				m_tools[2]->setFillColor(sf::Color(255, 0, 0, 64));
 		}
+		else if (m_tools[3]->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		{
+			AppSettings::setObjectNameDisplayed(!AppSettings::displayObjectName());
+
+			if (AppSettings::displayObjectName())
+				m_tools[3]->setFillColor(sf::Color(0, 255, 0, 64));
+			else
+				m_tools[3]->setFillColor(sf::Color(255, 0, 0, 64));
+		}
 		
 	}
 	if (m_backgrounds.at(1)->isInvaded(mousePosition.byWindow)) // data panel
@@ -1745,6 +1772,9 @@ void SimulationState::renderByWindow()
 	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
 
 
+	for (auto& itr : m_onScreen)
+		itr->renderVisualAdditives(window);
+	
 	m_distance_preview.render(window);
 
 

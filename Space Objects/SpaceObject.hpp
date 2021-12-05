@@ -60,11 +60,13 @@ public:
 	virtual void updateClickRadius();
 
 	virtual void updateTrails(float dt, float simulation_speed);
+	virtual void updateVisualAdditives(const sf::Vector2f& winsize, sf::RenderWindow* window);
 
 	virtual bool invaded(const sf::Vector2f& mousePosition);
 	virtual bool clicked(sf::Mouse::Button button, const sf::Vector2f& mousePosition,  sf::Event& event);
 
 	virtual void render(sf::RenderWindow* window);
+	virtual void renderVisualAdditives(sf::RenderWindow* window);
 	
 	//virtual ke::Circle* object();
 	//virtual PhysicalData* data();
@@ -112,6 +114,7 @@ protected:
 	static unsigned int p_star_count;
 
 	ke::Circle p_click_radius;
+	ke::Rectangle p_name_tag;
 
 	sf::Shader p_shader;
 	sf::Shader p_glow_shader;
@@ -131,7 +134,7 @@ private:
 
 struct ForceData
 {
-	ForceData() {};
+	ForceData() : mass(0.0) {};
 	ForceData(const SpaceObject* object)
 	{
 		name = object->name();

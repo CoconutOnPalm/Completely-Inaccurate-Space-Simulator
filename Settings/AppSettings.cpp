@@ -39,6 +39,7 @@ bool AppSettings::Init()
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
 	Get().m_trails = true;
+	Get().m_displayObjectName = true;
 
 	ke::FileStream settings("Data/settings.bin", std::ios::in | std::ios::binary);
 
@@ -64,6 +65,7 @@ bool AppSettings::Init()
 	settings.binRead(Get().m_starShader);
 	settings.binRead(Get().m_glowShader);
 	settings.binRead(Get().m_trails);
+	settings.binRead(Get().m_displayObjectName);
 
 	return true;
 }
@@ -95,6 +97,7 @@ bool AppSettings::Save()
 	settings.binWrite(Get().m_starShader);
 	settings.binWrite(Get().m_glowShader);
 	settings.binWrite(Get().m_trails);
+	settings.binWrite(Get().m_displayObjectName);
 
 	return success;
 }
@@ -122,6 +125,7 @@ void AppSettings::RestoreDefaults()
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
 	Get().m_trails = true;
+	Get().m_displayObjectName = true;
 }
 
 void AppSettings::setDefaultWindowSize(const sf::Vector2f window_size)
@@ -282,6 +286,16 @@ void AppSettings::setTrailsEnabled(bool trails)
 bool AppSettings::TrailsEnabled()
 {
 	return Get().m_trails;
+}
+
+void AppSettings::setObjectNameDisplayed(bool display)
+{
+	Get().m_displayObjectName = display;
+}
+
+bool AppSettings::displayObjectName()
+{
+	return Get().m_displayObjectName;
 }
 
 void AppSettings::setCustomTimeStep(float custom_timestep)

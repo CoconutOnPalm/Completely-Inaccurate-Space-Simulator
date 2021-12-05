@@ -15,6 +15,8 @@ SpaceObject::SpaceObject(long double mass)
 	: p_type(ObjectType::UNDEFINED)
 	, p_class(ObjectClass::CLASS_UNDEFINED)
 	, p_subtype(ObjectSubtype::SUBTYPE_UNDEFINED)
+	, p_trail(sf::LinesStrip, 256)
+	, p_trail_time(0)
 {
 	object.initPhysics(mass, 0.0f);
 	object.physics()->setTarget(&object);
@@ -55,6 +57,26 @@ void SpaceObject::updateTrails(float dt, float simulation_speed)
 	}
 }
 
+void SpaceObject::updateVisualAdditives(const sf::Vector2f& winsize, sf::RenderWindow* window)
+{
+	if (AppSettings::displayObjectName())
+	{
+		sf::Vector2f displayed_size(window->mapCoordsToPixel(object.getPosition() + object.getSize() * 0.5f) - window->mapCoordsToPixel(object.getPosition()));
+
+		if (displayed_size.x > 1)
+		{
+			p_name_tag.setActiveStatus(true);
+			displayed_size.y *= -1;
+			p_name_tag.setPosition(sf::Vector2f(window->mapCoordsToPixel(object.getPosition())) + displayed_size);
+			//p_name_tag.setTextColor(sf::Color(p_name_tag.getTextColor().r, p_name_tag.getTextColor().g, p_name_tag.getTextColor().b, 255 - 7.5 * 255 / displayed_size.x));
+		}
+		else
+		{
+			p_name_tag.setActiveStatus(false);
+		}
+	}
+}
+
 bool SpaceObject::invaded(const sf::Vector2f& mousePosition)
 {
 	return (pow(object.getPosition().x - mousePosition.x, 2) + pow(object.getPosition().y - mousePosition.y, 2) < pow(p_click_radius.getRadius(), 2));
@@ -74,10 +96,18 @@ void SpaceObject::render(sf::RenderWindow* window)
 	object.render(window);
 }
 
+void SpaceObject::renderVisualAdditives(sf::RenderWindow* window)
+{
+	if (AppSettings::displayObjectName())
+		p_name_tag.render(window);
+}
+
 
 void SpaceObject::setName(const std::string& new_name)
 {
 	p_name = new_name;
+
+	p_name_tag.setText(ke::fixed::stow(p_name));
 }
 
 std::string SpaceObject::name() const

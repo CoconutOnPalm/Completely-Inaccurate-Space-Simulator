@@ -90,6 +90,9 @@ Star::Star(
 		p_trail[i].color = sf::Color(64, 255, 64, 255 - i);
 		p_trail[i].position = position;
 	}
+
+
+	p_name_tag.create({ 10, 10 }, position, ke::Origin::LEFT_BOTTOM, ke::fixed::stow(p_name), 8, ke::Origin::LEFT_BOTTOM, sf::Color::Transparent, sf::Color(255, 255, 128, 255));
 }
 
 Star::~Star()

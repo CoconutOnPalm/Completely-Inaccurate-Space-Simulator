@@ -4,7 +4,7 @@ SpaceObject::SpaceObject()
 	: p_type(ObjectType::UNDEFINED)
 	, p_class(ObjectClass::CLASS_UNDEFINED)
 	, p_subtype(ObjectSubtype::SUBTYPE_UNDEFINED)
-	, p_trail(sf::LinesStrip, 256)
+	, p_trail(sf::LinesStrip, AppSettings::TrailSize())
 	, p_trail_time(0)
 {
 	object.initPhysics(1.0, 0.0f);
@@ -15,7 +15,7 @@ SpaceObject::SpaceObject(long double mass)
 	: p_type(ObjectType::UNDEFINED)
 	, p_class(ObjectClass::CLASS_UNDEFINED)
 	, p_subtype(ObjectSubtype::SUBTYPE_UNDEFINED)
-	, p_trail(sf::LinesStrip, 256)
+	, p_trail(sf::LinesStrip, AppSettings::TrailSize())
 	, p_trail_time(0)
 {
 	object.initPhysics(mass, 0.0f);
@@ -39,6 +39,23 @@ void SpaceObject::updateClickRadius()
 
 void SpaceObject::updateTrails(float dt, float simulation_speed)
 {
+	if (p_trail.getVertexCount() != AppSettings::TrailSize())
+	{
+		p_trail.resize(AppSettings::TrailSize());
+		std::cout << AppSettings::TrailSize() << '\n';
+
+		for (int i = 0; i < p_trail.getVertexCount(); ++i)
+		{
+			if (p_type == ObjectType::STAR)
+				p_trail[i].color = sf::Color(64, 255, 64, 255 - ((256.f / AppSettings::TrailSize()) * i));
+			else
+				p_trail[i].color = sf::Color(64, 64, 255, 255 - ((256.f / AppSettings::TrailSize()) * i));
+
+			p_trail[i].position = object.getPosition();
+		}
+	}
+
+
 	if (p_trail_timer.getElapsedTime().asMicroseconds() >=  dt * 10000 * simulation_speed)
 	{
 		p_trail_timer.restart();

@@ -18,7 +18,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 {
 	//this->InitState();
 
-	AppSettings::setObjectNameDisplayed(true);
+	//AppSettings::setObjectNameDisplayed(true);
 
 	m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, ke::Settings::EmptyFHDTexturePath(), {}, {}, {}, sf::Color::Black);
 
@@ -250,7 +250,7 @@ void SimulationState::InitBackground()
 	m_backgrounds.reserve(4); // background | top | right | bottom 
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x, 5 * winSize.y / 32), sf::Vector2f(0, 0), ke::Origin::LEFT_TOP, L"Completely Inaccurate Space Simulator", winSize.y / 64, ke::Origin::MIDDLE_TOP, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, 7 * winSize.y / 8), sf::Vector2f(winSize.x, 5 * winSize.y / 32), ke::Origin::RIGHT_TOP, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
-	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, winSize.y / 32), sf::Vector2f(0, winSize.y), ke::Origin::LEFT_BOTTOM, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
+	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, winSize.y / 32 - winSize.y / 360), sf::Vector2f(0, winSize.y), ke::Origin::LEFT_BOTTOM, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 4 - winSize.y / 360, winSize.y / 32), sf::Vector2f(4 * winSize.x / 5, winSize.y), ke::Origin::RIGHT_BOTTOM, L"", winSize.y / 64, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255), 0.f, sf::Text::Bold, sf::Vector2f(winSize.y / 180, 0)));
 }
 
@@ -584,9 +584,9 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 		//objectUpdate = std::thread{ &ObjectController::updateObjects, m_deltaTime, m_time_scale, m_simulation_speed };
 
-		ke::debug::Benchmark updateTime("Object update time");
+		//ke::debug::Benchmark updateTime("Object update time");
 		m_ObjController.updateObjects(m_deltaTime, m_time_scale, m_simulation_speed);
-		updateTime.Stop();
+		//updateTime.Stop();
 
 		for (auto& itr : m_objects)
 			itr->updateTrails(dt, m_simulation_speed);

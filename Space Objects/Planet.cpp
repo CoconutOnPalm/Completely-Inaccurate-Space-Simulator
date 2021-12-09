@@ -54,7 +54,7 @@ Planet::Planet(
 
     for (int i = 0; i < p_trail.getVertexCount(); ++i)
     {
-        p_trail[i].color = sf::Color(64, 64, 255, 255 - i);
+        p_trail[i].color = sf::Color(64, 64, 255, 255 - ((256.f / AppSettings::TrailSize())) * i);
         p_trail[i].position = position;
     }
 

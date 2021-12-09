@@ -35,30 +35,25 @@ void SettingsOverlay::initUI()
 
 	m_background.create(sf::Vector2f(winsize.x / 2, winsize.y * 0.8), winsize / 2.f, ke::Origin::MIDDLE_MIDDLE, std::wstring(), 0, 0, sf::Color(8, 8, 8, 255));
 
-	m_music_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 1 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Mars_icon.png",
+	m_music_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 1 * winsize.y / 12), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Mars_icon.png",
 		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_music_volume.setPercent(AppSettings::MusicVolume());
 
-	m_sfx_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 2 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Moon_icon.png",
+	m_sfx_volume.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 2 * winsize.y / 12), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Moon_icon.png",
 		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	m_sfx_volume.setPercent(AppSettings::MusicVolume());
 
 
-	m_vsync.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 40, sf::Vector2f(m_music_volume.getShapeCenter().x, yShift + 3 * winsize.y / 10), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Neptune_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_vsync.create(sf::Vector2f(winsize.x / 18, winsize.y / 21), winsize.y / 40, sf::Vector2f(m_music_volume.getShapeCenter().x, yShift + 3 * winsize.y / 12), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Neptune_icon.png", ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
 	
-	m_simulationFPS.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), nullptr, AppSettings::MaxSimulationFPS(), 120.0, 960.0, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
-
-	m_FPS_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::MaxSimulationFPS()), m_simulationFPS.getSize().y / 2,
+	m_simulationFPS.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 12), nullptr, AppSettings::MaxSimulationFPS(), 120.0, 960.0, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
+	m_FPS_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 4 * winsize.y / 12), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::MaxSimulationFPS()), m_simulationFPS.getSize().y / 2,
 		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_simulationFPS.getSize().x / 256, 0));
 	
 
-	m_background_brightness.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 10), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Jupiter_icon.png",
-		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
-	m_background_brightness.setPercent(AppSettings::BackgroundBrightness());
-
 
 	const float box_size = winsize.x / 30;
-	sf::Vector2f box_position(winsize.x / 2 + xShift, yShift + 5 * winsize.y / 10);
+	sf::Vector2f box_position(winsize.x / 2 + xShift, yShift + 5 * winsize.y / 12);
 
 
 	m_background_images.reserve(10);
@@ -82,18 +77,30 @@ void SettingsOverlay::initUI()
 	}
 
 
+	m_background_brightness.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), winsize.y / 40, sf::Vector2f(winsize.x / 2 + xShift, yShift + 7 * winsize.y / 12), ke::Origin::LEFT_MIDDLE, "Textures/StateTextures/Simulation/SettingsOverlay/Jupiter_icon.png",
+		ke::Settings::EmptyTexturePath(), sf::Color::Transparent, sf::Color(32, 32, 32, 255));
+	m_background_brightness.setPercent(AppSettings::BackgroundBrightness());
+
+	std::cout << AppSettings::TrailSize() << '\n';
+	m_trail_size.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 8 * winsize.y / 12), nullptr, AppSettings::TrailSize(), 0, 2000, ke::Origin::LEFT_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(64, 64, 64, 255));
+	m_trail_text.create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 + xShift, yShift + 8 * winsize.y / 12), ke::Origin::LEFT_MIDDLE, std::to_wstring(AppSettings::TrailSize()), m_trail_size.getSize().y / 2,
+		ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color::White, 0, sf::Color::Transparent, 0, 0, sf::Vector2f(m_trail_size.getSize().x / 256, 0));
+
+
+
 	m_selected_image = m_background_images.begin() + AppSettings::SimulationBackgroundImage();
 
 	(*m_selected_image)->setOutlineColor(sf::Color::Cyan);
 	(*m_selected_image)->setOutlineThickness(winsize.x / 512);
 
 
-	m_descriptions[0].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 1 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"music volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[1].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 2 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"SFX volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"vertical synchronization", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"max FPS in simulation", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5.5 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"background image", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 7 * winsize.y / 10), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[0].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 1 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"music volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[1].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 2 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"SFX volume", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"vertical synchronization", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"max FPS in simulation", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5.5 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"background image", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 7 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[6].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 8 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 }
 
 void SettingsOverlay::updateEvents(const MousePosition& mousePosition, float dt)
@@ -154,6 +161,26 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 		m_FPS_text.setText(wstr.str());
 
 		AppSettings::setMaxSimulationFPS(m_simulationFPS.getPointCount());
+	}
+
+
+	if (m_trail_size.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_trail_size.addPoints(200);
+
+		std::wstringstream wstr;
+		wstr << std::fixed << std::setprecision(0) << m_trail_size.getPointCount();
+
+		m_trail_text.setText(wstr.str());
+	}
+	else if (m_trail_size.isClicked(sf::Mouse::Right, mousePosition.byWindow, event))
+	{
+		m_trail_size.subtractPoints(200);
+
+		std::wstringstream wstr;
+		wstr << std::fixed << std::setprecision(0) << m_trail_size.getPointCount();
+
+		m_trail_text.setText(wstr.str());
 	}
 
 
@@ -254,6 +281,8 @@ void SettingsOverlay::render()
 	(*m_selected_image)->render(m_window);
 
 	m_background_brightness.render(m_window);
+	m_trail_size.render(m_window);
+	m_trail_text.render(m_window);
 }
 
 bool SettingsOverlay::active() const
@@ -270,6 +299,9 @@ void SettingsOverlay::activate()
 void SettingsOverlay::deactivate()
 {
 	m_active = false;
+
+	if (AppSettings::TrailSize() != m_trail_size.getPointCount())
+		AppSettings::setTrailSize(m_trail_size.getPointCount());
 
 	m_window->setFramerateLimit(AppSettings::MaxSimulationFPS());
 	m_window->setVerticalSyncEnabled(AppSettings::vSync());

@@ -35,6 +35,7 @@ bool AppSettings::Init()
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
 	Get().m_simulationBackgroundImage = 0;
+	Get().m_trail_size = 200;
 
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
@@ -61,6 +62,7 @@ bool AppSettings::Init()
 	settings.binRead(Get().m_custom_dt);
 	settings.binRead(Get().m_custom_timestep);
 	settings.binRead(Get().m_simulationBackgroundImage);
+	settings.binRead(Get().m_trail_size);
 
 	settings.binRead(Get().m_starShader);
 	settings.binRead(Get().m_glowShader);
@@ -93,6 +95,7 @@ bool AppSettings::Save()
 	settings.binWrite(Get().m_custom_dt);
 	settings.binWrite(Get().m_custom_timestep);
 	settings.binWrite(Get().m_simulationBackgroundImage);
+	settings.binWrite(Get().m_trail_size);
 
 	settings.binWrite(Get().m_starShader);
 	settings.binWrite(Get().m_glowShader);
@@ -121,6 +124,7 @@ void AppSettings::RestoreDefaults()
 	Get().m_custom_dt = false;
 	Get().m_custom_timestep = 0.0001;
 	Get().m_simulationBackgroundImage = 0;
+	Get().m_trail_size = 200;
 
 	Get().m_glowShader = true;
 	Get().m_starShader = true;
@@ -316,4 +320,14 @@ void AppSettings::setSimulationBackgroundImage(int index)
 int AppSettings::SimulationBackgroundImage()
 {
 	return Get().m_simulationBackgroundImage;
+}
+
+void AppSettings::setTrailSize(int size)
+{
+	Get().m_trail_size = size;
+}
+
+int AppSettings::TrailSize()
+{
+	return Get().m_trail_size;
 }

@@ -66,6 +66,9 @@ public:
 	static void setSimulationBackgroundImage(int index);
 	static int SimulationBackgroundImage();
 
+	static void setTrailSize(int size);
+	static int TrailSize();
+
 
 	static void setGlowShader(bool glow_shader);
 	static bool GlowShader();
@@ -104,6 +107,7 @@ private:
 	bool m_custom_dt;
 	float m_custom_timestep;
 	int m_simulationBackgroundImage;
+	int m_trail_size;
 
 	bool m_starShader;
 	bool m_glowShader;

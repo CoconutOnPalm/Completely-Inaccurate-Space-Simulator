@@ -56,7 +56,11 @@ private:
 
 	ke::PercentageBar m_background_brightness;
 
-	std::array<ke::Rectangle, 6> m_descriptions;
+	ke::PointBar m_trail_size;
+	ke::Rectangle m_trail_text;
 
-	std::array<ke::Colorf, 20> m_colors;
+
+	std::array<ke::Rectangle, 7> m_descriptions;
+
+	std::array<ke::Colorf, 21> m_colors;
 };

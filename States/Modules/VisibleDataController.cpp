@@ -288,7 +288,7 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		(*selected_object)->data.mass = mass;
 		(*selected_object)->updatePhysicalData();
 
-		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius) >= (*selected_object)->data.radius) // black hole conversion
+		if (schwarzschild_radius((*selected_object)->data.mass) >= (*selected_object)->data.radius) // black hole conversion
 		{
 			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
 
@@ -296,18 +296,25 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 
 			if (ke::ionRange(std::abs((*selected_object)->data.mass), static_cast<long double>(0), 100.0 * solar_mass))
 				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_STELLAR_SIZE_BH);
-			else if (ke::inRange(std::abs((*selected_object)->data.mass), 100.0 * solar_mass, 100000.0 * solar_mass))
+			else if (ke::inRange(std::abs((*selected_object)->data.mass), 100.0 * solar_mass, 100'000.0 * solar_mass))
 				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_INTERMEDIATE_SIZE_BH);
 			else
 				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_SUPERMASSIVE_BH);
 
+			(*selected_object)->object.setRadius(schwarzschild_radius((*selected_object)->data.mass) * m_space_scale * m_star_scale);
+			(*selected_object)->data.radius = schwarzschild_radius((*selected_object)->data.mass);
+
 			(*selected_object)->object.setTexture("Textures/ObjectTextures/Universal/BlackHole.png");
+			(*selected_object)->setBasicFilename("Textures/ObjectTextures/Universal/BlackHole.png");
+			(*selected_object)->setIconFilename("Textures/IconTextures/Universal/BlackHole_icon.png");
 		}
 
 		std::wstringstream back_stream;
 
 		back_stream << std::fixed << std::setprecision(3) << std::scientific << mass;
 		(*m_values)["MASS"]->setText(back_stream.str());
+
+		(*selected_object)->data.mass = mass;
 	}
 
 	if ((*m_values)["RADIUS"]->getEPS())
@@ -338,7 +345,7 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 		}
 
 
-		if (schwarzschild_radius((*selected_object)->data.mass, (*selected_object)->data.radius) >= (*selected_object)->data.radius) // black hole conversion
+		if (schwarzschild_radius((*selected_object)->data.mass) >= (*selected_object)->data.radius) // black hole conversion
 		{
 			(*selected_object)->setObjectClass(ObjectClass::CLASS_BLACK_HOLE);
 
@@ -352,6 +359,8 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 				(*selected_object)->setSubtype(ObjectSubtype::SUBTYPE_SUPERMASSIVE_BH);
 
 			(*selected_object)->object.setTexture("Textures/ObjectTextures/Universal/BlackHole.png");
+			(*selected_object)->setBasicFilename("Textures/ObjectTextures/Universal/BlackHole.png");
+			(*selected_object)->setIconFilename("Textures/IconTextures/Universal/BlackHole_icon.png");
 		}
 
 
@@ -359,6 +368,8 @@ void VisibleDataController::updateStaticData(objvector::iterator selected_object
 
 		back_stream << std::fixed << std::setprecision(3) << radius;
 		(*m_values)["RADIUS"]->setText(back_stream.str());
+
+		(*selected_object)->data.radius = radius;
 	}
 }
 

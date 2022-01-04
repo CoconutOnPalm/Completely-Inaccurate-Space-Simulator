@@ -44,7 +44,7 @@ inline long double surface_gravity(long double M, long double r)
 }
 
 
-inline long double schwarzschild_radius(long double M, long double r)
+inline long double schwarzschild_radius(long double M)
 {
 	return 2 * G * M / (c * c);
 }

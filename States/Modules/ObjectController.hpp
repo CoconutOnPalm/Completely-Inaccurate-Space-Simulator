@@ -28,7 +28,7 @@ public:
 
 
 	void addObject(objvector::iterator& selected_object,
-		ObjectBuffer* object_data, const MousePosition& mousePosition, 
+		ObjectBuffer* object_data, const sf::Vector2f& position,
 		const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name);
 
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon);
@@ -40,7 +40,7 @@ public:
 	void updateObjectPreview(objvector::iterator selected_object, 
 		const MousePosition& mousePosition, const sf::Vector2f& viewSize, const sf::Vector2f& winSize);
 
-	void checkName(std::string& name);
+	void checkName(std::string& name); // leave unstatic
 
 private:
 

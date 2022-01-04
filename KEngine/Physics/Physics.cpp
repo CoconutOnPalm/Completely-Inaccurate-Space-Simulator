@@ -831,4 +831,40 @@ namespace ke
 		}
 	}
 
+	sf::Vector2f getCircleCollisionPoint(GuiObject* circle1, GuiObject* circle2, const float dt)
+	{
+		float radius_1 = circle1->getSize().x * 0.5;
+		float radius_2 = circle2->getSize().x * 0.5;
+
+		return sf::Vector2f(
+			(circle1->getShapeCenter().x * radius_2 + circle2->getShapeCenter().x * radius_1) / (radius_1 + radius_2),
+			(circle1->getShapeCenter().y * radius_2 + circle2->getShapeCenter().y * radius_1) / (radius_1 + radius_2));
+	}
+
+	bool CircleCollision(GuiObject* circle1, GuiObject* circle2, const float dt, float energy_loss_prc, float friction)
+	{
+		// I'm too dumb to figure it out myself, here's my 'inspiration':
+		// https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
+
+		//if (areColliding_CircleCircle(circle1, circle2))
+		{
+			/*sf::Vector2<double> new_speed_1(
+				circle1->physics()->getSpeed().x * (circle1->physics()->getMass() - circle2->physics()->getMass()) + (2 * circle2->physics()->getMass() * circle2->physics()->getSpeed().x) / (circle1->physics()->getMass() + circle2->physics()->getMass()),
+				circle1->physics()->getSpeed().y * (circle1->physics()->getMass() - circle2->physics()->getMass()) - (2 * circle2->physics()->getMass() * circle2->physics()->getSpeed().y) / (circle1->physics()->getMass() + circle2->physics()->getMass()));
+
+			sf::Vector2<double> new_speed_2(
+				circle2->physics()->getSpeed().x * (circle2->physics()->getMass() - circle1->physics()->getMass()) + (2 * circle1->physics()->getMass() * circle1->physics()->getSpeed().x) / (circle1->physics()->getMass() + circle2->physics()->getMass()),
+				circle2->physics()->getSpeed().y * (circle2->physics()->getMass() - circle1->physics()->getMass()) - (2 * circle1->physics()->getMass() * circle1->physics()->getSpeed().y) / (circle1->physics()->getMass() + circle2->physics()->getMass()));
+
+			circle1->physics()->setSpeed(circle1->physics()->getSpeed() + new_speed_1);
+			circle2->physics()->setSpeed(circle2->physics()->getSpeed() + new_speed_2);
+
+			return true;*/
+
+
+		}
+
+		return false;
+	}
+
 } // namespace ke

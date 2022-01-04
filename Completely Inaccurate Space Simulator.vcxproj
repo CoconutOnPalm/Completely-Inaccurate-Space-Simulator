@@ -159,6 +159,7 @@
     <ClCompile Include="States\Global\FileStorage.cpp" />
     <ClCompile Include="States\Global\TypeMap.cpp" />
     <ClCompile Include="States\MainMenu.cpp" />
+    <ClCompile Include="States\Modules\Collider.cpp" />
     <ClCompile Include="States\Modules\ObjectController.cpp" />
     <ClCompile Include="States\Modules\ObjectSelectionPanel.cpp" />
     <ClCompile Include="States\Modules\StateControlPanel.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="States\Global\FileStorage.hpp" />
     <ClInclude Include="States\Global\TypeMap.hpp" />
     <ClInclude Include="States\MainMenu.hpp" />
+    <ClInclude Include="States\Modules\Collider.hpp" />
     <ClInclude Include="States\Modules\ObjectController.hpp" />
     <ClInclude Include="States\Modules\ObjectSelectionPanel.hpp" />
     <ClInclude Include="States\Modules\StateControlPanel.hpp" />

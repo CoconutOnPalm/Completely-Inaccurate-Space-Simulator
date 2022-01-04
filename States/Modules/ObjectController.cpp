@@ -33,34 +33,34 @@ void ObjectController::assignScale(long double space_scale, long double planet_s
 }
 
 
-void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuffer* object_data, const MousePosition& mousePosition, const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name)
+void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuffer* object_data, const sf::Vector2f& position, const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name)
 {
 	size_t iter_pos = std::distance(m_objects->begin(), selected_object);
 
 	switch (object_data->type())
 	{
 	case STAR:
-		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Star>(position, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 
 		break;
 	case PLANET:
-		m_objects->push_back(std::make_unique<Planet>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Planet>(position, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_planet_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 
 		break;
 	default:
-		m_objects->push_back(std::make_unique<Star>(mousePosition.byView, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
+		m_objects->push_back(std::make_unique<Star>(position, name, object_data->filename(), object_data->iconFilename(), object_data->objectClass(), object_data->subtype(), object_data->mass(),
 			object_data->radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data->brightness(), object_data->color()));
 		m_objects->back()->data.radius = object_data->radius();
 		ke::throw_error("ObjectController::addObject(...)", "incorrect object type", "ERROR");
 		break;
 	}
 
-	std::cout << object_data->objectClass() << ' ' << object_data->subtype() << '\n';
-	std::cout << m_objects->back()->objectClass() << ' ' << m_objects->back()->subtype() << '\n';
+	//std::cout << object_data->objectClass() << ' ' << object_data->subtype() << '\n';
+	//std::cout << m_objects->back()->objectClass() << ' ' << m_objects->back()->subtype() << '\n';
 
 	// TODO: bug ze trzeba tego uzywac a nie w konstruktorze robic ^
 	m_objects->back()->clickRange()->setOutlineThickness(viewSize.x / winSize.x * 2);
@@ -129,7 +129,7 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 			angle += 180;
 
 
-		m_objects->back()->object.physics()->setSpeed(round_orbit_velocity((*selected_object)->object.physics()->getMass(),
+		m_objects->back()->object.physics()->setSpeed(round_orbit_velocity(object_data->mass(),
 			position_to_distance((*selected_object)->object.getPosition(), m_objects->back()->object.getPosition()) / m_space_scale), angle - 90);
 
 		if (isnan(m_objects->back()->object.physics()->getSpeed().x) || isnan(m_objects->back()->object.physics()->getSpeed().y))
@@ -240,7 +240,7 @@ void ObjectController::deleteObject(objvector::iterator& selected_object)
 }
 
 
-static  void calculateForce(std::vector<std::unique_ptr<SpaceObject>>* m_objects, std::vector<std::unique_ptr<SpaceObject>>::iterator itr, std::vector<std::unique_ptr<SpaceObject>>::iterator eoi, long double m_space_scale)
+static void calculateForce(std::vector<std::unique_ptr<SpaceObject>>* m_objects, std::vector<std::unique_ptr<SpaceObject>>::iterator itr, std::vector<std::unique_ptr<SpaceObject>>::iterator eoi, long double m_space_scale)
 {
 	for (auto i = m_objects->begin() + 1; i != eoi; ++i)
 	{
@@ -350,7 +350,7 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 
 		for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
 		{
-			m_calculationThreads.push_back(std::async(std::launch::async, calculateForce, m_objects, itr, eoi, m_space_scale));
+			m_calculationThreads.push_back(std::async(std::launch::async | std::launch::deferred, calculateForce, m_objects, itr, eoi, m_space_scale));
 		}
 
 

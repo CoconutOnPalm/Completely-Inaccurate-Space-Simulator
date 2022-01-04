@@ -14,6 +14,7 @@
 #include "Modules/ObjectController.hpp"
 #include "Modules/ObjectSelectionPanel.hpp"
 #include "Modules/StateControlPanel.hpp"
+#include "Modules/Collider.hpp"
 
 #include "Overlays/ObjectLibraryOverlay.hpp"
 #include "Overlays/SimParamsOverlay.hpp"
@@ -98,6 +99,7 @@ private:
     ObjectController m_ObjController;
     ObjectSelectionPanel m_objIconPanel;
     StateControlPanel m_StateControlPanel;
+    Collider m_collider;
 
 
     // EXTERNAL WINDOWS

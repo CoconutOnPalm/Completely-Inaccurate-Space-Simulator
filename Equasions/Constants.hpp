@@ -33,3 +33,6 @@ constexpr long double H = 71;
 
 /// solar mass in kg
 constexpr long double solar_mass = 1.9891e+30;
+
+// solar radius in m
+constexpr long double solar_radius = 696'340'000;

@@ -463,4 +463,9 @@ namespace ke
 	/// <returns>if colliding - true</returns>
 	bool RectangleCollision(GuiObject* rectangle1, GuiObject* rectangle2, const float dt, float energy_loss_prc = 0.f, float friction = 0.f);
 
+
+	sf::Vector2f getCircleCollisionPoint(GuiObject* circle1, GuiObject* circle2, const float dt);
+
+	bool CircleCollision(GuiObject* circle1, GuiObject* circle2, const float dt, float energy_loss_prc = 0.f, float friction = 0.f);
+
 } // namespace ke

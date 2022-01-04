@@ -80,7 +80,7 @@ bool Planet::update(float dt)
 
 void Planet::updatePhysicalData()
 {
-    data.schwarzschild_radius = schwarzschild_radius(data.mass, data.radius);
+    data.schwarzschild_radius = schwarzschild_radius(data.mass);
 
     data.gravitational_field_intensity = gravitational_field_intensity(data.mass, data.radius);
     data.first_space_speed = gravitational_field_intensity(data.mass, data.radius);

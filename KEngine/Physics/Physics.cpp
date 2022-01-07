@@ -139,7 +139,9 @@ namespace ke
 		}
 		else
 		{
-			throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			//throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			print_note("adding force form Physics::modifyForce(...)");
+			this->addForce(name, newtons, angle);
 			return false;
 		}
 	}
@@ -165,7 +167,9 @@ namespace ke
 		}
 		else
 		{
-			throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			//throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			print_note("adding force form Physics::modifyForce(...)");
+			this->addForce(name, force);
 			return false;
 		}
 	}

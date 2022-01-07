@@ -162,6 +162,7 @@
     <ClCompile Include="States\Modules\Collider.cpp" />
     <ClCompile Include="States\Modules\ObjectController.cpp" />
     <ClCompile Include="States\Modules\ObjectSelectionPanel.cpp" />
+    <ClCompile Include="States\Modules\SaveController.cpp" />
     <ClCompile Include="States\Modules\StateControlPanel.cpp" />
     <ClCompile Include="States\Modules\TimeController.cpp" />
     <ClCompile Include="States\Modules\VisibleDataController.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="States\Modules\Collider.hpp" />
     <ClInclude Include="States\Modules\ObjectController.hpp" />
     <ClInclude Include="States\Modules\ObjectSelectionPanel.hpp" />
+    <ClInclude Include="States\Modules\SaveController.hpp" />
     <ClInclude Include="States\Modules\StateControlPanel.hpp" />
     <ClInclude Include="States\Modules\TimeController.hpp" />
     <ClInclude Include="States\Modules\VisibleDataController.hpp" />

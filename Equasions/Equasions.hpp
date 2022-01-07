@@ -61,3 +61,15 @@ inline long double Volume(long double radius)
 {
 	return 1.33333333333333333 * PI * radius * radius * radius;
 }
+
+
+inline long double EnergyToDestroyAPalnet(long double M, long double R)
+{
+	return (3 * G * M * M) / (5 * R);
+}
+
+
+inline long double KineticEnergy(long double M, const sf::Vector2<double>& v)
+{
+	return M * (v.x * v.x + v.y * v.y) * 0.5;
+}

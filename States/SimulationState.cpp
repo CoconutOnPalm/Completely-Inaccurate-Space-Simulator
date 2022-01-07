@@ -57,6 +57,8 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 
 	m_collider.assing(&m_ObjController, sf::Vector2f(window->getSize()), m_space_scale);
 
+	m_saveController.assign(&m_ObjController);
+
 
 	m_placed_object.create(100, { 1000, 1000 }, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
 
@@ -81,12 +83,13 @@ void SimulationState::InitState()
 
 
 	std::thread object_loading_thread(&SimulationState::InitSpaceObjects, this);
+	
 
 	// don't multithread these below:
 
-	ke::debug::Benchmark objectLading("object loading");
+	ke::debug::Benchmark objectLoading("object loading");
 	//this->InitSpaceObjects();
-	objectLading.Stop();
+	objectLoading.Stop();
 
 	ke::debug::Benchmark background("Background");
 	this->InitBackground();
@@ -106,11 +109,11 @@ void SimulationState::InitState()
 
 
 
-	//for (auto& itr : m_project_menagers)
-	//{
-	//	itr->setOutlineColor(sf::Color::White);
-	//	itr->setOutlineThickness(1);
-	//}
+	for (auto& itr : m_project_menagers)
+	{
+		itr->setOutlineColor(sf::Color::White);
+		itr->setOutlineThickness(1);
+	}
 
 	//for (auto& itr : m_state_controllers)
 	//{
@@ -136,14 +139,8 @@ void SimulationState::InitState()
 	//	itr->setOutlineThickness(1);
 	//}
 
-	//ObjDataGUI_loading_thread.join(); // heaviest one
-	//background_loading_thread.join();
-	//TopPanelGUI_loading_thread.join();
+
 	object_loading_thread.join();
-	//TimePanel_loading_thread.join();
-
-
-	//m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow);
 }
 
 void SimulationState::InitSpaceObjects()
@@ -598,21 +595,37 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		//ke::debug::Benchmark updateTime("Object update time");
 		m_ObjController.updateObjects(m_deltaTime, m_time_scale, m_simulation_speed);
 
-		if (m_collider.update(&m_objects, dt, m_selected_object, view->getSize(), winSize))
+
+		// I'm so tired of this please let me sleep
+		if (!AppSettings::MultithreadingAllowed()) // not removing this I don't want to play with this again
 		{
-			for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
-				if ((*itr)->name() == m_collider.deletedObjects().first)
-					m_objects.erase(itr);
-			for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
-				if ((*itr)->name() == m_collider.deletedObjects().second)
-					m_objects.erase(itr);
+			if (m_collider.update(&m_objects, dt, m_selected_object, view->getSize(), winSize))
+			{
+				for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+				{
+					if ((*itr)->name() == m_collider.deletedObjects().first)
+					{
+						m_objects.erase(itr);
+						break;
+					}
+				}
+				for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+				{
+					if ((*itr)->name() == m_collider.deletedObjects().second)
+					{
+						m_objects.erase(itr);
+						break;
+					}
+				}
 
-			m_selected_object = m_objects.begin();
+				m_selected_object = m_objects.begin();
 
-			detailedDataWindow.updateObjectPointer(m_selected_object->get());
+				m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
+				detailedDataWindow.updateObjectPointer(m_selected_object->get());
 
-			if (m_selected_object->get() != nullptr)
-				m_VDController.loadData(m_selected_object, sf::Vector2f(window->getSize()));
+				if (m_selected_object->get() != nullptr)
+					m_VDController.loadData(m_selected_object, sf::Vector2f(window->getSize()));
+			}
 		}
 		//std::cout << m_objects.size() << '\n';
 		//std::cout << m_selected_object->get()->data.mass << '\n';
@@ -1382,6 +1395,20 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 				detailedDataWindow.UpdateStaticData(buffer);
 			}
 		}
+	}
+
+
+
+
+	// FEATURE: saving simulation
+
+	// save button
+	if (m_project_menagers.at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		if (m_saveController.Save("test1", &m_objects) == SimulationSaveErrorCode::FILE_ALREADY_EXISTS)
+			std::cout << "file already exists\n";
+		else
+			std::cout << "simulation saved succeeded\n";
 	}
 
 

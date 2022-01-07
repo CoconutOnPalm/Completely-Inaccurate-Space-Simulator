@@ -243,7 +243,7 @@ void SimulationState::InitSpaceObjects()
 	}
 
 
-	//m_saveController.Load("test1", &m_objects, viewSize, winSize);
+	m_saveController.Load("test1", &m_objects, viewSize, winSize);
 	
 	m_selected_object = m_objects.begin();
 

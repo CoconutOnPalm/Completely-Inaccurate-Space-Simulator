@@ -71,11 +71,8 @@ bool Planet::update(float dt)
 {
     //ke::SmoothRotation(&object, 359, data.rotation_speed, dt);
     object.updatePhysics(dt);
-    ke::debug::printVector2(object.physics()->getSpeed(), "speed");
-
-    double x = object.physics()->getSpeed().y;
-
-   // if (p_click_radius.isActive())
+    
+    // if (p_click_radius.isActive())
     p_click_radius.setPosition(object.getPosition());
 
     return false;

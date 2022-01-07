@@ -244,6 +244,15 @@ void SimulationState::InitSpaceObjects()
 
 		ke::debug::printVector2((*itr)->object.physics()->getSpeed());
 	}
+
+
+	m_saveController.Load("test1", &m_objects, viewSize, winSize);
+	
+	m_selected_object = m_objects.begin();
+
+	// assigning m_objects again
+	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object); 
+	m_VDController.assign(&m_symbols, &m_values, &m_units, &m_modifiers, &m_object_name, &m_objects);
 }
 
 

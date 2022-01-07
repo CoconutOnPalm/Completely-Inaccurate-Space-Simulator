@@ -129,7 +129,7 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 			angle += 180;
 
 
-		m_objects->back()->object.physics()->setSpeed(round_orbit_velocity(object_data->mass(),
+		m_objects->back()->object.physics()->setSpeed(round_orbit_velocity((*selected_object)->data.mass,
 			position_to_distance((*selected_object)->object.getPosition(), m_objects->back()->object.getPosition()) / m_space_scale), angle - 90);
 
 		if (isnan(m_objects->back()->object.physics()->getSpeed().x) || isnan(m_objects->back()->object.physics()->getSpeed().y))

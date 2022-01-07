@@ -122,7 +122,7 @@ namespace ke
 		std::map<std::string, sf::Vector2<double>>::iterator itr = m_forces.find(name);
 
 		// if that force exists
-		if (itr != m_forces.end())
+		//if (itr != m_forces.end())
 		{
 			m_total_force -= itr->second;
 
@@ -137,10 +137,12 @@ namespace ke
 
 			return true;
 		}
-		else
+		//else
 		{
-			throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
-			return false;
+			//throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			/*print_note("adding force form Physics::modifyForce(...)");
+			this->addForce(name, newtons, angle);
+			return false;*/
 		}
 	}
 
@@ -150,7 +152,7 @@ namespace ke
 		std::map<std::string, sf::Vector2<double>>::iterator itr = m_forces.find(name);
 
 		// if that force exists
-		if (itr != m_forces.end())
+		//if (itr != m_forces.end())
 		{
 			m_total_force -= (itr->second);
 			m_total_force += force;
@@ -163,10 +165,13 @@ namespace ke
 
 			return true;
 		}
-		else
+		//else
 		{
-			throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
-			return false;
+			//	//throw_error("Physics::modifyForce(..)", "force not found", "WARNING");
+			//	print_note("adding force form Physics::modifyForce(...)");
+			//	this->addForce(name, force);
+			//	return false;
+			//
 		}
 	}
 

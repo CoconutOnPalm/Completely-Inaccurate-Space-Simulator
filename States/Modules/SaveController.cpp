@@ -1,6 +1,7 @@
 #include "SaveController.hpp"
 
 SaveController::SaveController()
+	: m_objectController(nullptr)
 {
 	std::ifstream loader("Data/saved_simulations_list.txt");
 
@@ -37,6 +38,11 @@ void SaveController::assign(ObjectController* object_controller)
 SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize)
 {
 	ke::FileStream loader(this->getFilePath(name), std::ios::in | std::ios::binary);
+
+	std::cout << this->getFilePath(name) << '\n';
+
+	if (!loader.loaded())
+		return SimulationSaveErrorCode::FILE_NOT_FOUND;
 
 
 	size_t objcount;
@@ -84,7 +90,7 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 
 SimulationSaveErrorCode SaveController::Save(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects)
 {
-	if (m_savedSimulations.find(name) != m_savedSimulations.end())
+	if (this->file_exists(name))
 		return SimulationSaveErrorCode::FILE_ALREADY_EXISTS;
 
 	m_savedSimulations[name] = "Data/Simulations/" + name + ".sim";
@@ -116,7 +122,42 @@ SimulationSaveErrorCode SaveController::Save(const std::string& name, std::vecto
 		saver.binWrite(obj.object.physics()->getSpeed().x);
 		saver.binWrite(obj.object.physics()->getSpeed().y);
 	}
-	
+
+	return SimulationSaveErrorCode::NO_FILE_ERROR;
+}
+
+SimulationSaveErrorCode SaveController::AutoSave(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects)
+{
+	if (!this->file_exists(name))
+		return SimulationSaveErrorCode::FILE_DOES_NOT_EXIST;;
+
+	ke::FileStream saver(this->getFilePath(name), std::ios::out | std::ios::binary);
+
+	if (!saver.loaded())
+		return SimulationSaveErrorCode::FILE_NOT_FOUND;
+
+	saver.binWrite(objects->size() - 1);
+
+	for (auto itr = objects->begin() + 1; itr != objects->end(); ++itr)
+	{
+		saver.binWrite(obj.name());
+		saver.binWrite(obj.filename());
+		saver.binWrite(obj.iconFilename());
+		saver.binWrite(obj.type());
+		saver.binWrite(obj.objectClass());
+		saver.binWrite(obj.subtype());
+		saver.binWrite(obj.data.mass);
+		saver.binWrite(obj.data.radius);
+		saver.binWrite(obj.data.brightness);
+		saver.binWrite(obj.data.color.x);
+		saver.binWrite(obj.data.color.y);
+		saver.binWrite(obj.data.color.z);
+
+		saver.binWrite(obj.object.getPosition().x);
+		saver.binWrite(obj.object.getPosition().y);
+		saver.binWrite(obj.object.physics()->getSpeed().x);
+		saver.binWrite(obj.object.physics()->getSpeed().y);
+	}
 
 	return SimulationSaveErrorCode::NO_FILE_ERROR;
 }
@@ -127,6 +168,9 @@ SimulationSaveErrorCode SaveController::Save(const std::string& name, std::vecto
 SimulationSaveErrorCode SaveController::LoadLatest(std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize)
 {
 	ke::FileStream loader("Data/Simulations/latest_save.sim", std::ios::in | std::ios::binary);
+
+	if (!loader.loaded())
+		return SimulationSaveErrorCode::FILE_NOT_FOUND;
 
 
 	size_t objcount;
@@ -212,10 +256,15 @@ SimulationSaveErrorCode SaveController::QuickSave(std::vector<std::unique_ptr<Sp
 
 std::string SaveController::getFilePath(std::string name)
 {
-	if (m_savedSimulations.find(name) != m_savedSimulations.end())
+	if (this->file_exists(name))
 		return m_savedSimulations[name];
 	else
 		return "Data/Simulations/latest_save.sim";
+}
+
+bool SaveController::file_exists(std::string name) const
+{
+	return m_savedSimulations.find(name) != m_savedSimulations.end();
 }
 
 SimulationSaveErrorCode SaveController::SaveAll()
@@ -227,7 +276,7 @@ SimulationSaveErrorCode SaveController::SaveAll()
 
 
 	saver << m_savedSimulations.size() << '\n';
-	std::cout << m_savedSimulations.size() << '\n';
+	//std::cout << m_savedSimulations.size() << '\n';
 
 	for (auto itr : m_savedSimulations)
 		saver << itr.first << ' ' << itr.second << '\n';

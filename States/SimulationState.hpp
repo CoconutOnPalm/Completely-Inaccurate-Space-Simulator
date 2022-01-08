@@ -20,6 +20,7 @@
 #include "Overlays/ObjectLibraryOverlay.hpp"
 #include "Overlays/SimParamsOverlay.hpp"
 #include "Overlays/SettingsOverlay.hpp"
+#include "Overlays/SimSavingOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -31,7 +32,7 @@ class SimulationState :
 {
 public:
 
-    SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view);
+    SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view, const std::string& simulation_name);
     virtual ~SimulationState();
 
     void InitState();
@@ -40,7 +41,6 @@ public:
     void InitTopGUI();
     void InitObjDataGUI();
     void InitTimeGUI();
-
 
     void reloadState();
 
@@ -63,6 +63,8 @@ public:
     void renderByWindow();
 
 private:
+
+    std::string m_simulation_name;
 
     STATE m_next_state;
 
@@ -107,6 +109,8 @@ private:
     // EXTERNAL WINDOWS
 
     DetailedDataWindow detailedDataWindow;
+
+    // EXTERNAL CLASSES
 
 
     // simulation objects
@@ -174,6 +178,7 @@ private:
     // state holders & overlays
 
     std::unique_ptr<QuitOverlay> m_quitOverlay;
+    std::unique_ptr<SimSavingOverlay> m_simSavingOverlay;
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
     SimParamsOverlay m_SimParamsOverlay;
     SettingsOverlay m_SettingsOverlay;
@@ -184,4 +189,3 @@ private:
     std::vector<std::future<void>> m_filteringThreads; // don't use it
     std::future<void> m_DetailedDataWindwThread;
 };
-

@@ -1,6 +1,6 @@
 #include "SimulationState.hpp"
 
-SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
+SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view, const std::string& simulation_name)
 	: State(sf_window, sf_view, STATE::SIMULATION)
 	, m_next_state(STATE::NONE)
 	, m_deltaTime(0.0001)
@@ -15,6 +15,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_brightness_scale(1.0)
 	, m_text_entered(false)
 	, m_object_buffer_ready(false)
+	, m_simulation_name(simulation_name)
 {
 	//this->InitState();
 
@@ -65,6 +66,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view)
 }
 
 
+static std::mutex s_loadingProgressMutex;
 static std::mutex s_endingMutex;
 
 SimulationState::~SimulationState()
@@ -72,18 +74,35 @@ SimulationState::~SimulationState()
 	//detailedDataWindow.End();
 	view->setSize(winSize);
 
-	std::lock_guard<std::mutex> lock(s_endingMutex);
+	if (m_simulation_name.empty() && m_simulation_name != "empty")
+		m_saveController.QuickSave(&m_objects);
+
+	std::lock_guard<std::mutex> lock(s_endingMutex); // idk why but leave it here
 }
 
 
 
 void SimulationState::InitState()
 {
+	size_t loading_breakpoints = 6;
+
+	if (m_simulation_name.empty() || m_simulation_name == "empty")
+	{
+		
+	}
+	else if (m_simulation_name == "latest_save")
+	{
+		m_saveController.LoadLatest(&m_objects, viewSize, winSize);
+	}
+	else
+	{
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize);
+	}
+
 	m_view_holding.setView(view);
 
-
 	std::thread object_loading_thread(&SimulationState::InitSpaceObjects, this);
-	
+
 
 	// don't multithread these below:
 
@@ -243,12 +262,27 @@ void SimulationState::InitSpaceObjects()
 	}
 
 
-	m_saveController.Load("test1", &m_objects, viewSize, winSize);
+
+	//m_saveController.Load("stress_test01", &m_objects, viewSize, winSize);
+
+	if (m_simulation_name.empty() || m_simulation_name == "empty")
+	{
+
+	}
+	else if (m_simulation_name == "latest_save")
+	{
+		m_saveController.LoadLatest(&m_objects, viewSize, winSize);
+	}
+	else
+	{
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize);
+	}
 	
+
 	m_selected_object = m_objects.begin();
 
 	// assigning m_objects again
-	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object); 
+	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
 	m_VDController.assign(&m_symbols, &m_values, &m_units, &m_modifiers, &m_object_name, &m_objects);
 }
 
@@ -462,7 +496,6 @@ void SimulationState::InitTimeGUI()
 	m_time_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 32), sf::Vector2f(3 * winSize.y / 32, winSize.y), ke::Origin::LEFT_BOTTOM, &speedUp_texture));
 	m_time_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 32), sf::Vector2f(winSize.x / 5, winSize.y), ke::Origin::RIGHT_BOTTOM, nullptr, L"Time: \u00D71", winSize.y / 48, ke::Origin::LEFT_MIDDLE));
 }
-
 
 
 
@@ -684,7 +717,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	// FEATURE: updating external windows (put undoer simulation core)
+	// FEATURE: updating external windows (put under simulation core)
 
 
 	// don't multithread this
@@ -703,6 +736,9 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	m_ObjectLibraryOverlay.updateEvents(mousePosition, dt);
 	m_SimParamsOverlay.updateEvents(mousePosition, dt);
 	m_SettingsOverlay.updateEvents(mousePosition, dt);
+
+	if (m_simSavingOverlay != nullptr)
+		m_simSavingOverlay->updateEvents(mousePosition, dt);
 
 
 
@@ -820,10 +856,13 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active(), sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
+
+	if (m_simSavingOverlay != nullptr)
+		m_simSavingOverlay->updateColors(mousePosition.byWindow, dt);
 
 	m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 
@@ -883,6 +922,18 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 		return;
 	}
+
+
+	if (m_simSavingOverlay != nullptr)
+	{
+		m_simSavingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects);
+
+		if (m_simSavingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
+			m_simSavingOverlay = nullptr;
+
+		return;
+	}
+
 
 
 	if (m_ObjectLibraryOverlay.active())
@@ -1405,10 +1456,23 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	// save button
 	if (m_project_menagers.at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		if (m_saveController.Save("test1", &m_objects) == SimulationSaveErrorCode::FILE_ALREADY_EXISTS)
-			std::cout << "file already exists\n";
-		else
-			std::cout << "simulation saved succeeded\n";
+		sf::RenderTexture texture;
+		texture.create(300, 300);
+
+
+		sf::Texture buffer;
+		buffer.create(window->getSize().x, window->getSize().y);
+		buffer.update(*window);
+		sf::Sprite drawable(buffer, sf::IntRect(winSize.x / 2 - 150, winSize.y / 2 - 150, 300, 300));
+		//
+		texture.draw(drawable);
+
+		if (m_simSavingOverlay == nullptr)
+			m_simSavingOverlay = std::make_unique<SimSavingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running, &texture.getTexture());
+		//if (m_saveController.Save("test1", &m_objects) == SimulationSaveErrorCode::FILE_ALREADY_EXISTS)
+		//	std::cout << "file already exists\n";
+		//else
+		//	std::cout << "simulation saved succeeded\n";
 	}
 
 
@@ -1882,6 +1946,9 @@ void SimulationState::renderByWindow()
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->render(window);
+
+	if (m_simSavingOverlay != nullptr)
+		m_simSavingOverlay->render(window);
 
 	m_ObjectLibraryOverlay.render();
 	m_SimParamsOverlay.render();

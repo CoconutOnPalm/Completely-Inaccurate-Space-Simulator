@@ -34,6 +34,11 @@ public:
 	void addObject(ObjectBuffer* object_data, const sf::Vector2f& position, // without selected_object
 		const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity);
 
+	void addObjectsParallelly(std::vector<ObjectBuffer>* objdata, std::vector<sf::Vector2f>* positions, std::vector<sf::Vector2<double>>* velocities, const sf::Vector2f& viewSize, const sf::Vector2f& winSize);
+
+	void assignForcesParallelly(std::vector<ObjectBuffer>* objdata, std::vector<sf::Vector2f>* positions, std::vector<sf::Vector2<double>>* velocities, const sf::Vector2f& viewSize, const sf::Vector2f& winSize);
+
+
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon);
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object);
 	void createObjectPreview(ObjectBuffer* object_data);

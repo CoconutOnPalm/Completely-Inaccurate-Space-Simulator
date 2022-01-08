@@ -24,6 +24,8 @@ public:
         float brightness = 100,
         const sf::Vector3f& color = sf::Vector3f(1.0, 1.0, 1.0));
 
+    Star(const Star& other);
+
     virtual ~Star();
 
     bool update(float dt) override;

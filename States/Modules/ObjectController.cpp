@@ -238,7 +238,6 @@ void ObjectController::addObject(ObjectBuffer* object_data, const sf::Vector2f& 
 
 
 
-
 void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon)
 {
 	//object_data->load(*selected_icon->get());

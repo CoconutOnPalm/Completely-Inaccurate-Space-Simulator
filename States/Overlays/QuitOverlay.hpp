@@ -2,8 +2,6 @@
 
 #include "States/State.hpp"
 
-//#include "KEngine/Algorithms.hpp"
-
 
 enum QUIT_OverlayQuitStatus
 {

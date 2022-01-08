@@ -6,6 +6,7 @@ OpeningState::OpeningState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	, m_sm_color(sf::Color::Black)
 	, m_next_state(STATE::NONE)
 	, m_outro_time(0)
+	, m_simulation_name("empty")
 {
 	view->setCenter(winSize / 2.f);
 
@@ -97,7 +98,7 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			case STATE::SIMULATION:
-				states->back() = std::make_unique<SimulationState>(window, view);
+				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);
 				break;
 			default:
 				ke::throw_error("OpeningState::updateEvents() -> state quitting", "State not found", "ERROR");
@@ -120,7 +121,7 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 				states->back() = std::make_unique<MainMenu>(window, view);
 				break;
 			case STATE::SIMULATION:
-				states->back() = std::make_unique<SimulationState>(window, view);
+				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);
 				break;
 			default:
 				ke::throw_error("OpeningState::updateEvents() -> state quitting", "State not found", "ERROR");
@@ -170,6 +171,13 @@ void OpeningState::updatePollEvents(const MousePosition& mousePosition, float dt
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SIMULATION;
+		m_simulation_name = "empty";
+	}
+	else if (m_load_latest.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		p_quitCode = StateQuitCode::STATE_QUIT;
+		m_next_state = STATE::SIMULATION;
+		m_simulation_name = "latest_save";
 	}
 }
 

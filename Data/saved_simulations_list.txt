@@ -1,2 +1,5 @@
-1
+4
+stress_test01 Data/Simulations/stress_test01.sim
+stress_test02 Data/Simulations/stress_test02.sim
 test1 Data/Simulations/test1.sim
+test2 Data/Simulations/test2.sim

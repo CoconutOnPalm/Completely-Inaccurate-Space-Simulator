@@ -41,6 +41,7 @@ private:
 
     std::array<ke::Colorf, 7> m_button_colors;
 
+    std::string m_simulation_name;
 
     STATE m_next_state;
 

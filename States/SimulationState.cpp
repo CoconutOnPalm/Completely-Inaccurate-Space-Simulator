@@ -290,7 +290,15 @@ void SimulationState::InitSpaceObjects()
 void SimulationState::InitBackground()
 {
 	m_backgrounds.reserve(4); // background | top | right | bottom 
-	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x, 5 * winSize.y / 32), sf::Vector2f(0, 0), ke::Origin::LEFT_TOP, L"Completely Inaccurate Space Simulator", winSize.y / 64, ke::Origin::MIDDLE_TOP, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
+	
+	std::wstring simulation_name_tag(L"Completely Inaccurate Space Imulator");
+
+	if (m_simulation_name != "empty" && m_simulation_name != "latest_save")
+		simulation_name_tag = ke::fixed::stow(m_simulation_name);
+
+	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x, 5 * winSize.y / 32), sf::Vector2f(0, 0), ke::Origin::LEFT_TOP, simulation_name_tag, winSize.y / 64, ke::Origin::MIDDLE_TOP, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
+	m_backgrounds.back()->setTextPosition(ke::Origin::MIDDLE_TOP, sf::Vector2f(0, winSize.y / 270));
+
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, 7 * winSize.y / 8), sf::Vector2f(winSize.x, 5 * winSize.y / 32), ke::Origin::RIGHT_TOP, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, winSize.y / 32 - winSize.y / 360), sf::Vector2f(0, winSize.y), ke::Origin::LEFT_BOTTOM, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 4 - winSize.y / 360, winSize.y / 32), sf::Vector2f(4 * winSize.x / 5, winSize.y), ke::Origin::RIGHT_BOTTOM, L"", winSize.y / 64, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255), 0.f, sf::Text::Bold, sf::Vector2f(winSize.y / 180, 0)));
@@ -740,6 +748,9 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	if (m_simSavingOverlay != nullptr)
 		m_simSavingOverlay->updateEvents(mousePosition, dt);
 
+	if (m_simLoadingOverlay != nullptr)
+		m_simLoadingOverlay->updateEvents(mousePosition, dt);
+
 
 
 
@@ -856,13 +867,16 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr || m_simLoadingOverlay != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
 
 	if (m_simSavingOverlay != nullptr)
 		m_simSavingOverlay->updateColors(mousePosition.byWindow, dt);
+	
+	if (m_simLoadingOverlay != nullptr)
+		m_simLoadingOverlay->updateColors(mousePosition.byWindow, dt);
 
 	m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 
@@ -930,6 +944,16 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 		if (m_simSavingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
 			m_simSavingOverlay = nullptr;
+
+		return;
+	}
+	
+	if (m_simLoadingOverlay != nullptr)
+	{
+		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects);
+
+		if (m_simLoadingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
+			m_simLoadingOverlay = nullptr;
 
 		return;
 	}
@@ -1476,6 +1500,15 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	}
 
 
+	// FEATURE: loading simulation
+
+	if (m_project_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		if (m_simLoadingOverlay == nullptr)
+			m_simLoadingOverlay = std::make_unique<SimLoadingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running);
+	}
+
+
 
 
 	// FEATURE: updating view holding (click)
@@ -1949,6 +1982,9 @@ void SimulationState::renderByWindow()
 
 	if (m_simSavingOverlay != nullptr)
 		m_simSavingOverlay->render(window);
+
+	if (m_simLoadingOverlay != nullptr)
+		m_simLoadingOverlay->render(window);
 
 	m_ObjectLibraryOverlay.render();
 	m_SimParamsOverlay.render();

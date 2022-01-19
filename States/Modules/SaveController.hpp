@@ -34,6 +34,8 @@ public:
 	bool file_exists(std::string name) const;
 
 
+	std::map<std::string, std::string> m_savedSimulations;
+
 private:
 
 	SimulationSaveErrorCode SaveAll();
@@ -41,6 +43,5 @@ private:
 	ObjectController* m_objectController;
 
 	std::string m_latest;
-	std::map<std::string, std::string> m_savedSimulations;
 };
 

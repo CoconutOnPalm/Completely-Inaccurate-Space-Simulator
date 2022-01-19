@@ -21,6 +21,7 @@
 #include "Overlays/SimParamsOverlay.hpp"
 #include "Overlays/SettingsOverlay.hpp"
 #include "Overlays/SimSavingOverlay.hpp"
+#include "Overlays/SimLoadingOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -108,7 +109,20 @@ private:
 
     // EXTERNAL WINDOWS
 
-    DetailedDataWindow detailedDataWindow;
+    DetailedDataWindow detailedDataWindow; // don't touch anything related to that (please)
+
+
+    // state holders & overlays
+
+    std::unique_ptr<QuitOverlay> m_quitOverlay;
+    std::unique_ptr<SimSavingOverlay> m_simSavingOverlay;
+    std::unique_ptr<SimLoadingOverlay> m_simLoadingOverlay;
+    ObjectLibraryOverlay m_ObjectLibraryOverlay;
+    SimParamsOverlay m_SimParamsOverlay;
+    SettingsOverlay m_SettingsOverlay;
+
+
+
 
     // EXTERNAL CLASSES
 
@@ -173,16 +187,6 @@ private:
 
     ke::Circle m_orbit_preview;
     ke::Rectangle m_distance_preview;
-
-
-    // state holders & overlays
-
-    std::unique_ptr<QuitOverlay> m_quitOverlay;
-    std::unique_ptr<SimSavingOverlay> m_simSavingOverlay;
-    ObjectLibraryOverlay m_ObjectLibraryOverlay;
-    SimParamsOverlay m_SimParamsOverlay;
-    SettingsOverlay m_SettingsOverlay;
-
 
     // threads
 

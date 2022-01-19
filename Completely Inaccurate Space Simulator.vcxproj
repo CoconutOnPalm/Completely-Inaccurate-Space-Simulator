@@ -170,6 +170,7 @@
     <ClCompile Include="States\Overlays\ObjectLibraryOverlay.cpp" />
     <ClCompile Include="States\Overlays\QuitOverlay.cpp" />
     <ClCompile Include="States\Overlays\SettingsOverlay.cpp" />
+    <ClCompile Include="States\Overlays\SimLoadingOverlay.cpp" />
     <ClCompile Include="States\Overlays\SimParamsOverlay.cpp" />
     <ClCompile Include="States\Overlays\SimSavingOverlay.cpp" />
     <ClCompile Include="States\SettingsState.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="States\Overlays\ObjectLibraryOverlay.hpp" />
     <ClInclude Include="States\Overlays\QuitOverlay.hpp" />
     <ClInclude Include="States\Overlays\SettingsOverlay.hpp" />
+    <ClInclude Include="States\Overlays\SimLoadingOverlay.hpp" />
     <ClInclude Include="States\Overlays\SimParamsOverlay.hpp" />
     <ClInclude Include="States\Overlays\SimSavingOverlay.hpp" />
     <ClInclude Include="States\SettingsState.hpp" />

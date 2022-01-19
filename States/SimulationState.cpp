@@ -950,10 +950,24 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	
 	if (m_simLoadingOverlay != nullptr)
 	{
-		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects);
+		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize());
 
 		if (m_simLoadingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
+		{
 			m_simLoadingOverlay = nullptr;
+			m_selected_object = m_objects.begin();
+
+			m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
+			detailedDataWindow.updateObjectPointer(m_selected_object->get());
+
+			if (m_selected_object->get() != nullptr)
+				m_VDController.loadData(m_selected_object, sf::Vector2f(window->getSize()));
+
+			if (m_objects.size() > 1) // if there's any object
+			{
+				view->setCenter(m_objects.at(1)->object.getPosition());
+			}
+		}
 
 		return;
 	}

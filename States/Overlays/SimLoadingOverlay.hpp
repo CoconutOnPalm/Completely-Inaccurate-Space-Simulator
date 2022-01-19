@@ -16,7 +16,7 @@ public:
 
 
 	void updateEvents(const MousePosition& mousePosition, float dt);
-	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects);
+	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize);
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
@@ -34,7 +34,14 @@ private:
 	ke::Button m_background;
 	ke::Button m_buttons_background;
 
+	ke::Button m_load;
+	ke::Button m_cancel;
+
 	std::vector<std::unique_ptr<SaveBlock>> m_saved_simulations;
+	std::vector<std::unique_ptr<SaveBlock>>::iterator m_selected_simulation;
+	std::vector<std::string> m_simulations_names;
+
+	std::list<std::vector<std::unique_ptr<SaveBlock>>::iterator> m_on_screen;
 
 	ke::InputButton m_search_button;
 	ke::Slider m_slider;
@@ -45,6 +52,8 @@ private:
 	sf::View m_view;
 
 	std::array<ke::Colorf, 10> m_colors;
+
+	std::vector<ke::Colorf> m_BlockColors;
 };
 
 
@@ -67,14 +76,19 @@ public:
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
-	void render(sf::RenderWindow* window);
+	std::string& name();
 
+	ke::Button* getHitbox();
+
+	void render(sf::RenderWindow* window);
 
 private:
 
 	static sf::Vector2f s_winsize;
 
+	std::string m_name;
+
 	ke::Button m_background;
 	ke::Button m_icon;
-	ke::Button m_name;
+	ke::Button m_name_block;
 };

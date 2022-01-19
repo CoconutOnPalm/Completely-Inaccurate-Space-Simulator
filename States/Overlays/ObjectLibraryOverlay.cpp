@@ -672,7 +672,7 @@ void ObjectLibraryOverlay::updateSystemSorting()
 			std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
 				[](unsigned char c) { return std::tolower(c); });
 
-			if (!objName_buffer.compare(0, m_filter.size(), m_filter)) // IDK why I have to !negate it, but it works and I'm not touching it
+			if (!objName_buffer.compare(0, m_filter.size(), m_filter) != 0)
 			{
 				position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
 

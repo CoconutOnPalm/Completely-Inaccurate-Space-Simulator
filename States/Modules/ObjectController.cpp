@@ -235,6 +235,13 @@ void ObjectController::addObject(ObjectBuffer* object_data, const sf::Vector2f& 
 	m_objects->back()->object.physics()->setSpeed(velocity);
 }
 
+void ObjectController::clearObjects(const sf::Vector2f& viewsize)
+{
+	m_objects->clear();
+
+	m_objects->push_back(std::make_unique<CenterOfMass>(viewsize.y / 64, viewsize.y / 256));
+}
+
 
 
 

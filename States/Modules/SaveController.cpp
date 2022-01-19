@@ -48,6 +48,7 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 	size_t objcount;
 	loader.binRead(objcount);
 
+	m_objectController->clearObjects(viewsize);
 
 	for (int i = 0; i < objcount; i++)
 	{

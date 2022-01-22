@@ -16,7 +16,7 @@ public:
 
 
 	void updateEvents(const MousePosition& mousePosition, float dt);
-	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize);
+	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object);
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 

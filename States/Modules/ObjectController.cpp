@@ -150,8 +150,6 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 }
 
 
-
-
 void ObjectController::addObject(ObjectBuffer* object_data, const sf::Vector2f& position, const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity)
 {
 	switch (object_data->type())
@@ -235,6 +233,100 @@ void ObjectController::addObject(ObjectBuffer* object_data, const sf::Vector2f& 
 	m_objects->back()->object.physics()->setSpeed(velocity);
 }
 
+
+
+std::mutex obj_vector_lock;
+
+
+
+void ObjectController::addObjectParallelly(ObjectBuffer object_data, const sf::Vector2f& position, const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity)
+{
+	std::unique_ptr<SpaceObject> object;
+
+	switch (object_data.type())
+	{
+	case STAR:
+
+		object = std::make_unique<Star>(position, name, object_data.filename(), object_data.iconFilename(), object_data.objectClass(), object_data.subtype(), object_data.mass(),
+			object_data.radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data.brightness(), object_data.color());
+		break;
+
+	case PLANET:
+
+		object = std::make_unique<Planet>(position, name, object_data.filename(), object_data.iconFilename(), object_data.objectClass(), object_data.subtype(), object_data.mass(),
+			object_data.radius() * m_space_scale * m_planet_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data.brightness(), object_data.color());
+		break;
+
+	default:
+
+		object = std::make_unique<Star>(position, name, object_data.filename(), object_data.iconFilename(), object_data.objectClass(), object_data.subtype(), object_data.mass(),
+			object_data.radius() * m_space_scale * m_star_scale, 0, viewSize.x / winSize.x * 16, viewSize.x / winSize.x * 2, sf::Vector2<double>(0, 0), object_data.brightness(), object_data.color());
+		ke::throw_error("ObjectController::addObject(...)", "incorrect object type", "ERROR");
+		break;
+	}
+
+
+	//std::lock_guard<std::mutex> lock(obj_vector_lock);
+	obj_vector_lock.lock();
+	m_objects->push_back(std::move(object));
+	obj_vector_lock.unlock();
+
+
+
+	m_objects->back()->data.radius = object_data.radius();
+
+	// TODO: bug ze trzeba tego uzywac a nie w konstruktorze robic ^
+	m_objects->back()->clickRange()->setOutlineThickness(viewSize.x / winSize.x * 2);
+	m_objects->back()->clickRange()->setRadius(viewSize.x / winSize.x * 16);
+
+
+	m_objects->back()->getObjectShader()->setUniform("basic_a", 1.f - m_objects->back()->object.getSize().y / viewSize.y);
+
+
+	m_objects->back()->getGlowShader()->setUniform("size", m_objects->back()->object.getSize().y / viewSize.y * winSize.y * 2.f * m_brightness_scale);
+
+
+	if (viewSize.y / m_objects->back()->object.getSize().y > m_objects->back()->data.brightness)
+	{
+		float shader_size = m_objects->back()->data.brightness - viewSize.y / m_objects->back()->object.getSize().y / winSize.y;
+
+		m_objects->back()->getObjectShader()->setUniform("size", (shader_size * shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
+	}
+
+
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
+	{
+		float angle = std::atan(-(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y) / (m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x)) * TO_DEG;
+
+		if ((m_objects->back()->object.getPosition().x > (*itr)->object.getPosition().x))
+			angle += 180;
+
+		m_objects->back()->object.physics()->addForce((*itr)->name(),
+			gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
+				(std::pow(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y, 2) + (std::pow(m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x, 2)))) * m_space_scale,
+			angle);
+	}
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
+	{
+		float angle = std::atan(-((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y) / ((*itr)->object.getPosition().x) - m_objects->back()->object.getPosition().x) * TO_DEG;
+
+		if ((m_objects->back()->object.getPosition().x < (*itr)->object.getPosition().x))
+			angle += 180;
+
+		(*itr)->object.physics()->addForce(m_objects->back()->name(),
+			gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
+				(std::pow((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - m_objects->back()->object.getPosition().x, 2)))) * m_space_scale,
+			angle);
+	}
+
+	m_objects->back()->object.physics()->setSpeed(velocity);
+}
+
+
+
+
 void ObjectController::clearObjects(const sf::Vector2f& viewsize)
 {
 	m_objects->clear();
@@ -255,7 +347,7 @@ void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector:
 	{
 	case PLANET:
 		//m_placed_object->setRadius(object_data->radius() * m_space_scale * m_planet_scale);
-		
+
 		m_placed_object->create(object_data->radius() * m_space_scale * m_planet_scale, pos_buffer, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
 
 		//(*selected_object)->data.radius = object_data->radius();

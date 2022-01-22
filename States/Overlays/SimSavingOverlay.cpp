@@ -86,6 +86,10 @@ void SimSavingOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 
 	if (m_name.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr))
 	{
+		std::wstring textbuffer = m_name.getText();
+		std::replace(textbuffer.begin(), textbuffer.end(), L' ', L'_');
+		m_name.setText(textbuffer);
+
 		std::string name = ke::fixed::wtos(m_name.getText());
 
 		if (name.empty())

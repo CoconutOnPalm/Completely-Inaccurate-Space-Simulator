@@ -22,6 +22,7 @@
 #include "Overlays/SettingsOverlay.hpp"
 #include "Overlays/SimSavingOverlay.hpp"
 #include "Overlays/SimLoadingOverlay.hpp"
+#include "Overlays/WarningOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -117,6 +118,7 @@ private:
     std::unique_ptr<QuitOverlay> m_quitOverlay;
     std::unique_ptr<SimSavingOverlay> m_simSavingOverlay;
     std::unique_ptr<SimLoadingOverlay> m_simLoadingOverlay;
+    std::unique_ptr<WarningOverlay> m_new_simulation_warning;
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
     SimParamsOverlay m_SimParamsOverlay;
     SettingsOverlay m_SettingsOverlay;
@@ -182,6 +184,7 @@ private:
     sf::Texture m_pause_texture;
 
     std::array<ke::Colorf, 6> m_timeGuiColors;
+    std::array<ke::Colorf, 3> m_otherTopPanelColors;
                                      
     // object GUI
 

@@ -34,6 +34,9 @@ public:
 	void addObject(ObjectBuffer* object_data, const sf::Vector2f& position, // without selected_object
 		const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity);
 
+	void addObjectParallelly(ObjectBuffer object_data, const sf::Vector2f& position, // without selected_object
+		const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity);
+
 	void clearObjects(const sf::Vector2f& viewsize);
 
 	void createObjectPreview(ObjectBuffer* object_data, objvector::iterator selected_object, iconvector::iterator selected_icon);

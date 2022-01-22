@@ -173,6 +173,7 @@
     <ClCompile Include="States\Overlays\SimLoadingOverlay.cpp" />
     <ClCompile Include="States\Overlays\SimParamsOverlay.cpp" />
     <ClCompile Include="States\Overlays\SimSavingOverlay.cpp" />
+    <ClCompile Include="States\Overlays\WarningOverlay.cpp" />
     <ClCompile Include="States\SettingsState.cpp" />
     <ClCompile Include="States\SimulationState.cpp" />
     <ClCompile Include="States\State.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="States\Overlays\SimLoadingOverlay.hpp" />
     <ClInclude Include="States\Overlays\SimParamsOverlay.hpp" />
     <ClInclude Include="States\Overlays\SimSavingOverlay.hpp" />
+    <ClInclude Include="States\Overlays\WarningOverlay.hpp" />
     <ClInclude Include="States\SettingsState.hpp" />
     <ClInclude Include="States\SimulationState.hpp" />
     <ClInclude Include="States\State.hpp" />

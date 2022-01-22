@@ -4,6 +4,7 @@ SaveController::SaveController()
 	: m_objectController(nullptr)
 {
 	std::ifstream loader("Data/saved_simulations_list.txt");
+	std::ifstream filecheck;
 
 	if (!loader.is_open())
 	{
@@ -19,7 +20,12 @@ SaveController::SaveController()
 	for (int i = 0; i < map_size; i++)
 	{
 		loader >> name >> path;
-		m_savedSimulations[name] = path;
+		filecheck.open(path);
+		if (filecheck.is_open())
+		{
+			m_savedSimulations[name] = path;
+			std::cout << "opened\n";
+		}
 	}
 }
 
@@ -35,18 +41,22 @@ void SaveController::assign(ObjectController* object_controller)
 
 #define obj (*itr->get())
 
-SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize)
+SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object)
 {
-	ke::FileStream loader(this->getFilePath(name), std::ios::in | std::ios::binary);
+	ke::debug::Benchmark loadingtime("simulation loading time");
 
-	std::cout << this->getFilePath(name) << '\n';
+	ke::FileStream loader(this->getFilePath(name), std::ios::in | std::ios::binary);
 
 	if (!loader.loaded())
 		return SimulationSaveErrorCode::FILE_NOT_FOUND;
 
+	m_loading_futures.clear();
 
 	size_t objcount;
 	loader.binRead(objcount);
+
+	objects->reserve(objcount);
+	selected_object = objects->begin();
 
 	m_objectController->clearObjects(viewsize);
 
@@ -81,10 +91,18 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 		loader.binRead(velocity.y);
 
 		buffer.load(type, _class, subtype, mass, radius, name, filename, icon_filename, brightness, color);
-
-		m_objectController->addObject(&buffer, position, viewsize, winsize, name, velocity);
+		
+		m_loading_futures.push_back(std::async(std::launch::async, &ObjectController::addObjectParallelly, m_objectController, buffer, position, viewsize, winsize, name, velocity));
+		selected_object = objects->begin();
+		//m_objectController->addObject(&buffer, position, viewsize, winsize, name, velocity);
 	}
 
+
+	for (auto& itr : m_loading_futures)
+		while (itr.wait_for(std::chrono::microseconds(10)) != std::future_status::ready)
+		{ }
+
+	selected_object = objects->begin();
 
 	return SimulationSaveErrorCode::NO_FILE_ERROR;
 }
@@ -168,7 +186,7 @@ SimulationSaveErrorCode SaveController::AutoSave(const std::string& name, std::v
 
 SimulationSaveErrorCode SaveController::LoadLatest(std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize)
 {
-	ke::FileStream loader("Data/Simulations/latest_save.sim", std::ios::in | std::ios::binary);
+	ke::FileStream loader(this->getFilePath("Data/Simulations/latest_save.sim"), std::ios::in | std::ios::binary);
 
 	if (!loader.loaded())
 		return SimulationSaveErrorCode::FILE_NOT_FOUND;
@@ -177,6 +195,7 @@ SimulationSaveErrorCode SaveController::LoadLatest(std::vector<std::unique_ptr<S
 	size_t objcount;
 	loader.binRead(objcount);
 
+	m_objectController->clearObjects(viewsize);
 
 	for (int i = 0; i < objcount; i++)
 	{
@@ -201,7 +220,7 @@ SimulationSaveErrorCode SaveController::LoadLatest(std::vector<std::unique_ptr<S
 		loader.binRead(brightness);
 		loader.binRead(color.x);
 		loader.binRead(color.y);
-		loader.binRead(color.y);
+		loader.binRead(color.z);
 
 		loader.binRead(position.x);
 		loader.binRead(position.y);

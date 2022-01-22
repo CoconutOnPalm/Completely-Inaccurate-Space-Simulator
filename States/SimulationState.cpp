@@ -74,8 +74,8 @@ SimulationState::~SimulationState()
 	//detailedDataWindow.End();
 	view->setSize(winSize);
 
-	if (m_simulation_name.empty() && m_simulation_name != "empty")
-		m_saveController.QuickSave(&m_objects);
+	//if (!m_simulation_name.empty() && m_simulation_name != "empty")
+	m_saveController.QuickSave(&m_objects);
 
 	std::lock_guard<std::mutex> lock(s_endingMutex); // idk why but leave it here
 }
@@ -96,7 +96,7 @@ void SimulationState::InitState()
 	}
 	else
 	{
-		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize);
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object);
 	}
 
 	m_view_holding.setView(view);
@@ -128,11 +128,11 @@ void SimulationState::InitState()
 
 
 
-	for (auto& itr : m_project_menagers)
-	{
-		itr->setOutlineColor(sf::Color::White);
-		itr->setOutlineThickness(1);
-	}
+	//for (auto& itr : m_project_menagers)
+	//{
+	//	itr->setOutlineColor(sf::Color::White);
+	//	itr->setOutlineThickness(1);
+	//}
 
 	//for (auto& itr : m_state_controllers)
 	//{
@@ -275,7 +275,7 @@ void SimulationState::InitSpaceObjects()
 	}
 	else
 	{
-		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize);
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object);
 	}
 	
 
@@ -308,9 +308,9 @@ void SimulationState::InitBackground()
 void SimulationState::InitTopGUI()
 {
 	m_project_menagers.reserve(3); // create new | save | open
-	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
-	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 16 + winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
-	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 8 + winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, nullptr));
+	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/NewSimulation.png"));
+	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 16 + winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/SaveSimulation.png"));
+	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 8 + winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/LoadSimulation.png"));
 
 
 	m_state_controllers.reserve(3); // Quit to menu | settings | simulation params
@@ -855,6 +855,13 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	ke::SmoothOutlineColorChange(m_backgrounds.at(2).get(), m_backgrounds.at(2)->isInvaded(mousePosition.byWindow), sf::Color(192, 192, 192, 255), sf::Color(128, 128, 128, 255), m_backgrounds_colors.at(2), 128, dt);
 
+	auto top_color_itr = m_otherTopPanelColors.begin();
+
+	for (auto& itr : m_project_menagers)
+	{
+		ke::SmoothColorChange(itr.get(), itr->isInvaded(mousePosition.byWindow), sf::Color(0, 0, 0, 0), sf::Color(0, 0, 0, 64), *color_itr, 256, dt);
+		++color_itr;
+	}
 
 	// FEATURE: module color update
 
@@ -867,7 +874,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr || m_simLoadingOverlay != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr || m_simLoadingOverlay != nullptr || m_new_simulation_warning != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
@@ -877,6 +884,9 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	
 	if (m_simLoadingOverlay != nullptr)
 		m_simLoadingOverlay->updateColors(mousePosition.byWindow, dt);
+
+	if (m_new_simulation_warning != nullptr)
+		m_new_simulation_warning->updateColors(mousePosition.byWindow, dt);
 
 	m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 
@@ -950,7 +960,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	
 	if (m_simLoadingOverlay != nullptr)
 	{
-		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize());
+		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize(), m_selected_object);
 
 		if (m_simLoadingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
 		{
@@ -967,6 +977,24 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			{
 				view->setCenter(m_objects.at(1)->object.getPosition());
 			}
+		}
+
+		return;
+	}
+
+
+	if (m_new_simulation_warning != nullptr)
+	{
+		m_new_simulation_warning->updatePollEvents(mousePosition, dt, event);
+
+		if (m_new_simulation_warning->quitStatus() == OverlayQuitCode::CANCELING)
+		{
+			m_new_simulation_warning = nullptr;
+		}
+		else if (m_new_simulation_warning->quitStatus() == OverlayQuitCode::ACCEPTING)
+		{
+			m_ObjController.clearObjects(view->getSize());
+			m_new_simulation_warning = nullptr;
 		}
 
 		return;
@@ -1516,11 +1544,21 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	// FEATURE: loading simulation
 
-	if (m_project_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	else if (m_project_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		if (m_simLoadingOverlay == nullptr)
 			m_simLoadingOverlay = std::make_unique<SimLoadingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running);
 	}
+
+
+	// FEATURE: creating new simulation
+
+	else if (m_project_menagers.at(0)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		if (m_new_simulation_warning == nullptr)
+			m_new_simulation_warning = std::make_unique<WarningOverlay>(L"Warning!\nAll unsaved progress will be lost", sf::Vector2f(window->getSize()));
+	}
+
 
 
 
@@ -1707,7 +1745,6 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			else
 				m_tools[3]->setFillColor(sf::Color(255, 0, 0, 64));
 		}
-
 	}
 	if (m_backgrounds.at(1)->isInvaded(mousePosition.byWindow)) // data panel
 	{
@@ -1999,6 +2036,9 @@ void SimulationState::renderByWindow()
 
 	if (m_simLoadingOverlay != nullptr)
 		m_simLoadingOverlay->render(window);
+
+	if (m_new_simulation_warning != nullptr)
+		m_new_simulation_warning->render(window);
 
 	m_ObjectLibraryOverlay.render();
 	m_SimParamsOverlay.render();

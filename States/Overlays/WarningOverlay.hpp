@@ -1,14 +1,15 @@
 #pragma once
 
+
 #include "States/State.hpp"
 
 
-class QuitOverlay
+class WarningOverlay
 {
 public:
 
-	QuitOverlay(const sf::Vector2f& winSize);
-	~QuitOverlay();
+	WarningOverlay(const std::wstring& message, const sf::Vector2f & winSize);
+	~WarningOverlay();
 
 	void updateEvents(const MousePosition& mousePosition, float dt);
 	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event);
@@ -23,10 +24,11 @@ private:
 
 	OverlayQuitCode m_quitCode;
 
-	ke::Button m_button;
-	//ke::Button m_quit_button;
-	std::unordered_map<std::string, ke::Button> m_buttons;
-	std::array<ke::Colorf, 3> m_buttonColors;
-
+	ke::Button m_background;
+	ke::Button m_ok;
+	ke::Button m_cancel;
+	
+	ke::Colorf ok_color;
+	ke::Colorf cancel_color;
 };
 

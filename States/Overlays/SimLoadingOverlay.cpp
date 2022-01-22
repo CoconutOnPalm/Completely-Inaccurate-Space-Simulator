@@ -21,10 +21,10 @@ SimLoadingOverlay::SimLoadingOverlay(const sf::Vector2f& winsize, SaveController
 		winsize.y, ke::Origin::RIGHT_BOTTOM, nullptr, nullptr, sf::Color(64, 64, 64, 255), sf::Color((32, 32, 32, 32)));
 
 	m_load.create(sf::Vector2f(winsize.x * 0.1, winsize.y / 18), sf::Vector2f(m_background.getPosition().x + m_background.getSize().x * 0.5 - winsize.x / 64, m_search_button.getPosition().y), ke::Origin::RIGHT_MIDDLE,
-		nullptr, L"LOAD", winsize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(64, 255, 64, 128));
+		nullptr, L"LOAD", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(64, 255, 64, 128));
 
 	m_cancel.create(sf::Vector2f(winsize.x * 0.1, winsize.y / 18), sf::Vector2f(m_background.getPosition().x + m_background.getSize().x * 0.5 - winsize.x / 32 - m_load.getSize().x, m_search_button.getPosition().y), ke::Origin::RIGHT_MIDDLE,
-		nullptr, L"CANCEL", winsize.y / 64, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(255, 64, 64, 128));
+		nullptr, L"CANCEL", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(255, 64, 64, 128));
 
 
 	//m_saved_simulations.emplace_back(std::make_unique<SaveBlock>("stress_test01", winsize));
@@ -82,7 +82,7 @@ void SimLoadingOverlay::updateEvents(const MousePosition& mousePosition, float d
 	m_view_barrier.update(mousePosition.byWindow, sf::Mouse::Right);
 }
 
-void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize)
+void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object)
 {
 	if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left && !m_background.isInvaded(mousePosition.byWindow))
 	{
@@ -98,7 +98,7 @@ void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, flo
 	{
 		if (m_load.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
-			m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize);
+			m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object);
 			m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 			return;
 		}
@@ -302,7 +302,7 @@ SaveBlock::SaveBlock(std::string name, const sf::Vector2f& winsize)
 
 	m_background.create(sf::Vector2f(winsize.x * 0.75 - winsize.x / 128, winsize.y / 6), sf::Vector2f(-1000, -1000), ke::Origin::LEFT_TOP, nullptr, std::wstring(), 0, 0, sf::Color(32, 32, 32, 32));
 	m_icon.create(sf::Vector2f(winsize.y / 8, winsize.y / 8), sf::Vector2f(m_background.getPosition().x + s_winsize.y / 48, m_background.getPosition().y + s_winsize.y / 48), ke::Origin::LEFT_TOP, "Data/Simulations/SimulationIcons/" + name + ".jpg");
-	m_name_block.create(sf::Vector2f(winsize.x * 0.5, winsize.y / 10), sf::Vector2f(m_background.getPosition().x + winsize.y / 9, m_background.getPosition().y + winsize.y / 180), ke::Origin::LEFT_MIDDLE, nullptr, ke::fixed::stow(name), winsize.y / 16, ke::Origin::LEFT_MIDDLE);
+	m_name_block.create(sf::Vector2f(winsize.x * 0.5, winsize.y / 10), sf::Vector2f(m_background.getPosition().x + winsize.y / 9, m_background.getPosition().y + winsize.y / 180), ke::Origin::LEFT_MIDDLE, nullptr, ke::fixed::stow(name), winsize.y / 32, ke::Origin::LEFT_MIDDLE);
 
 	m_background.setOutlineThickness(winsize.y / 360);
 }

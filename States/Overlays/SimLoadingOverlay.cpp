@@ -57,8 +57,6 @@ SimLoadingOverlay::SimLoadingOverlay(const sf::Vector2f& winsize, SaveController
 
 	float fheigh = block_position.y;
 
-	std::cout << fheigh << '\n';
-
 	if (fheigh < winsize.y)
 		fheigh = winsize.y;
 
@@ -82,7 +80,7 @@ void SimLoadingOverlay::updateEvents(const MousePosition& mousePosition, float d
 	m_view_barrier.update(mousePosition.byWindow, sf::Mouse::Right);
 }
 
-void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object)
+void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object, long double space_scale)
 {
 	if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left && !m_background.isInvaded(mousePosition.byWindow))
 	{
@@ -98,7 +96,7 @@ void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, flo
 	{
 		if (m_load.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
-			m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object);
+			m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object, space_scale);
 			m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 			return;
 		}
@@ -266,8 +264,8 @@ void SimLoadingOverlay::render(sf::RenderWindow* window)
 
 	mPosView = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
 
-	for (auto& itr : m_saved_simulations)
-		itr->render(window);
+	for (auto& itr : m_on_screen)
+		(*itr)->render(window);
 
 	window->setView(window->getDefaultView());
 
@@ -323,6 +321,14 @@ void SaveBlock::setPosition(const sf::Vector2f& position)
 	m_name_block.setPosition(sf::Vector2f(m_background.getPosition().x + s_winsize.y / 5, m_background.getPosition().y + m_background.getSize().y / 2));
 }
 
+
+void SaveBlock::assign(const sf::Vector2f& winsize)
+{
+	s_winsize = winsize;
+}
+
+
+
 void SaveBlock::updateEvents(const MousePosition& mousePosition, float dt)
 {
 
@@ -343,12 +349,24 @@ std::string& SaveBlock::name()
 	return m_name;
 }
 
+void SaveBlock::resetSize(const sf::Vector2f& winsize)
+{
+	m_background.setSize(sf::Vector2f(winsize.x * 0.75 - winsize.x / 128, winsize.y / 6));
+	m_icon.setSize(sf::Vector2f(winsize.y / 8, winsize.y / 8));
+	m_icon.setTexture(m_icon.getTexturePath());
+	m_name_block.setSize(sf::Vector2f(winsize.x * 0.5, winsize.y / 10));
+	m_name_block.setCharacterSize(winsize.y / 32);
+
+	m_background.setOutlineThickness(winsize.y / 360);
+}
+
 void SaveBlock::render(sf::RenderWindow* window)
 {
 	m_background.render(window);
 	m_icon.render(window);
 	m_name_block.render(window);
 }
+
 
 ke::Button* SaveBlock::getHitbox()
 {

@@ -3,6 +3,7 @@
 #include "State.hpp"
 #include "MainMenu.hpp"
 #include "SimulationState.hpp"
+#include "SavedState.hpp"
 
 class OpeningState :
     public State

@@ -295,33 +295,70 @@ void ObjectController::addObjectParallelly(ObjectBuffer object_data, const sf::V
 
 
 
-	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
+	//for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
+	//{
+	//	float angle = std::atan(-(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y) / (m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x)) * TO_DEG;
+
+	//	if ((m_objects->back()->object.getPosition().x > (*itr)->object.getPosition().x))
+	//		angle += 180;
+
+	//	m_objects->back()->object.physics()->addForce((*itr)->name(),
+	//		gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
+	//			(std::pow(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y, 2) + (std::pow(m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x, 2)))) * m_space_scale,
+	//		angle);
+	//}
+
+	//for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
+	//{
+	//	float angle = std::atan(-((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y) / ((*itr)->object.getPosition().x) - m_objects->back()->object.getPosition().x) * TO_DEG;
+
+	//	if ((m_objects->back()->object.getPosition().x < (*itr)->object.getPosition().x))
+	//		angle += 180;
+
+	//	(*itr)->object.physics()->addForce(m_objects->back()->name(),
+	//		gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
+	//			(std::pow((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - m_objects->back()->object.getPosition().x, 2)))) * m_space_scale,
+	//		angle);
+	//}
+
+	
+}
+
+void ObjectController::addForceParallelly(std::vector<std::unique_ptr<SpaceObject>>* m_objects, std::vector<std::unique_ptr<SpaceObject>>::iterator this_object, long double m_space_scale, const sf::Vector2<double>& velocity)
+{
+	obj_vector_lock.lock();
+	for (auto itr = m_objects->begin() + 1; itr != m_objects->end(); ++itr)
 	{
-		float angle = std::atan(-(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y) / (m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x)) * TO_DEG;
+		if (itr != this_object)
+		{
+			/*float angle = std::atan(-((*this_object)->object.getPosition().y - (*i)->object.getPosition().y) / ((*this_object)->object.getPosition().x - (*i)->object.getPosition().x)) * TO_DEG;
 
-		if ((m_objects->back()->object.getPosition().x > (*itr)->object.getPosition().x))
-			angle += 180;
+			if (((*this_object)->object.getPosition().x > (*i)->object.getPosition().x))
+				angle += 180;
 
-		m_objects->back()->object.physics()->addForce((*itr)->name(),
-			gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
-				(std::pow(m_objects->back()->object.getPosition().y - (*itr)->object.getPosition().y, 2) + (std::pow(m_objects->back()->object.getPosition().x - (*itr)->object.getPosition().x, 2)))) * m_space_scale,
-			angle);
+			(*this_object)->object.physics()->addForce((*i)->name(),
+				gravitational_force_2((*this_object)->data.mass, (*i)->data.mass,
+					(std::pow((*this_object)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*this_object)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+				angle);*/
+
+			float angle = std::atan(-((*this_object)->object.getPosition().y - (*itr)->object.getPosition().y) / ((*this_object)->object.getPosition().x - (*itr)->object.getPosition().x)) * TO_DEG;
+
+			if (((*this_object)->object.getPosition().x > (*itr)->object.getPosition().x))
+				angle += 180;
+
+			(*this_object)->object.physics()->addForce((*itr)->name(),
+				gravitational_force_2((*this_object)->data.mass, (*itr)->data.mass,
+					(std::pow((*this_object)->object.getPosition().y - (*itr)->object.getPosition().y, 2) + (std::pow((*this_object)->object.getPosition().x - (*itr)->object.getPosition().x, 2)))) * m_space_scale,
+				angle);
+
+			//ke::debug::printVector2((*this_object)->object.physics()->getForce((*itr)->name()));
+		};
 	}
 
-	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end() - 1; itr != eoi; ++itr)
-	{
-		float angle = std::atan(-((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y) / ((*itr)->object.getPosition().x) - m_objects->back()->object.getPosition().x) * TO_DEG;
+	(*this_object)->object.physics()->setSpeed(velocity);
+	//ke::debug::printVector2((*this_object)->object.physics()->getSpeed(), this_object->get()->name());
 
-		if ((m_objects->back()->object.getPosition().x < (*itr)->object.getPosition().x))
-			angle += 180;
-
-		(*itr)->object.physics()->addForce(m_objects->back()->name(),
-			gravitational_force_2(m_objects->back()->data.mass, (*itr)->data.mass,
-				(std::pow((*itr)->object.getPosition().y - m_objects->back()->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - m_objects->back()->object.getPosition().x, 2)))) * m_space_scale,
-			angle);
-	}
-
-	m_objects->back()->object.physics()->setSpeed(velocity);
+	obj_vector_lock.unlock();
 }
 
 

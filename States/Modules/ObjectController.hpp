@@ -36,6 +36,7 @@ public:
 
 	void addObjectParallelly(ObjectBuffer object_data, const sf::Vector2f& position, // without selected_object
 		const sf::Vector2f& viewSize, const sf::Vector2f& winSize, const std::string& name, const sf::Vector2<double>& velocity);
+	void addForceParallelly(std::vector<std::unique_ptr<SpaceObject>>* m_objects, std::vector<std::unique_ptr<SpaceObject>>::iterator this_object, long double m_space_scale, const sf::Vector2<double>& velocity);
 
 	void clearObjects(const sf::Vector2f& viewsize);
 

@@ -359,6 +359,8 @@ namespace ke
 		m_text.setString(text);
 		m_text.setRotation(rotation);
 
+		std::this_thread::sleep_for(std::chrono::microseconds(10)); // actually this fixes issue with text loading in threads
+
 		this->fullTextUpdate();
 
 		m_text.setFillColor(text_color);

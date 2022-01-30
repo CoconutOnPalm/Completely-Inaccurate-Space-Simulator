@@ -22,7 +22,7 @@ public:
 
 	void assign(ObjectController* object_controller);
 
-	SimulationSaveErrorCode Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object);
+	SimulationSaveErrorCode Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object, long double space_scale);
 	SimulationSaveErrorCode Save(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects);
 	SimulationSaveErrorCode AutoSave(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects);
 

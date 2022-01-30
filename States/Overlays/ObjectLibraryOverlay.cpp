@@ -89,8 +89,8 @@ void ObjectLibraryOverlay::loadObjects()
 	m_obj_view.setSize(winsize);
 	m_obj_view.setCenter(winsize.x * 0.5, winsize.y * 0.5);
 
-	ke::debug::printVector2(m_obj_view.getSize(), "viewSize");
-	ke::debug::printVector2(m_obj_view.getCenter(), "viewCenter");
+	//ke::debug::printVector2(m_obj_view.getSize(), "viewSize");
+	//ke::debug::printVector2(m_obj_view.getCenter(), "viewCenter");
 
 	std::vector<std::pair<std::string, std::string>> systems;
 

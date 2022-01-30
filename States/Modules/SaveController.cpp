@@ -41,8 +41,13 @@ void SaveController::assign(ObjectController* object_controller)
 
 #define obj (*itr->get())
 
-SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object)
+SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object, long double space_scale)
 {
+	// clarification: mutlithread object loading causes too many issues both on mine (broken velocity, random memory exceptions etc) and SFML side (font loading, random memory exceptions etc)
+	// also there's no THAT huge improvement in loading time (about 60%), and I don't want to sacrifice program stability
+	// I would try improving this only if I saw more that 5x shortage in loading time
+	// but for now, multithread code stays for the future
+
 	ke::debug::Benchmark loadingtime("simulation loading time");
 
 	ke::FileStream loader(this->getFilePath(name), std::ios::in | std::ios::binary);
@@ -54,6 +59,9 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 
 	size_t objcount;
 	loader.binRead(objcount);
+
+	//std::vector<sf::Vector2<double>> velocities;
+	//velocities.reserve(objcount);
 
 	objects->reserve(objcount);
 	selected_object = objects->begin();
@@ -92,17 +100,25 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 
 		buffer.load(type, _class, subtype, mass, radius, name, filename, icon_filename, brightness, color);
 		
-		m_loading_futures.push_back(std::async(std::launch::async, &ObjectController::addObjectParallelly, m_objectController, buffer, position, viewsize, winsize, name, velocity));
-		selected_object = objects->begin();
-		//m_objectController->addObject(&buffer, position, viewsize, winsize, name, velocity);
+		//m_loading_futures.push_back(std::async(std::launch::async, &ObjectController::addObjectParallelly, m_objectController, buffer, position, viewsize, winsize, name, velocity));
+		//velocities.push_back(velocity);
+		//selected_object = objects->begin();
+
+		m_objectController->addObject(&buffer, position, viewsize, winsize, name, velocity);
 	}
 
 
-	for (auto& itr : m_loading_futures)
-		while (itr.wait_for(std::chrono::microseconds(10)) != std::future_status::ready)
-		{ }
+	//for (auto& itr : m_loading_futures)
+	//	while (itr.wait_for(std::chrono::microseconds(0)) != std::future_status::ready)
+	//	{ }
 
-	selected_object = objects->begin();
+	//selected_object = objects->begin();
+
+	//std::cout << "obj count: " << objects->size() << '\n';
+
+	//auto v_itr = velocities.begin();
+	//for (auto itr = objects->begin() + 1; itr != objects->end(); ++itr, ++v_itr)
+	//	m_objectController->addForceParallelly(objects, itr, space_scale, *v_itr);
 
 	return SimulationSaveErrorCode::NO_FILE_ERROR;
 }
@@ -140,6 +156,8 @@ SimulationSaveErrorCode SaveController::Save(const std::string& name, std::vecto
 		saver.binWrite(obj.object.getPosition().y);
 		saver.binWrite(obj.object.physics()->getSpeed().x);
 		saver.binWrite(obj.object.physics()->getSpeed().y);
+
+		//ke::debug::printVector2(obj.object.physics()->getSpeed(), obj.name());
 	}
 
 	return SimulationSaveErrorCode::NO_FILE_ERROR;

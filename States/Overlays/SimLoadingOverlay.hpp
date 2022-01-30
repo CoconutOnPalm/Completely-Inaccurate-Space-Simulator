@@ -16,7 +16,7 @@ public:
 
 
 	void updateEvents(const MousePosition& mousePosition, float dt);
-	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object);
+	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object, long double space_scale);
 
 	void updateColors(const sf::Vector2f& mousePosition, const float dt);
 
@@ -70,6 +70,8 @@ public:
 	~SaveBlock();
 
 	void setPosition(const sf::Vector2f& position);
+	void resetSize(const sf::Vector2f& winsize);
+	static void assign(const sf::Vector2f& winsize);
 
 	void updateEvents(const MousePosition& mousePosition, float dt);
 	void updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event);

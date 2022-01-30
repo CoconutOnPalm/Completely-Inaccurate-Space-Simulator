@@ -92,11 +92,11 @@ void SimulationState::InitState()
 	}
 	else if (m_simulation_name == "latest_save")
 	{
-		m_saveController.LoadLatest(&m_objects, viewSize, winSize);
+		m_saveController.Load("latest_save", &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	}
 	else
 	{
-		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object);
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	}
 
 	m_view_holding.setView(view);
@@ -166,7 +166,7 @@ void SimulationState::InitSpaceObjects()
 {
 	m_objects.push_back(std::make_unique<CenterOfMass>(view->getSize().y / 64, view->getSize().y / 256));
 
-	double v = std::sqrt(G * 1.989 * std::pow(10, 30) / (au * 0.3));
+	//double v = std::sqrt(G * 1.989 * std::pow(10, 30) / (au * 0.3));
 
 
 	//m_objects.push_back(std::make_unique<Planet>(sf::Vector2f(au * m_space_scale * 0.9, 1), L"Earth1", "Textures/AudioIcon.png", 3.972 * std::pow(10, 24), 5370000 * m_space_scale * m_planet_scale, 24));
@@ -209,10 +209,10 @@ void SimulationState::InitSpaceObjects()
 						(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
 					angle);
 
-				std::cout << "M = " << (*itr)->data.mass << '\n';
-				std::cout << "R = " << std::sqrt(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))) << '\n';
-				std::cout << "Fg = " << gravitational_force((*itr)->data.mass, (*i)->data.mass,
-					std::sqrt(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) << '\n';
+				//std::cout << "M = " << (*itr)->data.mass << '\n';
+				//std::cout << "R = " << std::sqrt(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))) << '\n';
+				//std::cout << "Fg = " << gravitational_force((*itr)->data.mass, (*i)->data.mass,
+				//	std::sqrt(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) << '\n';
 
 			}
 
@@ -230,7 +230,7 @@ void SimulationState::InitSpaceObjects()
 		_m += (*itr)->data.mass;
 	}
 
-	std::cout << "mass: " << _m << '\n';
+	//std::cout << "mass: " << _m << '\n';
 
 	//m_objects.front()->object.physics()->setMass(_m);
 	m_objects.front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
@@ -258,7 +258,7 @@ void SimulationState::InitSpaceObjects()
 		(*itr)->object.physics()->setSpeed(round_orbit_velocity((*m_selected_object)->object.physics()->getMass() - (*itr)->data.mass,
 			position_to_distance((*m_selected_object)->object.getPosition(), (*itr)->object.getPosition() / static_cast<float>(m_space_scale))), angle - 90);
 
-		ke::debug::printVector2((*itr)->object.physics()->getSpeed());
+		//ke::debug::printVector2((*itr)->object.physics()->getSpeed());
 	}
 
 
@@ -271,11 +271,11 @@ void SimulationState::InitSpaceObjects()
 	}
 	else if (m_simulation_name == "latest_save")
 	{
-		m_saveController.LoadLatest(&m_objects, viewSize, winSize);
+		m_saveController.Load("latest_save", &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	}
 	else
 	{
-		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object);
+		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	}
 	
 
@@ -631,43 +631,41 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 		// FEATURE: updating objects with Object controller (ObjectController - menager)
 
-		//objectUpdate = std::thread{ &ObjectController::updateObjects, m_deltaTime, m_time_scale, m_simulation_speed };
-
 		//ke::debug::Benchmark updateTime("Object update time");
 		m_ObjController.updateObjects(m_deltaTime, m_time_scale, m_simulation_speed);
 
 
 		// I'm so tired of this please let me sleep
-		if (!AppSettings::MultithreadingAllowed()) // not removing this I don't want to play with this again
-		{
-			if (m_collider.update(&m_objects, dt, m_selected_object, view->getSize(), winSize))
-			{
-				for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
-				{
-					if ((*itr)->name() == m_collider.deletedObjects().first)
-					{
-						m_objects.erase(itr);
-						break;
-					}
-				}
-				for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
-				{
-					if ((*itr)->name() == m_collider.deletedObjects().second)
-					{
-						m_objects.erase(itr);
-						break;
-					}
-				}
+		//if (!AppSettings::MultithreadingAllowed()) // not removing this I don't want to play with this again
+		//{
+		//	if (m_collider.update(&m_objects, dt, m_selected_object, view->getSize(), winSize))
+		//	{
+		//		for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+		//		{
+		//			if ((*itr)->name() == m_collider.deletedObjects().first)
+		//			{
+		//				m_objects.erase(itr);
+		//				break;
+		//			}
+		//		}
+		//		for (auto itr = m_objects.begin() + 1; itr != m_objects.end(); ++itr)
+		//		{
+		//			if ((*itr)->name() == m_collider.deletedObjects().second)
+		//			{
+		//				m_objects.erase(itr);
+		//				break;
+		//			}
+		//		}
 
-				m_selected_object = m_objects.begin();
+		//		m_selected_object = m_objects.begin();
 
-				m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
-				detailedDataWindow.updateObjectPointer(m_selected_object->get());
+		//		m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
+		//		detailedDataWindow.updateObjectPointer(m_selected_object->get());
 
-				if (m_selected_object->get() != nullptr)
-					m_VDController.loadData(m_selected_object, sf::Vector2f(window->getSize()));
-			}
-		}
+		//		if (m_selected_object->get() != nullptr)
+		//			m_VDController.loadData(m_selected_object, sf::Vector2f(window->getSize()));
+		//	}
+		//}
 		//std::cout << m_objects.size() << '\n';
 		//std::cout << m_selected_object->get()->data.mass << '\n';
 		//updateTime.Stop();
@@ -960,7 +958,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	
 	if (m_simLoadingOverlay != nullptr)
 	{
-		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize(), m_selected_object);
+		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize(), m_selected_object, m_space_scale);
 
 		if (m_simLoadingOverlay->quitStatus() == OverlayQuitCode::CLOSING_OVRL)
 		{

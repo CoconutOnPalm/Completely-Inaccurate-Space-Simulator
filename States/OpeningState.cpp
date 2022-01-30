@@ -100,6 +100,9 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);
 				break;
+			case STATE::SAVED_BROWSER:
+				states->back() = std::make_unique<SavedState>(window, view); 
+				break;
 			default:
 				ke::throw_error("OpeningState::updateEvents() -> state quitting", "State not found", "ERROR");
 				break;
@@ -122,6 +125,9 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 				break;
 			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);
+				break;
+			case STATE::SAVED_BROWSER:
+				states->back() = std::make_unique<SavedState>(window, view);
 				break;
 			default:
 				ke::throw_error("OpeningState::updateEvents() -> state quitting", "State not found", "ERROR");
@@ -177,6 +183,12 @@ void OpeningState::updatePollEvents(const MousePosition& mousePosition, float dt
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SIMULATION;
+		m_simulation_name = "latest_save";
+	}
+	else if (m_load_saved.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		p_quitCode = StateQuitCode::STATE_QUIT;
+		m_next_state = STATE::SAVED_BROWSER;
 		m_simulation_name = "latest_save";
 	}
 }

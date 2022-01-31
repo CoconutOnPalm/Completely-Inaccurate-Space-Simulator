@@ -1,9 +1,10 @@
 #include "SimLoadingOverlay.hpp"
 
-SimLoadingOverlay::SimLoadingOverlay(const sf::Vector2f& winsize, SaveController* save_controller, bool* simulation_running)
+SimLoadingOverlay::SimLoadingOverlay(const sf::Vector2f& winsize, SaveController* save_controller, bool* simulation_running, sf::RenderWindow* window)
 	: m_quitCode(OverlayQuitCode::NOT_QUITTING)
 	, m_saveController(save_controller)
 	, m_winsize(winsize)
+	, m_window(window)
 {
 	*simulation_running = false;
 
@@ -96,7 +97,14 @@ void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, flo
 	{
 		if (m_load.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
+			//m_window->setActive(false);
+			//LoadingBarOverlay loadingBarOvrl(m_window);
+			//std::thread lbthread(&LoadingBarOverlay::run, loadingBarOvrl);
 			m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object, space_scale);
+			//lbthread.join();
+			//m_window->setActive(true);
+
+			//m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object, space_scale);
 			m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 			return;
 		}

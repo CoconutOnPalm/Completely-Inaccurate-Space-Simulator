@@ -2,6 +2,7 @@
 
 #include "States/State.hpp"
 #include "ObjectController.hpp"
+#include "States/Overlays/LoadingBarOverlay.hpp"
 
 
 enum class SimulationSaveErrorCode
@@ -20,7 +21,7 @@ public:
 	SaveController();
 	~SaveController();
 
-	void assign(ObjectController* object_controller);
+	void assign(ObjectController* object_controller, sf::RenderWindow* window);
 
 	SimulationSaveErrorCode Load(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects, const sf::Vector2f& viewsize, const sf::Vector2f& winsize, std::vector<std::unique_ptr<SpaceObject>>::iterator& selected_object, long double space_scale);
 	SimulationSaveErrorCode Save(const std::string& name, std::vector<std::unique_ptr<SpaceObject>>* objects);
@@ -45,5 +46,11 @@ private:
 	std::string m_latest;
 
 	std::vector<std::future<void>> m_loading_futures;
+
+
+	ke::Rectangle m_background;
+	ke::PointBar m_bar;
+	sf::RenderWindow* m_window;
+
 };
 

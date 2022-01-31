@@ -23,10 +23,13 @@
 #include "Overlays/SimSavingOverlay.hpp"
 #include "Overlays/SimLoadingOverlay.hpp"
 #include "Overlays/WarningOverlay.hpp"
+#include "Overlays/LoadingBarOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
 class StateControlPanel;
+
+
 
 
 class SimulationState :
@@ -122,6 +125,7 @@ private:
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
     SimParamsOverlay m_SimParamsOverlay;
     SettingsOverlay m_SettingsOverlay;
+    //LoadingBarOverlay m_ladingBarOverlay;
 
 
 

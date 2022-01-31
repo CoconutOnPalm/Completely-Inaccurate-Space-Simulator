@@ -2,6 +2,7 @@
 
 #include "States/State.hpp"
 #include "States/Modules/SaveController.hpp"
+#include "States/Overlays/LoadingBarOverlay.hpp"
 
 
 class SaveBlock;
@@ -11,7 +12,7 @@ class SimLoadingOverlay
 {
 public: 
 
-	SimLoadingOverlay(const sf::Vector2f& winsize, SaveController* save_controller, bool* simulation_running);
+	SimLoadingOverlay(const sf::Vector2f& winsize, SaveController* save_controller, bool* simulation_running, sf::RenderWindow* window);
 	~SimLoadingOverlay();
 
 
@@ -25,6 +26,8 @@ public:
 	void render(sf::RenderWindow* window);
 
 private:
+
+	sf::RenderWindow* m_window;
 
 	sf::Vector2f m_winsize;
 

@@ -74,6 +74,22 @@ struct MousePosition
 };
 
 
+class CISSMutex
+{
+public:
+
+	CISSMutex() {};
+	~CISSMutex() {};
+
+	static CISSMutex& Get() { static CISSMutex instance; return instance; };
+
+	static std::mutex& loadingBar() { return Get().m_loadingbar; };
+
+private:
+
+	std::mutex m_loadingbar;
+};
+
 
 class State
 {

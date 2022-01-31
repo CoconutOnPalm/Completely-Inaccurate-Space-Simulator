@@ -34,9 +34,14 @@ SaveController::~SaveController()
 	this->SaveAll();
 }
 
-void SaveController::assign(ObjectController* object_controller)
+void SaveController::assign(ObjectController* object_controller, sf::RenderWindow* window)
 {
 	m_objectController = object_controller;
+
+	m_background.create(sf::Vector2f(window->getSize()), { 0, 0 }, ke::Origin::LEFT_TOP, std::wstring(), 0, 0, sf::Color::Black);
+	m_bar.create(sf::Vector2f(window->getSize().x / 2, window->getSize().y / 10), sf::Vector2f(window->getSize().x / 2, window->getSize().y / 2), nullptr, 0, 0, 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(32, 32, 32, 255));
+
+	m_window = window;
 }
 
 #define obj (*itr->get())
@@ -49,7 +54,6 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 	// but for now, multithread code stays for the future
 
 	ke::debug::Benchmark loadingtime("simulation loading time");
-
 	ke::FileStream loader(this->getFilePath(name), std::ios::in | std::ios::binary);
 
 	if (!loader.loaded())
@@ -60,11 +64,14 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 	size_t objcount;
 	loader.binRead(objcount);
 
-	//std::vector<sf::Vector2<double>> velocities;
-	//velocities.reserve(objcount);
+	m_bar.setMaxPointCount(objcount);
+	m_bar.setPointCount(0);
+
+	ke::debug::printVector2(m_window->getSize(), "window size");
 
 	objects->reserve(objcount);
 	selected_object = objects->begin();
+
 
 	m_objectController->clearObjects(viewsize);
 
@@ -101,12 +108,18 @@ SimulationSaveErrorCode SaveController::Load(const std::string& name, std::vecto
 		buffer.load(type, _class, subtype, mass, radius, name, filename, icon_filename, brightness, color);
 		
 		//m_loading_futures.push_back(std::async(std::launch::async, &ObjectController::addObjectParallelly, m_objectController, buffer, position, viewsize, winsize, name, velocity));
-		//velocities.push_back(velocity);
 		//selected_object = objects->begin();
 
 		m_objectController->addObject(&buffer, position, viewsize, winsize, name, velocity);
-	}
 
+		m_window->setView(m_window->getDefaultView());
+		m_window->clear(sf::Color::Black);
+		m_background.render(m_window);
+		m_bar.addPoint();
+		m_bar.render(m_window);
+		m_window->display();
+	}
+	
 
 	//for (auto& itr : m_loading_futures)
 	//	while (itr.wait_for(std::chrono::microseconds(0)) != std::future_status::ready)

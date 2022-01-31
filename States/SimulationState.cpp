@@ -58,7 +58,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view,
 
 	m_collider.assing(&m_ObjController, sf::Vector2f(window->getSize()), m_space_scale);
 
-	m_saveController.assign(&m_ObjController);
+	m_saveController.assign(&m_ObjController, window);
 
 
 	m_placed_object.create(100, { 1000, 1000 }, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
@@ -86,15 +86,7 @@ void SimulationState::InitState()
 {
 	size_t loading_breakpoints = 6;
 
-	if (m_simulation_name.empty() || m_simulation_name == "empty")
-	{
-		
-	}
-	else if (m_simulation_name == "latest_save")
-	{
-		m_saveController.Load("latest_save", &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
-	}
-	else
+	if (!m_simulation_name.empty() && m_simulation_name != "empty")
 	{
 		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	}
@@ -265,18 +257,14 @@ void SimulationState::InitSpaceObjects()
 
 	//m_saveController.Load("stress_test01", &m_objects, viewSize, winSize);
 
-	if (m_simulation_name.empty() || m_simulation_name == "empty")
-	{
+	//if (m_simulation_name.empty() || m_simulation_name == "empty")
+	//{
 
-	}
-	else if (m_simulation_name == "latest_save")
-	{
-		m_saveController.Load("latest_save", &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
-	}
-	else
-	{
-		m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
-	}
+	//}
+	//else
+	//{
+	//	m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
+	//}
 	
 
 	m_selected_object = m_objects.begin();
@@ -1545,7 +1533,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	else if (m_project_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		if (m_simLoadingOverlay == nullptr)
-			m_simLoadingOverlay = std::make_unique<SimLoadingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running);
+			m_simLoadingOverlay = std::make_unique<SimLoadingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running, window);
 	}
 
 

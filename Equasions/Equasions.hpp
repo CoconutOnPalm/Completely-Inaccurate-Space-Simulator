@@ -15,6 +15,18 @@ inline long double gravitational_force_2(long double m1, long double m2, long do
 }
 
 
+
+inline long double gravitational_force_r(long double m1, long double m2, long double r)
+{
+	return G * (m1 * m2) / r;
+}
+
+inline long double gravitational_force_r3(long double m1, long double m2, long double r)
+{
+	return G * (m1 * m2) / r; // r is already ^3 here
+}
+
+
 inline long double round_orbit_velocity(long double M, long double r)
 {
 	return std::sqrt(G * M / r);

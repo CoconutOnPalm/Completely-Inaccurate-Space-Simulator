@@ -23,7 +23,8 @@
 #include "Overlays/SimSavingOverlay.hpp"
 #include "Overlays/SimLoadingOverlay.hpp"
 #include "Overlays/WarningOverlay.hpp"
-#include "Overlays/LoadingBarOverlay.hpp"
+#include "Overlays/HelpOverlay.hpp"
+#include "Overlays/EquasionSelectionOverlay.hpp"
 
 //#include "Overlays/QuitOverlay.hpp"
 
@@ -122,6 +123,8 @@ private:
     std::unique_ptr<SimSavingOverlay> m_simSavingOverlay;
     std::unique_ptr<SimLoadingOverlay> m_simLoadingOverlay;
     std::unique_ptr<WarningOverlay> m_new_simulation_warning;
+    std::unique_ptr<HelpOverlay> m_helpOverlay;
+    std::unique_ptr<EquasionSelectionOverlay> m_equasionSelectionOverlay;
     ObjectLibraryOverlay m_ObjectLibraryOverlay;
     SimParamsOverlay m_SimParamsOverlay;
     SettingsOverlay m_SettingsOverlay;
@@ -169,6 +172,7 @@ private:
 
     ke::Circle m_placed_object; // space object that is currenly beeing placed by user
 
+    ke::Button m_equasionSelector;
 
     // Obj data GUI
 

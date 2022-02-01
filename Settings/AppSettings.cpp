@@ -7,6 +7,7 @@ AppSettings::AppSettings()
 
 AppSettings::~AppSettings()
 {
+	Get().m_equasion = 2;
 	Get().Save();
 }
 
@@ -42,6 +43,8 @@ bool AppSettings::Init()
 	Get().m_trails = true;
 	Get().m_displayObjectName = true;
 
+	Get().m_equasion = 2; // <- default
+
 	ke::FileStream settings("Data/settings.bin", std::ios::in | std::ios::binary);
 
 	settings.binRead(Get().m_UDWindowSize.x);
@@ -68,6 +71,8 @@ bool AppSettings::Init()
 	settings.binRead(Get().m_glowShader);
 	settings.binRead(Get().m_trails);
 	settings.binRead(Get().m_displayObjectName);
+
+	settings.binRead(Get().m_equasion);
 
 	return true;
 }
@@ -102,6 +107,8 @@ bool AppSettings::Save()
 	settings.binWrite(Get().m_trails);
 	settings.binWrite(Get().m_displayObjectName);
 
+	settings.binWrite(Get().m_equasion);
+
 	return success;
 }
 
@@ -130,6 +137,18 @@ void AppSettings::RestoreDefaults()
 	Get().m_starShader = true;
 	Get().m_trails = true;
 	Get().m_displayObjectName = true;
+
+	Get().m_equasion = 2;
+}
+
+void AppSettings::setGForceEquasion(int equasion)
+{
+	Get().m_equasion = equasion;
+}
+
+int AppSettings::getGForceEquasion()
+{
+	return Get().m_equasion;
 }
 
 void AppSettings::setDefaultWindowSize(const sf::Vector2f window_size)

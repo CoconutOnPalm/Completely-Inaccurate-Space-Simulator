@@ -1,8 +1,6 @@
-8
+6
 10_objects Data/Simulations/10_objects.sim
 20_objects Data/Simulations/20_objects.sim
-2137 Data/Simulations/2137.sim
-30_objects Data/Simulations/30_objects.sim
 40_objects Data/Simulations/40_objects.sim
 stress_test01 Data/Simulations/stress_test01.sim
 test1 Data/Simulations/test1.sim

@@ -2,7 +2,6 @@
 
 #include "States/State.hpp"
 #include "States/Modules/SaveController.hpp"
-#include "States/Overlays/LoadingBarOverlay.hpp"
 
 
 class SaveBlock;

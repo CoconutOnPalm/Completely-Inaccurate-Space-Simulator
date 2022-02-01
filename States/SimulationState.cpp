@@ -43,7 +43,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view,
 	m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
 	m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
 
-	m_StateControlPanel.assign(&m_state_controllers, &m_quitOverlay, &m_SimParamsOverlay, &m_SettingsOverlay);
+	m_StateControlPanel.assign(&m_state_controllers, &m_quitOverlay, &m_SimParamsOverlay, &m_SettingsOverlay, &m_helpOverlay);
 
 	//m_ObjectLibraryOverlay = std::make_unique<ObjectLibraryOverlay>();
 	m_ObjectLibraryOverlay.assign(window);
@@ -301,10 +301,11 @@ void SimulationState::InitTopGUI()
 	m_project_menagers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.y / 8 + winSize.x / 64, winSize.y / 32), ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/LoadSimulation.png"));
 
 
-	m_state_controllers.reserve(3); // Quit to menu | settings | simulation params
+	m_state_controllers.reserve(4); // Quit to menu | settings | simulation params | help
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/QuitIcon.png"));
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 16, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/SettingsIcon.png"));
 	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 8, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 8, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/SimParamsIcon.png"));
+	m_state_controllers.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(winSize.y / 16, winSize.y / 16), sf::Vector2f(winSize.x - winSize.y / 4, winSize.y / 32), ke::Origin::RIGHT_TOP, "Textures/StateTextures/Simulation/help_button.png"));
 
 
 	m_tools.reserve(4); // enable star shader | enable glow shader | enable trails
@@ -360,6 +361,9 @@ void SimulationState::InitTopGUI()
 	m_icon_inv_iterator = m_object_icons.begin();
 	m_icon_iterator = m_object_icons.begin();
 	(*m_icon_iterator)->icon.setActiveStatus(false);
+
+
+	m_equasionSelector.create(sf::Vector2f(winSize.y / 4, winSize.y / 16), sf::Vector2f(winSize.x, winSize.y / 32 + winSize.y / 16), ke::Origin::RIGHT_TOP, nullptr, L"Choose equasion", winSize.y / 48, ke::Origin::MIDDLE_MIDDLE);
 }
 
 
@@ -860,7 +864,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// FEATURE: overlays color update
 
 	// ovrl mask update
-	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr || m_simLoadingOverlay != nullptr || m_new_simulation_warning != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
+	ke::SmoothColorChange(&m_overlayMask, m_quitOverlay != nullptr || m_ObjectLibraryOverlay.active() || m_SimParamsOverlay.active() || m_SettingsOverlay.active() || m_simSavingOverlay != nullptr || m_simLoadingOverlay != nullptr || m_new_simulation_warning != nullptr || m_equasionSelectionOverlay != nullptr, sf::Color(0, 0, 0, 128), sf::Color::Transparent, m_om_color, 512, dt);
 
 	if (m_quitOverlay != nullptr)
 		m_quitOverlay->updateColors(mousePosition.byWindow, dt);
@@ -873,6 +877,9 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	if (m_new_simulation_warning != nullptr)
 		m_new_simulation_warning->updateColors(mousePosition.byWindow, dt);
+	
+	if (m_equasionSelectionOverlay != nullptr)
+		m_equasionSelectionOverlay->updateColors(mousePosition.byWindow, dt);
 
 	m_ObjectLibraryOverlay.updateColors(mousePosition.byWindow, dt);
 
@@ -981,6 +988,36 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			m_ObjController.clearObjects(view->getSize());
 			m_new_simulation_warning = nullptr;
+		}
+
+		return;
+	}
+
+
+	if (m_helpOverlay != nullptr)
+	{
+		m_helpOverlay->updatePollEvents(mousePosition.byWindow, dt, event);
+
+		if (m_helpOverlay->quitStatus() == OverlayQuitCode::QUITTING)
+		{
+			m_helpOverlay = nullptr;
+		}
+
+		return;
+	}
+
+
+	if (m_equasionSelectionOverlay != nullptr)
+	{
+		m_equasionSelectionOverlay->updatePollEvents(mousePosition, dt, event);
+
+		if (m_equasionSelectionOverlay->quitStatus() == OverlayQuitCode::CANCELING)
+		{
+			m_equasionSelectionOverlay = nullptr;
+		}
+		else if (m_equasionSelectionOverlay->quitStatus() == OverlayQuitCode::ACCEPTING)
+		{
+			m_equasionSelectionOverlay = nullptr;
 		}
 
 		return;
@@ -1546,6 +1583,11 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	}
 
 
+	else if (m_equasionSelector.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		if (m_equasionSelectionOverlay == nullptr)
+			m_equasionSelectionOverlay = std::make_unique<EquasionSelectionOverlay>(sf::Vector2f(window->getSize()));
+	}
 
 
 
@@ -1563,6 +1605,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 				view->zoom(1.1); else;
 		else if (event.mouseWheelScroll.delta > 0)
 			view->zoom(0.9);
+
+		//m_zoomBar.setPercent((view->getSize().y / 108 - 1) / 100);
 
 		//std::cout << view->getSize().y << '\n';
 
@@ -1650,6 +1694,9 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			}
 		}
 	}
+
+
+
 
 
 	// FEATURE: centering view to object
@@ -1995,6 +2042,8 @@ void SimulationState::renderByWindow()
 	for (auto& itr : m_object_icons)
 		itr->icon.render(window);
 
+	m_equasionSelector.render(window);
+
 
 	m_object_name.render(window);
 
@@ -2026,11 +2075,17 @@ void SimulationState::renderByWindow()
 	if (m_new_simulation_warning != nullptr)
 		m_new_simulation_warning->render(window);
 
+	if (m_helpOverlay != nullptr)
+		m_helpOverlay->render(window);
+	
+	if (m_equasionSelectionOverlay != nullptr)
+		m_equasionSelectionOverlay->render(window);
+
 	m_ObjectLibraryOverlay.render();
 	m_SimParamsOverlay.render();
 	m_SettingsOverlay.render();
 
-	m_collider.renderBoooms(window);
+	//m_collider.renderBoooms(window);
 
 	m_stateMask.render(window);
 }

@@ -18,6 +18,7 @@
 #include "States/Overlays/QuitOverlay.hpp"
 #include "States/Overlays/SimParamsOverlay.hpp"
 #include "States/Overlays/SettingsOverlay.hpp"
+#include "States/Overlays/HelpOverlay.hpp"
 
 #define PanelUI std::vector<std::unique_ptr<ke::Button>>
 
@@ -30,7 +31,7 @@ public:
 	StateControlPanel();
 	~StateControlPanel();
 
-	void assign(PanelUI* controllers, std::unique_ptr<QuitOverlay>* QuitOverlay, SimParamsOverlay* simParamsOverlay, SettingsOverlay* settingsOverlay);
+	void assign(PanelUI* controllers, std::unique_ptr<QuitOverlay>* QuitOverlay, SimParamsOverlay* simParamsOverlay, SettingsOverlay* settingsOverlay, std::unique_ptr<HelpOverlay>* helpOverlay);
 
 	bool quittingRequestStatus() const;
 
@@ -50,8 +51,9 @@ private:
 	std::unique_ptr<QuitOverlay>* m_quitOverlay;
 	SimParamsOverlay* m_simParamsOverlay;
 	SettingsOverlay* m_settingsOverlay;
+	std::unique_ptr<HelpOverlay>* m_helpOverlay;
 
-	std::array<ke::Colorf, 3> m_colors;
+	std::array<ke::Colorf, 4> m_colors;
 
 	bool m_quitting;
 

@@ -19,6 +19,13 @@ public:
 	static void RestoreDefaults();
 
 
+	// 1 - G * (m1 * m2) / (r)
+	// 2 - G * (m1 * m2) / (r * r) <- default
+	// 3 - G * (m1 * m2) / (r * r * r)
+
+	static void setGForceEquasion(int equasion = 2); 
+	static int getGForceEquasion();
+
 	static void setDefaultWindowSize(const sf::Vector2f window_size);
 	static sf::Vector2f DefaultWindowSize();
 
@@ -100,6 +107,7 @@ private:
 	// keybinds
 
 	// simulation
+	int m_equasion;
 	long double m_planetSize;
 	long double m_starSize;
 	bool m_multithreading_allowed;

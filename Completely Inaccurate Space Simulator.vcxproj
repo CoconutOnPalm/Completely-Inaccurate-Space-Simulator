@@ -167,6 +167,8 @@
     <ClCompile Include="States\Modules\TimeController.cpp" />
     <ClCompile Include="States\Modules\VisibleDataController.cpp" />
     <ClCompile Include="States\OpeningState.cpp" />
+    <ClCompile Include="States\Overlays\EquasionSelectionOverlay.cpp" />
+    <ClCompile Include="States\Overlays\HelpOverlay.cpp" />
     <ClCompile Include="States\Overlays\ObjectLibraryOverlay.cpp" />
     <ClCompile Include="States\Overlays\QuitOverlay.cpp" />
     <ClCompile Include="States\Overlays\SettingsOverlay.cpp" />
@@ -211,6 +213,8 @@
     <ClInclude Include="States\Modules\TimeController.hpp" />
     <ClInclude Include="States\Modules\VisibleDataController.hpp" />
     <ClInclude Include="States\OpeningState.hpp" />
+    <ClInclude Include="States\Overlays\EquasionSelectionOverlay.hpp" />
+    <ClInclude Include="States\Overlays\HelpOverlay.hpp" />
     <ClInclude Include="States\Overlays\ObjectLibraryOverlay.hpp" />
     <ClInclude Include="States\Overlays\QuitOverlay.hpp" />
     <ClInclude Include="States\Overlays\SettingsOverlay.hpp" />

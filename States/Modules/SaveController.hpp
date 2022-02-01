@@ -2,7 +2,6 @@
 
 #include "States/State.hpp"
 #include "ObjectController.hpp"
-#include "States/Overlays/LoadingBarOverlay.hpp"
 
 
 enum class SimulationSaveErrorCode

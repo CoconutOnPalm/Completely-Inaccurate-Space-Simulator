@@ -276,9 +276,9 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 			float some_space = window->getSize().y / 48;
 			sf::Vector2f block_position(window->getSize().x * 0.5 - window->getSize().x * 0.375, window->getSize().y / 9 + some_space);
 
-			for (auto& itr : m_simulations_names)
+			for (auto& itr : m_saved_simulations)
 			{
-				//m_saved_simulations.back()->setPosition(block_position);
+				itr->setPosition(block_position);
 				block_position.y += window->getSize().y / 6 + some_space; // size of 1 block and some space
 			}
 

@@ -487,10 +487,37 @@ static void calculateForce(std::vector<std::unique_ptr<SpaceObject>>* m_objects,
 					if (((*itr)->object.getPosition().x > (*i)->object.getPosition().x))
 						angle += 180;
 
+					if (AppSettings::getGForceEquasion() == 2)
+					{
 					(*itr)->object.physics()->modifyForce((*i)->name(),
 						gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
 							(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
 						angle);
+					}
+					else if (AppSettings::getGForceEquasion() == 1)
+					{
+						(*itr)->object.physics()->modifyForce((*i)->name(),
+							gravitational_force_r((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+								std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))))) * m_space_scale,
+							angle);
+					}
+					else if (AppSettings::getGForceEquasion() == 3)
+					{
+						(*itr)->object.physics()->modifyForce((*i)->name(),
+							gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+								std::pow(std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))), 3)) * m_space_scale,
+							angle);
+					}
+					else
+					{
+						ke::throw_error("ObjectController::updateObjects", "GForce Equasion is not in <1, 3> range", "ERROR");
+						AppSettings::setGForceEquasion(2);
+
+						(*itr)->object.physics()->modifyForce((*i)->name(),
+							gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+								(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+							angle);
+					}
 				}
 			}
 			else
@@ -500,10 +527,37 @@ static void calculateForce(std::vector<std::unique_ptr<SpaceObject>>* m_objects,
 				if (((*itr)->object.getPosition().x > (*i)->object.getPosition().x))
 					angle += 180;
 
+				if (AppSettings::getGForceEquasion() == 2)
+				{
 				(*itr)->object.physics()->modifyForce((*i)->name(),
 					gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
 						(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
 					angle);
+				}
+				else if (AppSettings::getGForceEquasion() == 1)
+				{
+					(*itr)->object.physics()->modifyForce((*i)->name(),
+						gravitational_force_r((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+							std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))))) * m_space_scale,
+						angle);
+				}
+				else if (AppSettings::getGForceEquasion() == 3)
+				{
+					(*itr)->object.physics()->modifyForce((*i)->name(),
+						gravitational_force_r3((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+							std::pow(std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))), 3)) * m_space_scale,
+						angle);
+				}
+				else
+				{
+					ke::throw_error("ObjectController::updateObjects", "GForce Equasion is not in <1, 3> range", "ERROR");
+					AppSettings::setGForceEquasion(2);
+
+					(*itr)->object.physics()->modifyForce((*i)->name(),
+						gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+							(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+						angle);
+				}
 			}
 		};
 	}
@@ -533,10 +587,38 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 							if (((*itr)->object.getPosition().x > (*i)->object.getPosition().x))
 								angle += 180;
 
+
+							if (AppSettings::getGForceEquasion() == 2)
+							{
 							(*itr)->object.physics()->modifyForce((*i)->name(),
 								gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
 									(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
 								angle);
+							}
+							else if (AppSettings::getGForceEquasion() == 1)
+							{
+								(*itr)->object.physics()->modifyForce((*i)->name(),
+									gravitational_force_r((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+										std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))))) * m_space_scale,
+									angle);
+							}
+							else if (AppSettings::getGForceEquasion() == 3)
+							{
+								(*itr)->object.physics()->modifyForce((*i)->name(),
+									gravitational_force_r3((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+										std::pow(std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))), 3)) * m_space_scale,
+									angle);
+							}
+							else
+							{
+								ke::throw_error("ObjectController::updateObjects", "GForce Equasion is not in <1, 3> range", "ERROR");
+								AppSettings::setGForceEquasion(2);
+
+								(*itr)->object.physics()->modifyForce((*i)->name(),
+									gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+										(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+									angle);
+							}
 						}
 					}
 					else
@@ -546,10 +628,37 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 						if (((*itr)->object.getPosition().x > (*i)->object.getPosition().x))
 							angle += 180;
 
-						(*itr)->object.physics()->modifyForce((*i)->name(),
-							gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
-								(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
-							angle);
+						if (AppSettings::getGForceEquasion() == 2) // <- default
+						{
+							(*itr)->object.physics()->modifyForce((*i)->name(),
+								gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+									(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+								angle);
+						}
+						else if (AppSettings::getGForceEquasion() == 1)
+						{
+							(*itr)->object.physics()->modifyForce((*i)->name(),
+								gravitational_force_r((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+									std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2))))) * m_space_scale,
+								angle);
+						}
+						else if (AppSettings::getGForceEquasion() == 3)
+						{
+							(*itr)->object.physics()->modifyForce((*i)->name(),
+								gravitational_force_r3((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+									std::pow(std::sqrt((std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))), 3)) * m_space_scale,
+								angle);
+						}
+						else
+						{
+							ke::throw_error("ObjectController::updateObjects", "GForce Equasion is not in <1, 3> range", "ERROR");
+							AppSettings::setGForceEquasion(2);
+
+							(*itr)->object.physics()->modifyForce((*i)->name(),
+								gravitational_force_2((*itr)->object.physics()->getMass(), (*i)->object.physics()->getMass(),
+									(std::pow((*itr)->object.getPosition().y - (*i)->object.getPosition().y, 2) + (std::pow((*itr)->object.getPosition().x - (*i)->object.getPosition().x, 2)))) * m_space_scale,
+								angle);
+						}
 					}
 				}
 			}
@@ -578,7 +687,7 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 	}
 	else
 	{
-		//MULTITHREADING IMPROVES PERFORMANCE HERE BY AROUND 10 TIMES
+		// MULTITHREADING IMPROVES PERFORMANCE HERE BY AROUND 10 TIMES
 
 		for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
 		{

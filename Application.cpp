@@ -12,6 +12,7 @@ Application::Application()
 	this->InitObjects();
 
 	FileStorage::LinkFiles();
+	ke::Random::generateRandomSeed();
 
 	//IS_start_intro_closing(*(states.back().get()));
 }

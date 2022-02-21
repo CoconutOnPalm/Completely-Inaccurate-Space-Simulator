@@ -28,7 +28,7 @@ namespace ke
 
 
 
-	void Random::geterateRandomSeed()
+	void Random::generateRandomSeed()
 	{
 		Get().m_seed = static_cast<unsigned int>(std::time(nullptr));
 		srand(Get().m_seed);

@@ -143,7 +143,7 @@ void WindowGui::renderByWindow()
 	m_maximize.render(window);
 	m_minimize.render(window);
 
-	//m_mousePosVis.render(window);
+	m_mousePosVis.render(window);
 }
 
 StateQuitCode WindowGui::Quit()

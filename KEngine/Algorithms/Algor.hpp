@@ -369,4 +369,11 @@ namespace ke
 		return sf::Vector2<double>(x, y);
 	}
 
+
+	template <typename T, typename U>
+	inline bool areClose(const sf::Vector2<T>& vec1, const sf::Vector2<U>& vec2, double Epsilon = 0.001)
+	{
+		return (abs(vec1.x - vec2.x) <= Epsilon && abs(vec1.y - vec2.y) <= Epsilon);
+	}
+
 } // namespace ke

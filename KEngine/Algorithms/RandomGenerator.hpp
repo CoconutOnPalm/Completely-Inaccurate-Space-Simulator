@@ -49,7 +49,7 @@ namespace ke
 		/// <summary>
 		/// generates random seed (srand(time(0)))
 		/// </summary>
-		static void geterateRandomSeed();
+		static void generateRandomSeed();
 
 
 		////////////////

@@ -610,7 +610,7 @@ void SettingsState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			default:
 				ke::throw_error("SettingsState::updateEvents() -> state quitting", "State not found", "ERROR");
@@ -629,7 +629,7 @@ void SettingsState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			default:
 				ke::throw_error("SettingsState::updateEvents() -> state quitting", "State not found", "ERROR");

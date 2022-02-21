@@ -95,7 +95,7 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);
@@ -121,7 +121,7 @@ void OpeningState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			case STATE::SIMULATION:
 				states->back() = std::make_unique<SimulationState>(window, view, m_simulation_name);

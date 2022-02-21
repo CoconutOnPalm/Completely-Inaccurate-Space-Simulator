@@ -1,13 +1,13 @@
 #include "MainMenu.hpp"
 
-MainMenu::MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view)
+MainMenu::MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view, bool with_animation)
 	: State(sf_window, sf_view, STATE::MAIN_MENU)
 	, m_sm_color(sf::Color::Black)
 	, m_next_state(STATE::NONE)
 	, m_outro_time(0)
 	, m_current_point_1(40)
 	, m_current_point_2(50)
-	, m_animation_finished(false)
+	, m_animation_finished(!with_animation)
 	, m_quitting_app(false)
 	, point_count_multiplier(2)
 {
@@ -24,7 +24,7 @@ MainMenu::~MainMenu()
 
 void MainMenu::InitState()
 {
-	
+
 
 	m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, "Textures/StateTextures/Simulation/Backgrounds/NGC-2525.png");
 	m_backgroundMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, L"", 0, {}, sf::Color(0, 0, 0, 255.f - 255.f * AppSettings::BackgroundBrightness() * 0.01f));
@@ -56,8 +56,20 @@ void MainMenu::InitState()
 	m_orbit_2.setFillColor(sf::Color::Transparent);
 	 */
 
-	m_settings_button.create(winSize.y / 12, m_orbit_1.getPoint(0) + m_orbit_1.getPosition(), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/settings.png");
-	m_quitButton.create(winSize.y / 10, m_orbit_2.getPoint(0) + m_orbit_2.getPosition(), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/quit.png");
+	
+	if (m_animation_finished)
+	{
+		m_settings_button.create(winSize.y / 12, m_orbit_1.getPoint(0) + m_orbit_1.getPosition(), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/settings.png");
+		m_quitButton.create(winSize.y / 10, m_orbit_2.getPoint(0) + m_orbit_2.getPosition(), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/quit.png");
+	}
+	else
+	{
+		m_settings_button.create(winSize.y / 12, sf::Vector2f(winSize.x / 2.7683, winSize.y / 1.6740), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/settings.png");
+		m_quitButton.create(winSize.y / 10, sf::Vector2f(winSize.x / 1.3734, winSize.y / 1.1224), ke::Origin::MIDDLE_MIDDLE, "Textures/StateTextures/MainMenu/quit.png");
+
+		m_settings_button.setPosition(sf::Vector2f(winSize.x / 2.7683, winSize.y / 1.6740));
+		m_quitButton.setPosition(sf::Vector2f(winSize.x / 1.3734, winSize.y / 1.1224));
+	}
 
 
 
@@ -186,23 +198,37 @@ void MainMenu::updateEvents(const MousePosition& mousePosition, float dt)
 		ke::SmoothColorChange(&m_stateMask, true, sf::Color::Transparent, sf::Color::Black, m_sm_color, 256, dt);
 	}
 
-	if (m_current_point_1 < 130 * point_count_multiplier)
+	if (!m_animation_finished)
 	{
-		ke::SmoothMove(&m_settings_button, m_orbit_1.getPoint(m_current_point_1 + 1), m_orbit_1.getPoint(m_current_point_1), (130 * point_count_multiplier - m_current_point_1) * 10, dt);
+		if (m_current_point_1 < 130 * point_count_multiplier)
+		{
+			ke::SmoothMove(&m_settings_button, m_orbit_1.getPoint(m_current_point_1 + 1), m_orbit_1.getPoint(m_current_point_1), (130 * point_count_multiplier - m_current_point_1) * 10, dt);
 
-		if (ke::areClose(m_settings_button.getPosition(), m_orbit_1.getPoint(m_current_point_1 + 1)))
-			m_current_point_1++;
+			if (ke::areClose(m_settings_button.getPosition(), m_orbit_1.getPoint(m_current_point_1 + 1)))
+				m_current_point_1++;
+		}
+		else
+		{
+			if (!m_animation_finished)
+			{
+				ke::debug::printVector2(m_settings_button.getPosition(), "settigns");
+				ke::debug::printVector2(m_quitButton.getPosition(), "quit");
+			}
+			m_animation_finished = true;
+		}
+		if (m_current_point_2 < 110 * point_count_multiplier)
+		{
+			ke::SmoothMove(&m_quitButton, m_orbit_2.getPoint(m_current_point_2 + 1), m_orbit_2.getPoint(m_current_point_2), (110 * point_count_multiplier - m_current_point_2) * 10, dt);
+
+			if (ke::areClose(m_quitButton.getPosition(), m_orbit_2.getPoint(m_current_point_2 + 1)))
+				m_current_point_2++;
+		}
 	}
 	else
 	{
-		m_animation_finished = true;
-	}
-	if (m_current_point_2 < 110 * point_count_multiplier)
-	{
-		ke::SmoothMove(&m_quitButton, m_orbit_2.getPoint(m_current_point_2 + 1), m_orbit_2.getPoint(m_current_point_2), (110 * point_count_multiplier - m_current_point_2) * 10, dt);
 
-		if (ke::areClose(m_quitButton.getPosition(), m_orbit_2.getPoint(m_current_point_2 + 1)))
-			m_current_point_2++;
+		m_settings_button.setPosition(sf::Vector2f(winSize.x / 2.7683, winSize.y / 1.6740));
+		m_quitButton.setPosition(sf::Vector2f(winSize.x / 1.3734, winSize.y / 1.1224));
 	}
 
 
@@ -244,55 +270,24 @@ void MainMenu::updateEvents(const MousePosition& mousePosition, float dt)
 
 	auto color_itr = m_colors.begin();
 
-	//ke::SmoothColorChange(&m_settings_button, m_settings_button.isInvaded(mousePosition.byView), sf::Color(0, 0, 0, 0), sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
-	//ke::SmoothColorChange(&m_quitButton, m_quitButton.isInvaded(mousePosition.byView), sf::Color(0, 0, 0, 0), sf::Color(0, 0, 0, 32), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(&m_start_button, m_start_button.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(255, 255, 255, 128), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(&m_settings_button, m_settings_button.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(255, 255, 255, 128), *color_itr, 256, dt); ++color_itr;
+	ke::SmoothColorChange(&m_quitButton, m_quitButton.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(255, 255, 255, 128), *color_itr, 256, dt); ++color_itr;
 }
 
 void MainMenu::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
-	//if (mousePosition.byView.x > winSize.x * 0.125f && mousePosition.byView.x < winSize.x * 0.25f)
-	//{
-	//	for (auto& itr : m_buttons)
-	//		itr->update({ 0, 0 }, event, sf::Mouse::Left, nullptr);
-
-	//	if (m_buttons.at(0)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
-	//	{
-	//		p_quitCode = StateQuitCode::STATE_QUIT;
-	//		m_next_state = STATE::SIM_OPENING;
-	//	}
-	//	else if (m_buttons.at(1)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
-	//	{
-	//		//p_quitCode = StateQuitCode::STATE_QUIT;
-	//		//m_next_state = NextState::SETTINGS;
-	//	}
-	//	else if (m_buttons.at(2)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
-	//	{
-	//		p_quitCode = StateQuitCode::STATE_QUIT;
-	//		m_next_state = STATE::SETTINGS;
-	//	}
-
-	//	if (m_buttons.at(3)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
-	//		p_quitCode = StateQuitCode::APP_END;
-	//}
-
-	if (m_start_button.isInvaded(mousePosition.byView))
+	if (m_start_button.isClicked(sf::Mouse::Left, mousePosition.byView, event))
 	{
-		m_star_shader.setUniform("size", winSize.y / 2.9f);
-
-		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
-		{
-			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = STATE::SIM_OPENING;
-		}
+		p_quitCode = StateQuitCode::STATE_QUIT;
+		m_next_state = STATE::SIM_OPENING;
 	}
-	else
+	else if (m_settings_button.isClicked(sf::Mouse::Left, mousePosition.byView, event))
 	{
-		m_star_shader.setUniform("size", winSize.y / 3.5f);
+		p_quitCode = StateQuitCode::STATE_QUIT;
+		m_next_state = STATE::SETTINGS;
 	}
-
-	
-
-	if (!m_quitting_app)
+	else if (!m_quitting_app)
 	{
 		if (m_quitButton.isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
@@ -301,6 +296,7 @@ void MainMenu::updatePollEvents(const MousePosition& mousePosition, float dt, sf
 			m_outro_clock.restart();
 
 			m_stateMask.setFillColor(sf::Color(0, 255, 255, 128));
+			m_menu_logo.setActiveStatus(false);
 
 			m_sfx.play("Hyperspace jump");
 		}
@@ -313,7 +309,6 @@ void MainMenu::renderBackground()
 	m_backgroundMask.render(window);
 	window->draw(*m_backgroundMask.getShape(), &m_star_shader);
 	m_menu_logo.render(window);
-
 }
 
 void MainMenu::renderByView()

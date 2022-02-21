@@ -561,7 +561,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			default:
 				ke::throw_error("SimulationState::updateEvents() -> state quitting", "State not found", "ERROR");
@@ -580,7 +580,7 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 			switch (m_next_state)
 			{
 			case STATE::MAIN_MENU:
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, false);
 				break;
 			default:
 				ke::throw_error("SimulationState::updateEvents() -> state quitting", "State not found", "ERROR");

@@ -10,7 +10,7 @@ class MainMenu :
 {
 public:
 
-    MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view);
+    MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view, bool with_animation);
     virtual ~MainMenu();
 
     void InitState();
@@ -52,7 +52,7 @@ private:
 
     ke::SoundEffects m_sfx;
 
-    std::array<ke::Colorf, 3> m_colors;
+    std::array<ke::Colorf, 4> m_colors;
 
     sf::Shader m_star_shader;
 

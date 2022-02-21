@@ -76,7 +76,7 @@ void IntroState::updateEvents(const MousePosition& mousePosition, float dt)
 
 				if (m_sm_color == ke::Colorf(sf::Color::Black))
 				{
-					states->back() = std::make_unique<MainMenu>(window, view);
+					states->back() = std::make_unique<MainMenu>(window, view, true);
 					states->back()->InitState();
 					return;
 				}
@@ -84,7 +84,7 @@ void IntroState::updateEvents(const MousePosition& mousePosition, float dt)
 
 			if (m_pause_time > 10000) // safety guard
 			{
-				states->back() = std::make_unique<MainMenu>(window, view);
+				states->back() = std::make_unique<MainMenu>(window, view, true);
 				states->back()->InitState();
 				return;
 			}
@@ -96,7 +96,7 @@ void IntroState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 {
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 	{
-		states->back() = std::make_unique<MainMenu>(window, view);
+		states->back() = std::make_unique<MainMenu>(window, view, true);
 		states->back()->InitState();
 		return;
 	}

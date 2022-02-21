@@ -62,7 +62,7 @@ void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, s
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LSystem) && sf::Keyboard::isKeyPressed(sf::Keyboard::M))
 		window->setVisible(false);
-		//::ShowWindow(window->getSystemHandle(), SW_MINIMIZE);
+	//::ShowWindow(window->getSystemHandle(), SW_MINIMIZE);
 
 
 	if (mousePosition.byWindow.y < winSize.y / 32.f)
@@ -76,40 +76,43 @@ void WindowGui::updatePollEvents(const MousePosition& mousePosition, float dt, s
 
 		else if (m_maximize.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
-			RECT desktop;
-			const HWND hDesktop = GetDesktopWindow();
-			GetWindowRect(hDesktop, &desktop);
-
-			sf::Vector2u wSize(desktop.right, desktop.bottom);
-
-			if (!m_windowStatus && winSize != sf::Vector2f(1920, 1080)) // fullscreen
+			if (p_current_state != STATE::SIMULATION)
 			{
-				::ShowWindow(window->getSystemHandle(), SW_MAXIMIZE);
-				window->create(sf::VideoMode(wSize.x, wSize.y), "Completely Inaccurate Space Simulator", sf::Style::None);
-				winSize = sf::Vector2f(wSize);
-				viewSize = sf::Vector2f(wSize);
-				m_windowStatus = true;
+				RECT desktop;
+				const HWND hDesktop = GetDesktopWindow();
+				GetWindowRect(hDesktop, &desktop);
 
-				if (p_current_state != STATE::SIMULATION)
-					window->setFramerateLimit(AppSettings::MaxMenuFPS());
-				else
-					window->setFramerateLimit(AppSettings::MaxSimulationFPS());
+				sf::Vector2u wSize(desktop.right, desktop.bottom);
+
+				if (!m_windowStatus && winSize != sf::Vector2f(1920, 1080)) // fullscreen
+				{
+					::ShowWindow(window->getSystemHandle(), SW_MAXIMIZE);
+					window->create(sf::VideoMode(wSize.x, wSize.y), "Completely Inaccurate Space Simulator", sf::Style::None);
+					winSize = sf::Vector2f(wSize);
+					viewSize = sf::Vector2f(wSize);
+					m_windowStatus = true;
+
+					if (p_current_state != STATE::SIMULATION)
+						window->setFramerateLimit(AppSettings::MaxMenuFPS());
+					else
+						window->setFramerateLimit(AppSettings::MaxSimulationFPS());
+				}
+				else // normal
+				{
+					window->create(sf::VideoMode(AppSettings::DefaultWindowSize().x, AppSettings::DefaultWindowSize().y), "Completely Inaccurate Space Simulator", sf::Style::None);
+					m_windowStatus = false;
+					winSize = AppSettings::DefaultWindowSize();
+					viewSize = AppSettings::DefaultWindowSize();
+
+					if (p_current_state != STATE::SIMULATION)
+						window->setFramerateLimit(AppSettings::MaxMenuFPS());
+					else
+						window->setFramerateLimit(AppSettings::MaxSimulationFPS());
+				}
+
+				for (auto& itr : *states)
+					itr->reloadState();
 			}
-			else // normal
-			{
-				window->create(sf::VideoMode(AppSettings::DefaultWindowSize().x, AppSettings::DefaultWindowSize().y), "Completely Inaccurate Space Simulator", sf::Style::None);
-				m_windowStatus = false;
-				winSize = AppSettings::DefaultWindowSize();
-				viewSize = AppSettings::DefaultWindowSize();
-
-				if (p_current_state != STATE::SIMULATION)
-					window->setFramerateLimit(AppSettings::MaxMenuFPS());
-				else
-					window->setFramerateLimit(AppSettings::MaxSimulationFPS());
-			}
-
-			for (auto& itr : *states)
-				itr->reloadState();
 		}
 
 

@@ -34,14 +34,23 @@ void StateControlPanel::updateEvents(const MousePosition& mousePosition, float d
 void StateControlPanel::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event, sf::RenderWindow* window, sf::View* view)
 {
 	if (m_controllers->at(0)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		State::sfx.play("click");
 		(*m_quitOverlay) = std::make_unique<QuitOverlay>(sf::Vector2f(window->getSize()));
+	}
 	else if (m_controllers->at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		State::sfx.play("click");
 		m_settingsOverlay->activate();
+	}
 	else if (m_controllers->at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		State::sfx.play("click");
 		m_simParamsOverlay->activate();
+	}
 	else if (m_controllers->at(3)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		std::cout << "quack\n";
+		State::sfx.play("click");
 		(*m_helpOverlay) = std::make_unique<HelpOverlay>(sf::Vector2f(window->getSize()));
 	}
 }

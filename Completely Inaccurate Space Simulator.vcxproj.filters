@@ -123,6 +123,9 @@
     <ClCompile Include="States\Overlays\EquasionSelectionOverlay.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="States\Credits.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -242,6 +245,9 @@
     <ClInclude Include="States\Overlays\EquasionSelectionOverlay.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="States\Credits.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Completely Inaccurate Space Simulator.rc">
@@ -252,5 +258,9 @@
     <Image Include="res\CISS_icon.ico">
       <Filter>Pliki zasobów</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Audio\playlist.txt" />
+    <Text Include="Audio\sfxlist.txt" />
   </ItemGroup>
 </Project>

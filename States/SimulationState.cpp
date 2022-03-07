@@ -508,7 +508,52 @@ void SimulationState::InitTimeGUI()
 
 void SimulationState::reloadState()
 {
+	// TODO: deal with all vectors/arrays
 
+	//m_stateBackground.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, ke::Settings::EmptyFHDTexturePath(), {}, {}, {}, sf::Color::Black);
+
+	//m_stateMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Black);
+	//m_sm_color.setColor(sf::Color::Black);
+
+	//m_overlayMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Transparent);
+	//m_om_color.setColor(sf::Color::Transparent);
+
+	//m_shaderMask.create(winSize, { 0, 0 }, ke::Origin::LEFT_TOP, {}, {}, {}, sf::Color::Transparent);
+
+	//view->setSize(sf::Vector2f(winSize * 10.f));
+	//view->setCenter(sf::Vector2f(0, 0));
+
+
+	//m_VDController.assign(&m_symbols, &m_values, &m_units, &m_modifiers, &m_object_name, &m_objects);
+	//m_VDController.assignScale(m_space_scale, m_planet_scale, m_star_scale);
+
+	//m_TimeController.assign(&m_time_menagers);
+
+	//m_ObjController.assign(&m_objects, &m_orbit_preview, &m_distance_preview, &m_placed_object);
+	//m_ObjController.assignScale(m_space_scale, m_planet_scale, m_star_scale, m_shader_scale, m_brightness_scale);
+
+	//m_StateControlPanel.assign(&m_state_controllers, &m_quitOverlay, &m_SimParamsOverlay, &m_SettingsOverlay, &m_helpOverlay);
+
+	////m_ObjectLibraryOverlay = std::make_unique<ObjectLibraryOverlay>();
+	//m_ObjectLibraryOverlay.assign(window);
+	//m_ObjectLibraryOverlay.initUI();
+	//m_ObjectLibraryOverlay.loadObjects();
+
+	//m_SimParamsOverlay.assign(window);
+	//m_SimParamsOverlay.initUI();
+
+	//m_SettingsOverlay.assign(window, &m_stateBackground);
+	//m_SettingsOverlay.initUI();
+
+	//m_collider.assing(&m_ObjController, sf::Vector2f(window->getSize()), m_space_scale);
+
+	//m_saveController.assign(&m_ObjController, window);
+
+
+	//m_placed_object.create(100, { 1000, 1000 }, ke::Origin::MIDDLE_MIDDLE, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent);
+
+
+	//this->InitState();
 }
 
 
@@ -917,6 +962,9 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		m_quitOverlay->updatePollEvents(mousePosition, dt, event);
 
+		sf::RenderTexture texture;
+		texture.create(300, 300);
+
 		switch (m_quitOverlay->quitStatus())
 		{
 		case OverlayQuitCode::QUITTING:
@@ -925,8 +973,15 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 			break;
 
 		case OverlayQuitCode::QUITTING_AND_SAVING:
-			p_quitCode = StateQuitCode::STATE_QUIT;
-			m_next_state = STATE::MAIN_MENU;
+
+			texture.clear(sf::Color::Black);
+
+			m_simSavingOverlay = std::make_unique<SimSavingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running, &texture.getTexture());
+
+			m_quitOverlay = nullptr;
+
+			/*p_quitCode = StateQuitCode::STATE_QUIT;
+			m_next_state = STATE::MAIN_MENU;*/
 			// TODO: SAVING
 			break;
 
@@ -1349,6 +1404,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		if ((*(m_modifiers.begin()))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: OPEN EXTERNAL WINDOW
 		{
+			sfx.play("click");
+
 			if (detailedDataWindow.status() == ExternalWindowStatus::CLOSED)
 			{
 				m_DetailedDataWindwThread = std::async(std::launch::async, &DetailedDataWindow::Run, &detailedDataWindow, m_selected_object->get(), m_objectBuffer, m_space_scale);
@@ -1357,6 +1414,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		else if ((*(m_modifiers.begin() + 1))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: COPY OBJECT
 		{
 			// duplicating object
+
+			sfx.play("click");
 
 			m_objectBuffer.load(m_selected_object);
 
@@ -1369,6 +1428,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		else if ((*(m_modifiers.begin() + 2))->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: CHANGE POSITION
 		{
 			// changing object position
+
+			sfx.play("click");
 
 			m_objectBuffer.load(m_selected_object);
 
@@ -1383,6 +1444,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		else if (m_modifiers.back()->isClicked(sf::Mouse::Left, mousePosition.byWindow, event)) // BUTTON: DELETE OBJECT
 		{
 			// deleting object
+
+			sfx.play("click");
 
 			m_ObjController.deleteObject(m_selected_object);
 			m_VDController.setEmpty();
@@ -1545,6 +1608,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	// save button
 	if (m_project_menagers.at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
+
 		sf::RenderTexture texture;
 		texture.create(300, 300);
 
@@ -1569,6 +1634,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	else if (m_project_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
+
 		if (m_simLoadingOverlay == nullptr)
 			m_simLoadingOverlay = std::make_unique<SimLoadingOverlay>(sf::Vector2f(window->getSize()), &m_saveController, &m_running, window);
 	}
@@ -1578,6 +1645,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	else if (m_project_menagers.at(0)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
+
 		if (m_new_simulation_warning == nullptr)
 			m_new_simulation_warning = std::make_unique<WarningOverlay>(L"Warning!\nAll unsaved progress will be lost", sf::Vector2f(window->getSize()));
 	}
@@ -1585,6 +1654,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	else if (m_equasionSelector.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
+
 		if (m_equasionSelectionOverlay == nullptr)
 			m_equasionSelectionOverlay = std::make_unique<EquasionSelectionOverlay>(sf::Vector2f(window->getSize()));
 	}
@@ -1731,6 +1802,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			if ((*itr)->icon.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 			{
+				//sfx.play("click");
+
 				// WARNING
 				m_icon_iterator = itr;
 				m_objectBuffer.load(*(m_icon_iterator->get()));
@@ -1744,6 +1817,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 		if (m_tools[0]->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
+			sfx.play("click");
+
 			AppSettings::setStarShader(!AppSettings::StarShader());
 
 			if (AppSettings::StarShader())
@@ -1753,6 +1828,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 		else if (m_tools[1]->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
+			sfx.play("click");
+
 			AppSettings::setGlowShader(!AppSettings::GlowShader());
 
 			if (AppSettings::GlowShader())
@@ -1762,6 +1839,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 		else if (m_tools[2]->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
+			sfx.play("click");
+
 			AppSettings::setTrailsEnabled(!AppSettings::TrailsEnabled());
 
 			if (AppSettings::TrailsEnabled())
@@ -1771,6 +1850,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 		else if (m_tools[3]->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
+			sfx.play("click");
+
 			AppSettings::setObjectNameDisplayed(!AppSettings::displayObjectName());
 
 			if (AppSettings::displayObjectName())
@@ -1783,6 +1864,8 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 	{
 		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
 		{
+			//sfx.play("click");
+
 			for (auto& itr : m_values)
 			{
 				if (!itr.second->getEPS())
@@ -1816,18 +1899,34 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		// FEATURE: changing time using time panel
 
 		if (m_time_menagers.at(1)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		{
+			sfx.play("click");
+
 			if (m_running)
 				m_TimeController.stop(m_running, &m_play_texture);
 			else
 				m_TimeController.resume(m_running, &m_pause_texture);
+		}
 		else if (m_time_menagers.at(0)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		{
+			sfx.play("click");
 			m_TimeController.slowDown(m_simulation_speed, 2);
+		}
 		else if (m_time_menagers.at(2)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		{
+			sfx.play("click");
 			m_TimeController.speedUp(m_simulation_speed, 2);
+		}
 		else if (m_time_menagers.at(3)->isClicked(sf::Mouse::Right, mousePosition.byWindow, event))
+		{
+			sfx.play("click");
 			m_TimeController.slowDown(m_simulation_speed, 2);
+		}
 		else if (m_time_menagers.at(3)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		{
+			sfx.play("click");
 			m_TimeController.speedUp(m_simulation_speed, 2);
+		}
 	}
 	else // other
 	{

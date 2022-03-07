@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);C:\Users\Adam\Documents\programy\SFML-2.5.1vs\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);C:\Users\adamk\OneDrive\Dokumenty\SFML\32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +108,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)KEngine;C:\Users\adamk\OneDrive\Dokumenty\SFML\32-bit\SFML-2.5.1\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -155,6 +155,7 @@
     <ClCompile Include="Space Objects\Planet.cpp" />
     <ClCompile Include="Space Objects\SpaceObject.cpp" />
     <ClCompile Include="Space Objects\Star.cpp" />
+    <ClCompile Include="States\Credits.cpp" />
     <ClCompile Include="States\ExternalWindows\DetailedDataWindow.cpp" />
     <ClCompile Include="States\Global\FileStorage.cpp" />
     <ClCompile Include="States\Global\TypeMap.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Space Objects\Planet.hpp" />
     <ClInclude Include="Space Objects\SpaceObject.hpp" />
     <ClInclude Include="Space Objects\Star.hpp" />
+    <ClInclude Include="States\Credits.hpp" />
     <ClInclude Include="States\ExternalWindows\DetailedDataWindow.hpp" />
     <ClInclude Include="States\Global\FileStorage.hpp" />
     <ClInclude Include="States\Global\TypeMap.hpp" />
@@ -233,6 +235,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\CISS_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Audio\playlist.txt" />
+    <Text Include="Audio\sfxlist.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

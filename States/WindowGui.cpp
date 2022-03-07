@@ -48,7 +48,7 @@ void WindowGui::reloadState()
 void WindowGui::updateEvents(const MousePosition& mousePosition, float dt)
 {
 	ke::SmoothColorChange(&m_close, m_close.isInvaded(mousePosition.byWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), m_closecolor, 256, dt);
-	ke::SmoothColorChange(&m_maximize, m_maximize.isInvaded(mousePosition.byWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), m_maximcolor, 256, dt);
+	ke::SmoothColorChange(&m_maximize, m_maximize.isInvaded(mousePosition.byWindow) && p_current_state != STATE::SIMULATION, sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), m_maximcolor, 256, dt);
 	ke::SmoothColorChange(&m_minimize, m_minimize.isInvaded(mousePosition.byWindow), sf::Color(255, 255, 255, 32), sf::Color(255, 255, 255, 0), m_minmimcolor, 256, dt);
 
 	if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -146,7 +146,7 @@ void WindowGui::renderByWindow()
 	m_maximize.render(window);
 	m_minimize.render(window);
 
-	m_mousePosVis.render(window);
+	//m_mousePosVis.render(window);
 }
 
 StateQuitCode WindowGui::Quit()

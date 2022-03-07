@@ -18,7 +18,7 @@ void HelpOverlay::updateEvents(const MousePosition& mousePosition, float dt)
 
 void HelpOverlay::updatePollEvents(const sf::Vector2f& mousePosition, float dt, sf::Event& event)
 {
-	if (event.type == sf::Event::KeyPressed)
+	if (event.type == sf::Event::KeyPressed || event.type == sf::Event::MouseButtonPressed)
 		m_quitCode = OverlayQuitCode::QUITTING;
 }
 

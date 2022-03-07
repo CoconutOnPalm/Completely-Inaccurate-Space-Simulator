@@ -66,16 +66,22 @@ void EquasionSelectionOverlay::updatePollEvents(const MousePosition& mousePositi
 	}
 	else if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::CANCELING;
 	}
 	else if (m_ok.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		AppSettings::setGForceEquasion(m_selected);
 		m_quitCode = OverlayQuitCode::ACCEPTING;
 	}
 
 	if (m_r.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_r.setOutlineThickness(1);
 		m_r.setOutlineColor(sf::Color(64, 64, 64, 255));
 		m_selected = 1;
@@ -85,6 +91,8 @@ void EquasionSelectionOverlay::updatePollEvents(const MousePosition& mousePositi
 	}
 	else if (m_r2.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_r2.setOutlineThickness(1);
 		m_r2.setOutlineColor(sf::Color(64, 64, 64, 255));
 		m_selected = 2;
@@ -94,6 +102,8 @@ void EquasionSelectionOverlay::updatePollEvents(const MousePosition& mousePositi
 	}
 	else if (m_r3.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_r3.setOutlineThickness(1);
 		m_r3.setOutlineColor(sf::Color(64, 64, 64, 255));
 		m_selected = 3;

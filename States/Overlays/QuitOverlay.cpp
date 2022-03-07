@@ -42,16 +42,27 @@ void QuitOverlay::updatePollEvents(const MousePosition& mousePosition, float dt,
 {
 	// closing by clicking out of the box
 	if (!m_button.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
+	{
 		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
+	}
 
 	else if (m_buttons["_QUIT"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
 		m_quitCode = OverlayQuitCode::QUITTING;
+		State::sfx.play("click");
+	}
 
 	else if (m_buttons["_SAVE_N_QUIT"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
 		m_quitCode = OverlayQuitCode::QUITTING_AND_SAVING;
+		State::sfx.play("click");
+	}
 
 	else if (m_buttons["_CANCEL"].isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
 		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
+		State::sfx.play("click");
+	}
 
 	//else
 		//m_quitStatus = NOT_QUITTING;

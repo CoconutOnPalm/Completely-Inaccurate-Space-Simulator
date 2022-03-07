@@ -56,8 +56,8 @@ void ObjectLibraryOverlay::initUI()
 
 	m_close_button.setTextStyle(sf::Text::Bold);
 
-	m_add_button.setFont(ke::Font::Calibri);
-	m_close_button.setFont(ke::Font::Calibri);
+	//m_add_button.setFont(ke::Font::Calibri);
+	//m_close_button.setFont(ke::Font::Calibri);
 
 
 	// | name | mass | radius | type | class | subtype | system name |
@@ -269,6 +269,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 	else if (m_close_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::QUITTING_WITHOUT_OBJECT;
 		this->resetOutput();
 		this->deactivate();
@@ -278,6 +280,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	if (m_filtering_options.at(0).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_sorting_type = OBJECT_LIRARY_SORTING_BY::SYSTEMS;
 		this->updateSystemSorting();
 
@@ -287,6 +291,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 	else if (m_filtering_options.at(1).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_sorting_type = OBJECT_LIRARY_SORTING_BY::A_Z;
 		this->updateAZSorting();
 
@@ -296,6 +302,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	}
 	else if (m_filtering_options.at(2).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_sorting_type = OBJECT_LIRARY_SORTING_BY::Z_A;
 		this->updateZASorting();
 
@@ -374,6 +382,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 		if ((*itr)->Icon().icon.isClicked(sf::Mouse::Left, mPosView, event))
 		{
+			//State::sfx.play("click");
+
 			if (m_selected == itr)
 			{
 				(*m_selected)->Icon().icon.setOutlineColor(sf::Color::Transparent);
@@ -405,9 +415,15 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 	{
 		if (m_output.name() != "__EMPTY")
 		{
+			State::sfx.play("click");
+
 			m_quitCode = OverlayQuitCode::QUITTING_WITH_OBJECT;
 			this->deactivate();
 			return;
+		}
+		else
+		{
+			State::sfx.play("error");
 		}
 	}
 

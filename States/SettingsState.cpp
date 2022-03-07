@@ -53,6 +53,9 @@ SettingsState::~SettingsState()
 	AppSettings::setSFXVolume(m_SFX_volume.getPercent());
 	AppSettings::setMusicVolume(m_music_volume.getPercent());
 
+	sfx.setGeneralVolume(AppSettings::SFXVolume());
+	music.setVolume(AppSettings::MusicVolume());
+
 
 	////////////////////////////////
 
@@ -108,8 +111,8 @@ void SettingsState::InitGenSettGUI()
 
 	m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(1 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Window", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 255)));
 	m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(3 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Audio", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128)));
-	m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(5 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Simulation", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128)));
-	m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(7 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Keybinds", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128)));
+	//m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(5 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Simulation", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128)));
+	//m_settings_types.emplace_back(std::make_unique<ke::Rectangle>(winSize / 9.f, sf::Vector2f(7 * winSize.x / 9, winSize.y / 18), ke::Origin::LEFT_TOP, L"Keybinds", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 128)));
 
 	m_selected_type_itr = m_settings_types.begin();
 
@@ -138,8 +141,8 @@ void SettingsState::InitGenSettGUI()
 
 	// apply and restore defaults button
 
-	m_apply_button.create({ winSize.x * 0.1f, winSize.y * 0.05f }, { winSize.x / 6.f, 0.95f * winSize.y }, ke::RIGHT_TOP, L"Apply", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 64), sf::Color(192, 192, 192, 192));
-	m_restore_def_buttoon.create({ winSize.x * 0.1f, winSize.y * 0.05f }, { winSize.x / 6.f, 0.95f * winSize.y }, ke::LEFT_TOP, L"Restore defaults", winSize.y / 48.f, ke::Origin::MIDDLE_MIDDLE, sf::Color(128, 128, 128, 128), sf::Color(192, 192, 192, 255));
+	m_apply_button.create({ winSize.x * 0.1f, winSize.y * 0.05f }, { winSize.x / 6.f, 0.95f * winSize.y }, ke::RIGHT_TOP, L"Apply", winSize.y / 32.f, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(192, 192, 192, 192));
+	m_restore_def_buttoon.create({ winSize.x * 0.1f, winSize.y * 0.05f }, { winSize.x / 6.f, 0.95f * winSize.y }, ke::LEFT_TOP, L"Restore defaults", winSize.y / 48.f, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(192, 192, 192, 255));
 }
 
 
@@ -221,13 +224,13 @@ void SettingsState::InitWindowSettings()
 	// window size dropdown list
 
 	m_windowSize_drl.create({ winSize.x / 6.f, winSize.y / 24.f }, { 41.f * winSize.x / 60.f, 8.f * winSize.y * 0.1f }, nullptr, L"Something went wrong :(",
-		winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 192), winSize.y / 450, sf::Color(255, 255, 255, 192), sf::Text::Bold);
-	m_windowSize_drl.addMember(nullptr, L"1024 \u00D7 576", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
-	m_windowSize_drl.addMember(nullptr, L"1280 \u00D7 720", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
-	m_windowSize_drl.addMember(nullptr, L"1366 \u00D7 768", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
-	m_windowSize_drl.addMember(nullptr, L"1600 \u00D7 900", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
-	m_windowSize_drl.addMember(nullptr, L"1920 \u00D7 1080", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
-	m_windowSize_drl.addMember(nullptr, L"1920 \u00D7 1080 Fullscreen", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color::Transparent, sf::Color(160, 160, 160, 255));
+		winSize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(32, 32, 32, 255), sf::Color(255, 255, 255, 128), 0/*winSize.y / 450*/, sf::Color(255, 255, 255, 192), sf::Text::Bold);
+	m_windowSize_drl.addMember(nullptr, L"1024 \u00D7 576", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
+	m_windowSize_drl.addMember(nullptr, L"1280 \u00D7 720", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
+	m_windowSize_drl.addMember(nullptr, L"1366 \u00D7 768", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
+	m_windowSize_drl.addMember(nullptr, L"1600 \u00D7 900", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
+	m_windowSize_drl.addMember(nullptr, L"1920 \u00D7 1080", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
+	m_windowSize_drl.addMember(nullptr, L"1920 \u00D7 1080 Fullscreen", winSize.y / 56, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(160, 160, 160, 255));
 
 	for (auto& itr : *m_windowSize_drl.getMembers())
 		itr->update({ 0, 0 }, fake_event, sf::Mouse::Left, nullptr);
@@ -281,18 +284,6 @@ void SettingsState::InitAudioSettings()
 	m_AS_accessories.back()->setFillColor(sf::Color(255, 255, 255, 160));
 	m_AS_accessories.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.y / 24.f, winSize.y / 24.f), sf::Vector2f(winSize.x + 41.f * winSize.x / 64.f + winSize.x / 9.f, 5.f * winSize.y * 0.1f), ke::Origin::LEFT_MIDDLE, &audio_icon));
 	m_AS_accessories.back()->setFillColor(sf::Color(255, 255, 255, 160));
-
-
-	// sound effects
-
-	m_test_effects.addEffect("Quack", "Audio/Quack.wav", AppSettings::SFXVolume());
-	//m_test_effects.addEffect("Alarm", "Audio/Alarm Clock.wav", AppSettings::MusicVolume());
-
-
-	// music
-
-	m_test_music.addSong("Audio/Alarm Clock.wav");
-	m_test_music.enableLoop(false);
 }
 
 
@@ -842,6 +833,8 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 		{
 			if ((*itr)->isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 			{
+				sfx.play("click");
+
 				m_view_scrolling = false;
 
 				if (m_selected_type_id == i)
@@ -872,9 +865,7 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 
 		if (m_back_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 		{
-			//states->back() = std::make_unique<MainMenu>(window, view);
-			//states->back()->InitState();
-			//return;
+			sfx.play("click");
 
 			p_quitCode = StateQuitCode::STATE_QUIT;
 			m_next_state = STATE::MAIN_MENU;
@@ -899,6 +890,8 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 		// apply button
 		if (m_window_size_changed && m_apply_button.isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
+			sfx.play("click");
+
 			sf::Vector2u new_win_size(1920, 1080);
 
 			switch (m_windowSize_drl.getSelectedID())
@@ -930,6 +923,8 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 
 		if (m_restore_def_buttoon.isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
+			sfx.play("click");
+
 			AppSettings::RestoreDefaults();
 			AppSettings::Save();
 
@@ -1087,17 +1082,17 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 	{
 		if ((mousePosition.byView.y > winSize.y * 0.35f && mousePosition.byView.y < winSize.y * 0.5f) || m_SFX_volume.isHolded())
 			if (m_SFX_volume.update(mousePosition.byView, event, sf::Mouse::Left, nullptr))
-				m_test_effects.setVolume(m_SFX_volume.getPercent(), "Quack");
+				sfx.setVolume(m_SFX_volume.getPercent(), "Quack");
 
 		if ((mousePosition.byView.y > winSize.y * 0.45f && mousePosition.byView.y < winSize.y * 0.55f) || m_music_volume.isHolded())
 			if (m_music_volume.update(mousePosition.byView, event, sf::Mouse::Left, nullptr))
-				m_test_music.setVolume(m_music_volume.getPercent());
+				music.setVolume(m_music_volume.getPercent());
 
 
 		if (m_AS_accessories.at(2)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
-			m_test_effects.play("Quack");
+			sfx.play("Quack");
 
-		else if (m_AS_accessories.at(3)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
+		/*else if (m_AS_accessories.at(3)->isClicked(sf::Mouse::Left, mousePosition.byView, event))
 		{
 			if (m_test_music.playing())
 				m_test_music.skip();
@@ -1107,7 +1102,7 @@ void SettingsState::updatePollEvents(const MousePosition& mousePosition, float d
 				m_test_music.setVolume(m_music_volume.getPercent());
 				m_test_music.play();
 			}
-		}
+		}*/
 	}
 }
 
@@ -1146,17 +1141,17 @@ void SettingsState::genSettColorUpdate(const MousePosition& mousePosition, const
 
 	// apply and restore defaults SCC
 
-	ke::SmoothColorChange(&m_restore_def_buttoon, m_restore_def_buttoon.isInvaded(mousePosition.byView), sf::Color(128, 128, 128, 128), sf::Color(128, 128, 128, 64), m_settings_manip_colors[2], 256, dt);
-	ke::SmoothTextColorChange(&m_restore_def_buttoon, m_restore_def_buttoon.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(192, 192, 192, 255), m_settings_manip_colors[3], 256, dt);
+	ke::SmoothColorChange(&m_restore_def_buttoon, m_restore_def_buttoon.isInvaded(mousePosition.byView), sf::Color(32, 32, 32, 255), sf::Color(16, 16, 16, 255), m_settings_manip_colors[2], 128, dt);
+	ke::SmoothTextColorChange(&m_restore_def_buttoon, m_restore_def_buttoon.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(192, 192, 192, 255), m_settings_manip_colors[3], 128, dt);
 
 	if (m_window_size_changed)
 	{
-		ke::SmoothColorChange(&m_apply_button, m_apply_button.isInvaded(mousePosition.byView), sf::Color(128, 128, 128, 128), sf::Color(128, 128, 128, 64), m_settings_manip_colors[0], 256, dt);
-		ke::SmoothTextColorChange(&m_apply_button, m_apply_button.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(192, 192, 192, 192), m_settings_manip_colors[1], 256, dt);
+		ke::SmoothColorChange(&m_apply_button, m_apply_button.isInvaded(mousePosition.byView), sf::Color(32, 32, 32, 255), sf::Color(16, 16, 16, 255), m_settings_manip_colors[0], 128, dt);
+		ke::SmoothTextColorChange(&m_apply_button, m_apply_button.isInvaded(mousePosition.byView), sf::Color::White, sf::Color(192, 192, 192, 255), m_settings_manip_colors[1], 128, dt);
 	}
 	else
 	{
-		ke::SmoothColorChange(&m_apply_button, true, sf::Color(128, 128, 128, 32), sf::Color(128, 128, 128, 64), m_settings_manip_colors[0], 256, dt);
+		ke::SmoothColorChange(&m_apply_button, true, sf::Color(16, 16, 16, 255), sf::Color(32, 32, 32, 255), m_settings_manip_colors[0], 128, dt);
 	}
 }
 
@@ -1192,11 +1187,13 @@ void SettingsState::winSettColorUpdate(const MousePosition& mousePosition, const
 	ke::SmoothTextColorChange(gui_acc_itr->get(), (*gui_acc_itr)->isInvaded(mousePosition.byView) || m_bright_lvl.isInvaded(mousePosition.byView) || m_bright_lvl.isHolded(), sf::Color::White, sf::Color(255, 255, 255, 160), *ws_color_itr, 256, dt); ++ws_color_itr; ++gui_acc_itr;
 
 
+	ke::SmoothColorChange(m_windowSize_drl.getSelected(), m_windowSize_drl.getSelected()->isInvaded(mousePosition.byView) || m_windowSize_drl.Expanded(), sf::Color(64, 64, 64, 255), sf::Color(32, 32, 32, 255), *ws_color_itr, 256, dt); ++ws_color_itr;
 	ke::SmoothOutlineColorChange(m_windowSize_drl.getSelected(), m_windowSize_drl.getSelected()->isInvaded(mousePosition.byView) || m_windowSize_drl.Expanded(), sf::Color::White, sf::Color(255, 255, 255, 192), *ws_color_itr, 256, dt); ++ws_color_itr;
 	ke::SmoothTextColorChange(m_windowSize_drl.getSelected(), m_windowSize_drl.Expanded(), sf::Color::White, sf::Color(255, 255, 255, 192), *ws_color_itr, 256, dt); ++ws_color_itr;
 
 	for (auto itr = m_windowSize_drl.getMembers()->begin(), eoi = m_windowSize_drl.getMembers()->end(); itr != eoi; ++itr)
 	{
+		ke::SmoothColorChange(itr->get(), (*itr)->isInvaded(mousePosition.byView), sf::Color(32, 32, 32, 255), sf::Color(16, 16, 16, 255), *ws_color_itr, 256, dt);
 		ke::SmoothTextColorChange(itr->get(), (*itr)->isInvaded(mousePosition.byView), sf::Color::White, sf::Color(160, 160, 160, 255), *ws_color_itr, 512, dt);
 		++ws_color_itr;
 	}
@@ -1237,7 +1234,7 @@ void SettingsState::audSettColorUpdate(const MousePosition& mousePosition, const
 
 void SettingsState::renderBackground()
 {
-	m_stateBackground.render(window);
+	//m_stateBackground.render(window);
 	m_backgroundMask.render(window);
 }
 

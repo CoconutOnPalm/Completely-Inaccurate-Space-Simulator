@@ -195,6 +195,8 @@ void SimParamsOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 
 	if (m_apply.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::CHANGING_SETTINGS;
 
 		this->saveSettings();
@@ -202,6 +204,8 @@ void SimParamsOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 	}
 	else if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::QUITTING;
 
 		this->restoreSettings();

@@ -55,7 +55,8 @@ enum class STATE
 	SETTINGS,
 	SIM_OPENING,
 	SIMULATION,
-	SAVED_BROWSER
+	SAVED_BROWSER,
+	CREDITS
 };
 
 
@@ -118,6 +119,13 @@ public:
 	StateQuitCode p_quitCode;
 
 
+	static void loadMusic();
+	static void loadSFX();
+
+	static ke::Playlist music;
+	static ke::SoundEffects sfx;
+
+
 protected:
 
 	static sf::RenderWindow* window;
@@ -132,5 +140,7 @@ protected:
 
 
 private:
+
+	static std::future<void> m_music_thread;
 
 };

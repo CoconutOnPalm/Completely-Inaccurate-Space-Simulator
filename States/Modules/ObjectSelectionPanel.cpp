@@ -206,6 +206,8 @@ void ObjectSelectionPanel::updatePollEvents(const sf::Vector2f& mousePosition, f
 {
 	if (m_iconUI->at(1)->isClicked(sf::Mouse::Left, mousePosition, event)) // bottom icons UI
 	{
+		State::sfx.play("click");
+
 		++selected_layout;
 
 		if (selected_layout == filestorage.linked_icon_layouts_files.end())
@@ -215,6 +217,8 @@ void ObjectSelectionPanel::updatePollEvents(const sf::Vector2f& mousePosition, f
 	}
 	else if (m_iconUI->at(1)->isClicked(sf::Mouse::Right, mousePosition, event)) // bottom icons UI
 	{
+		State::sfx.play("click");
+
 		if (selected_layout == filestorage.linked_icon_layouts_files.begin())
 			selected_layout = filestorage.linked_icon_layouts_files.end();
 
@@ -224,6 +228,8 @@ void ObjectSelectionPanel::updatePollEvents(const sf::Vector2f& mousePosition, f
 	}
 	else if (m_iconUI->at(2)->isClicked(sf::Mouse::Left, mousePosition, event))
 	{
+		State::sfx.play("click");
+
 		m_objectLibraryOverlay->activate();
 	}
 }

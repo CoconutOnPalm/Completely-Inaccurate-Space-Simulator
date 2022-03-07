@@ -28,9 +28,11 @@ namespace ke
 
 	void Playlist::addSong(const std::string& filename)
 	{
-		m_filenames.push_back(filename);
-
-		m_current_playing = m_filenames.begin();
+		if (!filename.empty())
+		{
+			m_filenames.push_back(filename);
+			m_current_playing = m_filenames.begin();
+		}
 	}
 
 
@@ -41,13 +43,16 @@ namespace ke
 
 	void Playlist::play()
 	{
-		if (!m_music.openFromFile(*m_current_playing))
+		if (m_current_playing != m_filenames.end())
 		{
-			throw_error("Playlist::play()", "could not open music file", "ERROR");
-			return;
-		}
+			if (!m_music.openFromFile(*m_current_playing))
+			{
+				throw_error("Playlist::play()", "could not open music file", "ERROR");
+				return;
+			}
 
-		m_music.play();
+			m_music.play();
+		}
 	}
 
 

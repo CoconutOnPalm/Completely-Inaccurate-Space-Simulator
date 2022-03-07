@@ -56,6 +56,8 @@ void Application::InitStates()
 	states.emplace_back(std::make_unique<IntroState>(&window, &view));
 
 	State::LoadStaticData(&states);
+	State::loadMusic();
+	State::loadSFX();
 }
 
 
@@ -167,5 +169,6 @@ void Application::UpdateDeltaTime()
 
 void Application::End()
 {
+	State::music.pause();
 	window.close();
 }

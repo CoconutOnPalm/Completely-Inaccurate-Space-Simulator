@@ -32,11 +32,21 @@ void WarningOverlay::updateEvents(const MousePosition& mousePosition, float dt)
 void WarningOverlay::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
 	if (!m_background.isInvaded(mousePosition.byWindow) && event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
+	{
 		m_quitCode = OverlayQuitCode::CANCELING;
+	}
 	else if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::CANCELING;
+	}
 	else if (m_ok.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::ACCEPTING;
+	}
 }
 
 void WarningOverlay::updateColors(const sf::Vector2f& mousePosition, const float dt)

@@ -1,0 +1,6 @@
+5
+Quack Audio/SoundEffects/quack.wav
+HyperspaceJump Audio/SoundEffects/hyperspace_jump.wav
+Intro Audio/SoundEffects/intro.wav
+click Audio/SoundEffects/click.wav
+error Audio/SoundEffects/error.wav

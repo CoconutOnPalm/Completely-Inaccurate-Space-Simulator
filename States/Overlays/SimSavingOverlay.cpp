@@ -50,6 +50,8 @@ void SimSavingOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 
 	if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 		return;
 	}
@@ -59,6 +61,7 @@ void SimSavingOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 
 		if (!name.empty())
 		{
+
 			if (name.find('.') == std::string::npos && name.find('/') == std::string::npos && name.find('\\') == std::string::npos && name.find('?') == std::string::npos &&
 				name.find('<') == std::string::npos && name.find('>') == std::string::npos && name.find('*') == std::string::npos && name.find('|') == std::string::npos &&
 				name.find('"') == std::string::npos && name.find(':') == std::string::npos && name != "empty" && name != "latest_save") // illegal characters
@@ -73,12 +76,20 @@ void SimSavingOverlay::updatePollEvents(const MousePosition& mousePosition, floa
 				{
 					m_saveController->AutoSave(name, objects);
 				}
+					
+				State::sfx.play("click");
 
 				m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 			}
+			else
+			{
+				State::sfx.play("error");
+			}
 		}
 		else
+		{
 			m_quitCode = OverlayQuitCode::CLOSING_OVRL;
+		}
 
 
 	}

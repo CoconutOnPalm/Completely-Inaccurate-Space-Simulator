@@ -120,15 +120,12 @@ private:
 
     std::vector<std::unique_ptr<ke::Rectangle>> m_AS_accessories; // for audio settings
 
-    ke::SoundEffects m_test_effects;
-    ke::Playlist m_test_music;
-
 
     // Colors ////////////////////////
 
     std::array<ke::Colorf, 5> m_st_fcolors; // settings_types_colors
     ke::Colorf m_slider_colorf; // Slider color
     std::array<ke::Colorf, 4> m_settings_manip_colors; // apply button and restore def button colors
-    std::array<ke::Colorf, 26> m_windowSettings_colors; // window settings colors
+    std::array<ke::Colorf, 30> m_windowSettings_colors; // window settings colors
     std::array<ke::Colorf, 8> m_audio_colors;
 };

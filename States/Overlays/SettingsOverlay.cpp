@@ -9,7 +9,8 @@ SettingsOverlay::SettingsOverlay()
 
 SettingsOverlay::~SettingsOverlay()
 {
-
+	State::music.setVolume(AppSettings::MusicVolume());
+	State::sfx.setGeneralVolume(AppSettings::SFXVolume());
 }
 
 void SettingsOverlay::assign(sf::RenderWindow* window, ke::Button* background)
@@ -99,8 +100,8 @@ void SettingsOverlay::initUI()
 	m_descriptions[2].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 3 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"vertical synchronization", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 	m_descriptions[3].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 4 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"max FPS in simulation", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 	m_descriptions[4].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 5.5 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"background image", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 7 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
-	m_descriptions[6].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 8 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"backgroudn brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[5].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 7 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"background brightness", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
+	m_descriptions[6].create(sf::Vector2f(winsize.x / 6, winsize.y / 21), sf::Vector2f(winsize.x / 2 - xShift, yShift + 8 * winsize.y / 12), ke::Origin::RIGHT_MIDDLE, L"trail size", winsize.x / 64, ke::Origin::RIGHT_MIDDLE, sf::Color::Transparent, sf::Color(255, 255, 255, 192));
 }
 
 void SettingsOverlay::updateEvents(const MousePosition& mousePosition, float dt)
@@ -124,6 +125,7 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	if (m_music_volume.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr))
 	{
 		AppSettings::setMusicVolume(m_music_volume.getPercent());
+		State::music.setVolume(AppSettings::MusicVolume());
 	}
 	else if (m_sfx_volume.update(mousePosition.byWindow, event, sf::Mouse::Left, nullptr))
 	{
@@ -139,6 +141,8 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 
 	if (m_simulationFPS.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_simulationFPS.addPoints(120);
 
 		std::wstringstream wstr;
@@ -153,6 +157,8 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	}
 	else if (m_simulationFPS.isClicked(sf::Mouse::Right, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_simulationFPS.subtractPoints(120);
 
 		std::wstringstream wstr;
@@ -166,6 +172,8 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 
 	if (m_trail_size.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_trail_size.addPoints(200);
 
 		std::wstringstream wstr;
@@ -175,6 +183,8 @@ void SettingsOverlay::updatePollEvents(const MousePosition& mousePosition, float
 	}
 	else if (m_trail_size.isClicked(sf::Mouse::Right, mousePosition.byWindow, event))
 	{
+		//State::sfx.play("click");
+
 		m_trail_size.subtractPoints(200);
 
 		std::wstringstream wstr;

@@ -90,13 +90,17 @@ void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, flo
 	}
 	if (m_cancel.isClicked(sf::Mouse::Left, mousePosition.byWindow, event) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 	{
+		State::sfx.play("click");
+
 		m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 		return;
 	}
-	if (m_selected_simulation != m_saved_simulations.end())
+	if (m_load.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
-		if (m_load.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+		if (m_selected_simulation != m_saved_simulations.end())
 		{
+			State::sfx.play("click");
+
 			//m_window->setActive(false);
 			//LoadingBarOverlay loadingBarOvrl(m_window);
 			//std::thread lbthread(&LoadingBarOverlay::run, loadingBarOvrl);
@@ -107,6 +111,10 @@ void SimLoadingOverlay::updatePollEvents(const MousePosition& mousePosition, flo
 			//m_saveController->Load((*m_selected_simulation)->name(), objects, viewsize, m_winsize, selected_object, space_scale);
 			m_quitCode = OverlayQuitCode::CLOSING_OVRL;
 			return;
+		}
+		else
+		{
+			State::sfx.play("error");
 		}
 	}
 

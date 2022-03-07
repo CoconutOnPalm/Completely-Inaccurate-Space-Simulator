@@ -3,6 +3,7 @@
 #include "State.hpp"
 #include "SettingsState.hpp"
 #include "OpeningState.hpp"
+#include "Credits.hpp"
 
 
 class MainMenu :
@@ -48,13 +49,14 @@ private:
     size_t m_current_point_1;
     size_t m_current_point_2;
 
-    std::array<sf::VertexArray, 1000> m_hyperspace_jump;
+    std::vector<std::unique_ptr<ke::Button>> m_hints;
 
-    ke::SoundEffects m_sfx;
+    std::array<sf::VertexArray, 2000> m_hyperspace_jump;
 
-    std::array<ke::Colorf, 4> m_colors;
+    std::array<ke::Colorf, 7> m_colors;
 
     sf::Shader m_star_shader;
+
 
 
     //ke::Rectangle m_start_button;

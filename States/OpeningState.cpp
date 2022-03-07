@@ -170,23 +170,27 @@ void OpeningState::updatePollEvents(const MousePosition& mousePosition, float dt
 	}
 	else if (m_back_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::MAIN_MENU;
 	}
 	else if (m_create_new.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SIMULATION;
 		m_simulation_name = "empty";
 	}
 	else if (m_load_latest.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SIMULATION;
 		m_simulation_name = "latest_save";
 	}
 	else if (m_load_saved.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SAVED_BROWSER;
 		m_simulation_name = "latest_save";

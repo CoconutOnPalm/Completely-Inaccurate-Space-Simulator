@@ -10,8 +10,8 @@ IntroState::IntroState(sf::RenderWindow* sf_window, sf::View* sf_view)
 	p_quitCode = StateQuitCode::NOT_QUITTING;
 
 	sf::Texture logo;
-	//logo.loadFromFile("KEngine/Sources/Logos/ReversedKEngineLogo.png");
-	logo.loadFromFile("res/CISS_Logo.png");
+	logo.loadFromFile("KEngine/Sources/Logos/ReversedKEngineLogo.png");
+	//logo.loadFromFile("res/CISS_Logo.png");
 
 	logo.setSmooth(true);
 
@@ -34,7 +34,7 @@ IntroState::~IntroState()
 
 void IntroState::InitState()
 {
-
+	sfx.play("Intro");
 }
 
 void IntroState::reloadState()

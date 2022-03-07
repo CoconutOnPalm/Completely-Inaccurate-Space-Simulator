@@ -155,8 +155,8 @@ namespace ke
 
 	void SoundEffects::setGeneralVolume(float volume)
 	{
-		for (auto itr : m_sound_effects)
-			itr.second.volume *= volume;
+		for (auto& itr : m_sound_effects)
+			itr.second.volume = volume;
 	}
 
 

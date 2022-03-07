@@ -244,6 +244,8 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 	}
 	else if (m_back_button.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
+		sfx.play("click");
+
 		p_quitCode = StateQuitCode::STATE_QUIT;
 		m_next_state = STATE::SIM_OPENING;
 	}
@@ -251,14 +253,22 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 	{
 		if (m_selected_simulation != m_saved_simulations.end())
 		{
+			sfx.play("click");
+
 			p_quitCode = StateQuitCode::STATE_QUIT;
 			m_next_state = STATE::SIMULATION;
+		}
+		else
+		{
+			sfx.play("error");
 		}
 	}
 	else if (m_delete.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
 		if (m_selected_simulation != m_saved_simulations.end())
 		{
+			sfx.play("click");
+
 			m_saveController.m_savedSimulations.erase(m_selected_simulation->get()->name());
 			m_saved_simulations.erase(m_selected_simulation);
 			m_selected_simulation = m_saved_simulations.end();
@@ -289,6 +299,10 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 
 			m_slider.setFieldHeight(fheigh);
 			m_view_barrier.setBorders(sf::Vector2f(0, 0), sf::Vector2f(window->getSize().x, m_slider.getFieldHeight()));
+		}
+		else
+		{
+			sfx.play("error");
 		}
 	}
 

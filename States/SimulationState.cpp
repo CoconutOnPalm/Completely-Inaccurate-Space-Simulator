@@ -265,7 +265,7 @@ void SimulationState::InitSpaceObjects()
 	//{
 	//	m_saveController.Load(m_simulation_name, &m_objects, viewSize, winSize, m_selected_object, m_space_scale);
 	//}
-	
+
 
 	m_selected_object = m_objects.begin();
 
@@ -278,7 +278,7 @@ void SimulationState::InitSpaceObjects()
 void SimulationState::InitBackground()
 {
 	m_backgrounds.reserve(4); // background | top | right | bottom 
-	
+
 	std::wstring simulation_name_tag(L"Completely Inaccurate Space Imulator");
 
 	if (m_simulation_name != "empty" && m_simulation_name != "latest_save")
@@ -799,12 +799,32 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 #if MULTITHREADED_FILTERING == 0
 
 	for (auto& itr : m_objects)
+	{
 		if (itr->type() == STAR)
+		{
 			if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 8, view->getSize().y / 8 }))
-				m_onScreen.push_back(itr.get()); else;
+				m_onScreen.push_back(itr.get());
+		}
+		else if (itr->type() == ObjectType::CENTER_OF_MASS)
+		{
+			if (m_objects.size() > 2)
+			{
+				m_onScreen.push_back(itr.get());
+				itr->object.setActiveStatus(true);
+			}
+			else
+			{
+				itr->object.setActiveStatus(false);
+			}
+		}
 		else
+		{
 			if (!ke::isOutsideTheView(&itr->object, view, { view->getSize().y / 16, view->getSize().y / 16 }))
-				m_onScreen.push_back(itr.get()); else;
+			{
+				m_onScreen.push_back(itr.get());
+			}
+		}
+	}
 
 #else
 
@@ -916,13 +936,13 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	if (m_simSavingOverlay != nullptr)
 		m_simSavingOverlay->updateColors(mousePosition.byWindow, dt);
-	
+
 	if (m_simLoadingOverlay != nullptr)
 		m_simLoadingOverlay->updateColors(mousePosition.byWindow, dt);
 
 	if (m_new_simulation_warning != nullptr)
 		m_new_simulation_warning->updateColors(mousePosition.byWindow, dt);
-	
+
 	if (m_equasionSelectionOverlay != nullptr)
 		m_equasionSelectionOverlay->updateColors(mousePosition.byWindow, dt);
 
@@ -942,6 +962,26 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 	// thread joining
 
 	//detailedDataWindowThread.join();
+
+
+	// orbit_preview, distance preview and mass center repairs
+
+	long double distance = position_to_distance((*m_selected_object)->object.getPosition(), m_placed_object.getPosition()) / m_space_scale;
+
+	if (isnan(distance))
+		distance = 0;
+
+	m_orbit_preview.setOutlineThickness(view->getSize().y / 256);
+	m_orbit_preview.setPosition((*m_selected_object)->object.getPosition());
+	m_orbit_preview.setRadius(distance * m_space_scale);
+	m_objects.front()->object.setRadius(view->getSize().x / winSize.x * 4);
+	m_objects.front()->object.setOutlineThickness(view->getSize().x / winSize.x);
+
+	m_distance_preview.setPosition(mousePosition.byWindow);
+	m_distance_preview.setTextPosition(ke::Origin::LEFT_MIDDLE, { winSize.x / 32 + winSize.x * m_placed_object.getRadius() / view->getSize().x, 0 });
+
+	/*(*m_selected_object)->clickRange()->setOutlineThickness(view->getSize().x / winSize.x * 2);
+	(*m_selected_object)->clickRange()->setRadius(view->getSize().x / winSize.x * 16);*/
 }
 
 
@@ -1005,7 +1045,7 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 		return;
 	}
-	
+
 	if (m_simLoadingOverlay != nullptr)
 	{
 		m_simLoadingOverlay->updatePollEvents(mousePosition, dt, event, &m_objects, view->getSize(), m_selected_object, m_space_scale);
@@ -2099,8 +2139,9 @@ void SimulationState::renderByView()
 {
 	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
 
+	if (m_objects.front()->object.isActive()) // prevents orbitally placing object when there are no other objects
+		m_orbit_preview.render(window);
 
-	m_orbit_preview.render(window);
 	m_placed_object.render(window);
 
 
@@ -2176,7 +2217,7 @@ void SimulationState::renderByWindow()
 
 	if (m_helpOverlay != nullptr)
 		m_helpOverlay->render(window);
-	
+
 	if (m_equasionSelectionOverlay != nullptr)
 		m_equasionSelectionOverlay->render(window);
 

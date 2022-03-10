@@ -378,6 +378,7 @@ void ObjectController::createObjectPreview(ObjectBuffer* object_data, objvector:
 {
 	//object_data->load(*selected_icon->get());
 
+
 	sf::Vector2f pos_buffer = m_placed_object->getShapeCenter();
 
 	switch (object_data->type())
@@ -718,6 +719,9 @@ void ObjectController::updateObjects(float dt, unsigned int time_scale, float si
 
 void ObjectController::updateObjectPreview(objvector::iterator selected_object, const MousePosition& mousePosition, const sf::Vector2f& viewSize, const sf::Vector2f& winSize)
 {
+	if (selected_object == m_objects->begin() && m_objects->size() > 1)
+		return;
+
 	long double distance = position_to_distance((*selected_object)->object.getPosition(), m_placed_object->getPosition()) / m_space_scale;
 	std::wstringstream dist_buffer;
 

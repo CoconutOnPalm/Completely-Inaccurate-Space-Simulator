@@ -28,7 +28,7 @@ MainMenu::MainMenu(sf::RenderWindow* sf_window, sf::View* sf_view, bool with_ani
 
 MainMenu::~MainMenu()
 {
-
+	
 }
 
 

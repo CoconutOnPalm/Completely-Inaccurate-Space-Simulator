@@ -2139,7 +2139,8 @@ void SimulationState::renderByView()
 {
 	// REMINDER: DON'T TRY TO MULTITHREAD ANY OF THESE
 
-	if (m_objects.front()->object.isActive()) // prevents orbitally placing object when there are no other objects
+	//if (m_objects.front()->object.isActive()) // prevents orbitally placing object when there are no other objects
+	if (m_objects.size() > 1)
 		m_orbit_preview.render(window);
 
 	m_placed_object.render(window);

@@ -147,6 +147,20 @@ void ObjectController::addObject(objvector::iterator& selected_object, ObjectBuf
 		if (selected_object != m_objects->begin())
 			m_objects->back()->object.physics()->setSpeed(sf::Vector2<double>(m_objects->back()->object.physics()->getSpeed() + (*selected_object)->object.physics()->getSpeed()));
 	}
+
+
+	sf::Vector2<double> _mr(0, 0);	// Sum of mass * pos
+	long double _m = 0;				// total mass
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
+	{
+		_mr.x += (*itr)->data.mass * (*itr)->object.getPosition().x;
+		_mr.y += (*itr)->data.mass * (*itr)->object.getPosition().y;
+
+		_m += (*itr)->data.mass;
+	}
+
+	m_objects->front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
 }
 
 
@@ -231,6 +245,20 @@ void ObjectController::addObject(ObjectBuffer* object_data, const sf::Vector2f& 
 	}
 
 	m_objects->back()->object.physics()->setSpeed(velocity);
+
+
+	sf::Vector2<double> _mr(0, 0);	// Sum of mass * pos
+	long double _m = 0;				// total mass
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
+	{
+		_mr.x += (*itr)->data.mass * (*itr)->object.getPosition().x;
+		_mr.y += (*itr)->data.mass * (*itr)->object.getPosition().y;
+
+		_m += (*itr)->data.mass;
+	}
+
+	m_objects->front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
 }
 
 
@@ -468,8 +496,27 @@ void ObjectController::deleteObject(objvector::iterator& selected_object)
 		if (itr != selected_object)
 			(*itr)->object.physics()->removeForce((*selected_object)->name());
 
-	m_objects->erase(selected_object);
-	selected_object = m_objects->begin();
+	/*m_objects->erase(selected_object);
+	selected_object = m_objects->begin();*/
+
+	selected_object = m_objects->erase(selected_object);
+	
+	if (selected_object == m_objects->end())
+		selected_object = m_objects->begin();
+
+
+	sf::Vector2<double> _mr(0, 0);	// Sum of mass * pos
+	long double _m = 0;				// total mass
+
+	for (auto itr = m_objects->begin() + 1, eoi = m_objects->end(); itr != eoi; ++itr)
+	{
+		_mr.x += (*itr)->data.mass * (*itr)->object.getPosition().x;
+		_mr.y += (*itr)->data.mass * (*itr)->object.getPosition().y;
+
+		_m += (*itr)->data.mass;
+	}
+
+	m_objects->front()->object.setPosition(sf::Vector2f(_mr.x / _m, _mr.y / _m));
 }
 
 

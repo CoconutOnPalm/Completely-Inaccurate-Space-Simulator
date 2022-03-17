@@ -57,7 +57,7 @@ private:
 
     ke::HoldView m_view_barrier;
 
-    std::array<ke::Colorf, 11> m_colors;
+    std::array<ke::Colorf, 12> m_colors;
 
     std::vector<ke::Colorf> m_BlockColors;
 

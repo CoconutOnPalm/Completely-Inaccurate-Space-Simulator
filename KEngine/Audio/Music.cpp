@@ -45,13 +45,20 @@ namespace ke
 	{
 		if (m_current_playing != m_filenames.end())
 		{
-			if (!m_music.openFromFile(*m_current_playing))
+			try // had to add this because it sometimes threw exception on program end
 			{
-				throw_error("Playlist::play()", "could not open music file", "ERROR");
-				return;
-			}
+				if (!m_music.openFromFile(*m_current_playing))
+				{
+					throw_error("Playlist::play()", "could not open music file", "ERROR");
+					return;
+				}
 
-			m_music.play();
+				m_music.play();
+			}
+			catch (const std::exception&)
+			{
+				throw_error("Playlist::play()", "exception caught: requested program termination with a fatal error", "EXCEPTION: FATAL ERROR");
+			}
 		}
 	}
 

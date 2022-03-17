@@ -156,7 +156,7 @@ private:
     ke::Rectangle m_shaderMask;
 
     std::vector<std::unique_ptr<ke::Rectangle>> m_backgrounds;
-    std::array<ke::Colorf, 4> m_backgrounds_colors;
+    std::array<ke::Colorf, 12> m_backgrounds_colors;
 
 
     // top GUI
@@ -191,8 +191,8 @@ private:
     sf::Texture m_play_texture;
     sf::Texture m_pause_texture;
 
-    std::array<ke::Colorf, 6> m_timeGuiColors;
-    std::array<ke::Colorf, 3> m_otherTopPanelColors;
+    std::array<ke::Colorf, 12> m_timeGuiColors;
+    std::array<ke::Colorf, 12> m_otherTopPanelColors;
                                      
     // object GUI
 

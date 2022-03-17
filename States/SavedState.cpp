@@ -212,7 +212,7 @@ void SavedState::updateEvents(const MousePosition& mousePosition, float dt)
 
 	auto GUI_color_itr = m_colors.begin();
 
-	ke::SmoothColorChange(&m_back_button, m_back_button.isInvaded(mousePosition.byWindow), sf::Color::White, sf::Color(255, 255, 255, 128), *GUI_color_itr, 255, dt);
+	ke::SmoothColorChange(&m_back_button, m_back_button.isInvaded(mousePosition.byWindow), sf::Color(255, 255, 255, 255), sf::Color(255, 255, 255, 128), *GUI_color_itr, 256, dt); ++GUI_color_itr;
 
 	ke::SmoothColorChange(m_slider.getSlider(), m_slider.getSlider()->isInvaded(mousePosition.byWindow) || m_slider.isHolded(), sf::Color(96, 96, 96, 255), sf::Color(64, 64, 64, 255), *GUI_color_itr, 256, dt); ++GUI_color_itr;
 	ke::SmoothColorChange(m_slider.getSliderTrack(), m_slider.getSliderTrack()->isInvaded(mousePosition.byWindow) || m_slider.isHolded(), sf::Color(64, 64, 64, 64), sf::Color(32, 32, 32, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
@@ -268,6 +268,22 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 		if (m_selected_simulation != m_saved_simulations.end())
 		{
 			sfx.play("click");
+
+			std::string filepath = "Data/Simulations/";
+			std::string iconpath = filepath + "SimulationIcons/";
+
+			filepath += m_selected_simulation->get()->name() + ".sim";
+			iconpath += m_selected_simulation->get()->name() + ".jpg";
+
+			std::cout << "deleted simulation:	   " << filepath << '\n';
+			std::cout << "deleted simulation icon: " << iconpath << '\n';
+			
+			if (m_selected_simulation->get()->name() != "latest_save")
+			{
+				std::filesystem::remove(filepath);
+				std::filesystem::remove(iconpath);
+			}
+			
 
 			m_saveController.m_savedSimulations.erase(m_selected_simulation->get()->name());
 			m_saved_simulations.erase(m_selected_simulation);

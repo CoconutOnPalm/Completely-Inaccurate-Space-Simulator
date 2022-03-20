@@ -337,6 +337,11 @@ void SaveBlock::setPosition(const sf::Vector2f& position)
 	m_name_block.setPosition(sf::Vector2f(m_background.getPosition().x + s_winsize.y / 5, m_background.getPosition().y + m_background.getSize().y / 2));
 }
 
+sf::Vector2f SaveBlock::getPosition() const
+{
+	return m_background.getPosition();
+}
+
 
 void SaveBlock::assign(const sf::Vector2f& winsize)
 {

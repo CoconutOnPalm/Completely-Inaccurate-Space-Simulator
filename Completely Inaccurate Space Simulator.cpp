@@ -8,7 +8,8 @@ int main()
 {
     std::cout << "Hello World!\n";
 
-    KEngine::Init();
+    //KEngine::Init();
+    KEngine::CustomInit(false, true, false, false, false, false, false, false, false);
 
     Application CISS;
 

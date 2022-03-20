@@ -408,10 +408,11 @@ void SimulationState::InitObjDataGUI()
 		ke::Origin::LEFT_MIDDLE, nullptr, L"class", winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White, 0, sf::Text::Regular, sf::Vector2f(winSize.x / 256, 0)));
 	m_symbols.emplace_back(std::make_unique<ke::Button>(sf::Vector2f(backgroundSize.x / 8, backgroundSize.y / 16), sf::Vector2f(winSize.x - backgroundSize.x, m_backgrounds.at(1)->getShapeCenter().y - backgroundSize.y * 0.5f + backgroundSize.y / 16.f * 9.f),
 		ke::Origin::LEFT_MIDDLE, nullptr, L"subtype", winSize.y / 48, ke::Origin::LEFT_MIDDLE, sf::Color::Transparent, sf::Color(223, 223, 255, 255), 0, sf::Color::White, 0, sf::Text::Regular, sf::Vector2f(winSize.x / 256, 0)));
+
 	sf::Event fake_event;
 	for (auto& itr : m_symbols)
 	{
-		itr->setFont(ke::Font::TrebuchetMS);
+		//itr->setFont(ke::Font::TrebuchetMS);
 		itr->update({ 0, 0 }, fake_event, sf::Mouse::Left, nullptr);
 	}
 

@@ -72,6 +72,7 @@ public:
 	~SaveBlock();
 
 	void setPosition(const sf::Vector2f& position);
+	sf::Vector2f getPosition() const;
 	void resetSize(const sf::Vector2f& winsize);
 	static void assign(const sf::Vector2f& winsize);
 

@@ -3,6 +3,7 @@
 #include "State.hpp"
 #include "OpeningState.hpp"
 #include "Overlays/SimLoadingOverlay.hpp"
+#include "Overlays/AddSimulationOverlay.hpp"
 
 
 
@@ -40,11 +41,12 @@ private:
 
     ke::Rectangle m_back_button;
 
-    ke::Button m_background;
+    ke::Button m_background; 
     ke::Button m_buttons_background;
 
     ke::Button m_load;
     ke::Button m_delete;
+    ke::Button m_addSimulation;
 
     std::vector<std::unique_ptr<SaveBlock>> m_saved_simulations;
     std::vector<std::unique_ptr<SaveBlock>>::iterator m_selected_simulation;
@@ -57,9 +59,12 @@ private:
 
     ke::HoldView m_view_barrier;
 
-    std::array<ke::Colorf, 12> m_colors;
+    std::array<ke::Colorf, 14> m_colors;
 
     std::vector<ke::Colorf> m_BlockColors;
+
+
+    std::unique_ptr<AddSimulationOverlay> m_addSimulationOverlay;
 
 };
 

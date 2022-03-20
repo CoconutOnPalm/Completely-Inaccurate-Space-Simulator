@@ -11,7 +11,7 @@ SavedState::SavedState(sf::RenderWindow* sf_window, sf::View* sf_view)
 
 SavedState::~SavedState()
 {
-
+	
 }
 
 void SavedState::InitState()
@@ -48,6 +48,10 @@ void SavedState::InitState()
 
 	m_delete.create(sf::Vector2f(winsize.x * 0.1, winsize.y / 18), sf::Vector2f(m_background.getPosition().x + m_background.getSize().x * 0.5 - winsize.x / 32 - m_load.getSize().x, m_search_button.getPosition().y), ke::Origin::RIGHT_MIDDLE,
 		nullptr, L"DELETE", winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(255, 64, 64, 128));
+
+	m_addSimulation.create(sf::Vector2f(winsize.y / 18, winsize.y / 18), sf::Vector2f(m_background.getPosition().x + m_background.getSize().x * 0.5 - 3 * winsize.x / 64 - 2 * m_load.getSize().x, m_search_button.getPosition().y), ke::Origin::RIGHT_MIDDLE,
+		"Textures/StateTextures/SavedState/NewSimulation.png", std::wstring(), winsize.y / 48, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(255, 64, 64, 128));
+	//m_addSimulation.reverseRenderOrder();
 
 
 	m_simulations_names.reserve(m_saveController.m_savedSimulations.size());
@@ -86,6 +90,8 @@ void SavedState::InitState()
 
 void SavedState::reloadState()
 {
+	m_addSimulationOverlay = nullptr;
+
 	sf::Vector2f winsize(window->getSize());
 	SaveBlock::assign(winsize);
 
@@ -147,6 +153,15 @@ void SavedState::reloadState()
 
 void SavedState::updateEvents(const MousePosition& mousePosition, float dt)
 {
+	if (m_addSimulationOverlay != nullptr)
+	{
+		m_addSimulationOverlay->updateEvents(mousePosition, dt);
+		m_addSimulationOverlay->updateColors(mousePosition.byWindow, dt);
+		return;
+	}
+
+
+
 	if (p_quitCode == StateQuitCode::STATE_QUIT)
 	{
 		ke::SmoothColorChange(&m_stateMask, true, sf::Color::Black, sf::Color::Transparent, m_sm_color, 512, dt);
@@ -221,6 +236,7 @@ void SavedState::updateEvents(const MousePosition& mousePosition, float dt)
 	ke::SmoothTextColorChange(&m_load, m_load.isInvaded(mousePosition.byWindow), sf::Color(64, 255, 64, 255), sf::Color(64, 255, 64, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
 	ke::SmoothColorChange(&m_delete, m_delete.isInvaded(mousePosition.byWindow), sf::Color(24, 24, 24, 255), sf::Color(16, 16, 16, 255), *GUI_color_itr, 512, dt); ++GUI_color_itr;
 	ke::SmoothTextColorChange(&m_delete, m_delete.isInvaded(mousePosition.byWindow), sf::Color(255, 64, 64, 255), sf::Color(255, 24, 24, 128), *GUI_color_itr, 1024, dt); ++GUI_color_itr;
+	ke::SmoothColorChange(&m_addSimulation, m_addSimulation.isInvaded(mousePosition.byWindow), sf::Color::Transparent, sf::Color(0, 0, 0, 32), *GUI_color_itr, 256, dt); ++GUI_color_itr;
 
 
 	ke::SmoothColorChange(&m_search_button, m_search_button.isInvaded(mousePosition.byWindow) || m_search_button.getEPS(), sf::Color(40, 40, 40, 255), sf::Color(32, 32, 32, 255), *GUI_color_itr, 128, dt); ++GUI_color_itr;
@@ -237,6 +253,47 @@ void SavedState::updateEvents(const MousePosition& mousePosition, float dt)
 
 void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, sf::Event& event)
 {
+	if (m_addSimulationOverlay != nullptr)
+	{
+		if (m_addSimulationOverlay->quitStatus() == OverlayQuitCode::QUITTING_WITHOUT_OBJECT)
+		{
+			m_addSimulationOverlay = nullptr;
+		}
+		else if (m_addSimulationOverlay->quitStatus() == OverlayQuitCode::QUITTING_WITH_OBJECT)
+		{
+			std::string added_name = m_addSimulationOverlay->added_simulation_name();
+			m_addSimulationOverlay = nullptr;
+			m_saved_simulations.emplace_back(std::make_unique<SaveBlock>(added_name, sf::Vector2f(window->getSize())));
+			m_saved_simulations.back()->setPosition(sf::Vector2f((m_saved_simulations.end() - 2)->get()->getPosition().x, (m_saved_simulations.end() - 2)->get()->getPosition().y + winSize.y / 6 + winSize.y / 48));
+
+			float fheigh = m_saved_simulations.back()->getPosition().y;
+
+			if (fheigh < winSize.y)
+				fheigh = winSize.y;
+
+			m_view_barrier.setView(view);
+			m_slider.setFieldHeight(fheigh);
+			m_view_barrier.setBorders(sf::Vector2f(0, 0), sf::Vector2f(winSize.x, m_slider.getFieldHeight()));
+
+			m_selected_simulation = m_saved_simulations.end();
+
+			m_simulations_names.push_back(added_name);
+			m_BlockColors.push_back(ke::Colorf());
+
+			m_on_screen.clear();
+
+			return;
+		}
+		else
+		{
+			m_addSimulationOverlay->updatePollEvents(mousePosition, dt, event, &m_saveController);
+		}
+
+		return;
+	}
+
+
+
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
 	{
 		p_quitCode = StateQuitCode::STATE_QUIT;
@@ -277,13 +334,13 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 
 			std::cout << "deleted simulation:	   " << filepath << '\n';
 			std::cout << "deleted simulation icon: " << iconpath << '\n';
-			
+
 			if (m_selected_simulation->get()->name() != "latest_save")
 			{
 				std::filesystem::remove(filepath);
 				std::filesystem::remove(iconpath);
 			}
-			
+
 
 			m_saveController.m_savedSimulations.erase(m_selected_simulation->get()->name());
 			m_saved_simulations.erase(m_selected_simulation);
@@ -320,6 +377,12 @@ void SavedState::updatePollEvents(const MousePosition& mousePosition, float dt, 
 		{
 			sfx.play("error");
 		}
+	}
+	else if (m_addSimulation.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+	{
+		m_addSimulationOverlay = std::make_unique<AddSimulationOverlay>(sf::Vector2f(window->getSize()));
+
+		sfx.play("click");
 	}
 
 
@@ -459,6 +522,10 @@ void SavedState::renderByWindow()
 
 	m_delete.render(window);
 	m_load.render(window);
+	m_addSimulation.render(window);
+
+	if (m_addSimulationOverlay != nullptr)
+		m_addSimulationOverlay->render(window);
 
 	m_stateMask.render(window);
 }

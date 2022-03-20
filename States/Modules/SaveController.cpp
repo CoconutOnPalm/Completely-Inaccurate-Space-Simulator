@@ -39,7 +39,7 @@ void SaveController::assign(ObjectController* object_controller, sf::RenderWindo
 	m_objectController = object_controller;
 
 	m_background.create(sf::Vector2f(window->getSize()), { 0, 0 }, ke::Origin::LEFT_TOP, std::wstring(), 0, 0, sf::Color::Black);
-	m_bar.create(sf::Vector2f(window->getSize().x / 2, window->getSize().y / 10), sf::Vector2f(window->getSize().x / 2, window->getSize().y / 2), nullptr, 0, 0, 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(16, 16, 16, 255), sf::Color(32, 32, 32, 255));
+	m_bar.create(sf::Vector2f(window->getSize().x / 2, window->getSize().y / 10), sf::Vector2f(window->getSize().x / 2, window->getSize().y / 2), nullptr, 0, 0, 0, ke::Origin::MIDDLE_MIDDLE, sf::Color(2, 2, 2, 255), sf::Color(255, 255, 255, 255));
 
 	m_window = window;
 }

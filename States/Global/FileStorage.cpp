@@ -126,9 +126,8 @@ void FileStorage::linkObjectDatabase()
 			Get().linked_space_objects_database[name] = path;
 	}
 
-	Get().linked_space_objects_database["Planets"] = "Data/ObjectDatabase/Planets.sodb";
-	Get().linked_space_objects_database["Black Holes"] = "Data/ObjectDatabase/BlackHoles.sodb";
-
+	//Get().linked_space_objects_database["Colors"] = "Data/ObjectDatabase/Colors.sodb";
+	
 	// test
 	std::cout << "linkObjectDatabase()\n";
 	for (auto& itr : Get().linked_space_objects_database)

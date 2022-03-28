@@ -16,6 +16,7 @@ SimulationState::SimulationState(sf::RenderWindow* sf_window, sf::View* sf_view,
 	, m_text_entered(false)
 	, m_object_buffer_ready(false)
 	, m_simulation_name(simulation_name)
+	, m_center_view_to_center_of_mass(false)
 {
 	//this->InitState();
 
@@ -95,6 +96,8 @@ void SimulationState::InitState()
 
 	std::thread object_loading_thread(&SimulationState::InitSpaceObjects, this);
 
+	view->setSize(sf::Vector2f(winSize * 10.f));
+	view->setCenter(sf::Vector2f(0, 0));
 
 	// don't multithread these below:
 
@@ -662,9 +665,16 @@ void SimulationState::updateEvents(const MousePosition& mousePosition, float dt)
 		// FEATURE: centering view to object position
 
 		if (m_selected_object != m_objects.begin() && m_selected_object->get() != nullptr)
+		{
 			view->setCenter((*m_selected_object)->object.getPosition());
+		}
 		else
-			m_view_holding.update(mousePosition.byWindow * (view->getSize().x / winSize.x), sf::Mouse::Right);
+		{
+			if (!m_center_view_to_center_of_mass)
+				m_view_holding.update(mousePosition.byWindow * (view->getSize().x / winSize.x), sf::Mouse::Right);
+			else if (m_selected_object->get() != nullptr)
+				view->setCenter((*m_selected_object)->object.getPosition()); // centering to mass center
+		}
 
 
 		// FEATURE: updating objects with Object controller (ObjectController - menager)
@@ -1181,6 +1191,19 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		}
 	}
 
+
+	// FEATURE: changing m_center_view_to_center_of_mass status 
+
+	if (m_running)
+	{
+		if (m_selected_object == m_objects.begin())
+		{
+			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
+			{
+				m_center_view_to_center_of_mass ^= true;
+			}
+		}
+	}
 
 
 	// FEATURE: getting settings form overlay
@@ -1819,11 +1842,36 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 		{
 			view->setSize(sf::Vector2f((*m_selected_object)->object.getRadius() * 16, (*m_selected_object)->object.getRadius() * 9));
 
+
+			//long double distance = position_to_distance((*m_selected_object)->object.getPosition(), m_placed_object.getPosition()) / m_space_scale;
+
 			m_orbit_preview.setOutlineThickness(view->getSize().y / 256);
 			m_objects.front()->object.setRadius(view->getSize().x / winSize.x * 4);
 			m_objects.front()->object.setOutlineThickness(view->getSize().x / winSize.x);
 
 			view->setCenter((*m_selected_object)->object.getPosition());
+
+			for (auto& itr : m_objects)
+			{
+				//std::cout << view->getSize().y / itr->object.getSize().y << '\n';
+				itr->clickRange()->setOutlineThickness(view->getSize().x / winSize.x * 2);
+				itr->clickRange()->setRadius(view->getSize().x / winSize.x * 16);
+
+
+				// shader scaling
+
+				//if (itr->objectClass() != ObjectClass::CLASS_NEUTRON_STAR)
+				itr->getObjectShader()->setUniform("basic_a", 1.f - itr->object.getSize().y / view->getSize().y);
+
+				itr->getGlowShader()->setUniform("size", itr->object.getSize().y / view->getSize().y * winSize.y * 2.f * m_brightness_scale);
+
+
+				if (view->getSize().y / itr->object.getSize().y > itr->data.brightness)
+				{
+					float shader_size = itr->data.brightness - view->getSize().y / itr->object.getSize().y / winSize.y;
+					itr->getObjectShader()->setUniform("size", (shader_size * shader_size * m_brightness_scale >= 0) ? shader_size * m_brightness_scale : 0);
+				}
+			}
 		}
 	}
 

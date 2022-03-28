@@ -200,6 +200,15 @@ void ObjectLibraryOverlay::loadObjects()
 		m_sorted_object_order.push_back(std::make_pair(_i, itr->name()));
 		_i++;
 	}
+
+
+	//std::cout << "\n\n";
+
+	//for (auto& itr : m_objects)
+	//{
+	//	std::cout << "name: " << itr->name();
+	//	std::cout << "system name: " << itr->systemName();
+	//}
 }
 
 void ObjectLibraryOverlay::performPreLauchUpdates(const MousePosition& mousePosition, float dt)
@@ -288,6 +297,15 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
 		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
 		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+
+		m_on_screen.clear();
+
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		{
+			if ((*itr)->Icon().icon.isActive())
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
+					m_on_screen.push_back(itr);
+		}
 	}
 	else if (m_filtering_options.at(1).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
@@ -299,6 +317,15 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
 		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
 		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
+
+		m_on_screen.clear();
+
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		{
+			if ((*itr)->Icon().icon.isActive())
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
+					m_on_screen.push_back(itr);
+		}
 	}
 	else if (m_filtering_options.at(2).isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
 	{
@@ -310,6 +337,15 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		m_filtering_options.at(0).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
 		m_filtering_options.at(1).getTextureShape()->setFillColor(sf::Color(255, 255, 255, 255));
 		m_filtering_options.at(2).getTextureShape()->setFillColor(sf::Color(255, 255, 128, 255));
+
+		m_on_screen.clear();
+
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		{
+			if ((*itr)->Icon().icon.isActive())
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
+					m_on_screen.push_back(itr);
+		}
 	}
 	else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Tab)
 	{
@@ -335,7 +371,7 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
 		{
 			if ((*itr)->Icon().icon.isActive())
-				if (ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
 					m_on_screen.push_back(itr);
 		}
 	}
@@ -366,7 +402,7 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
 		{
 			if ((*itr)->Icon().icon.isActive())
-				if (ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
 					m_on_screen.push_back(itr);
 		}
 	}
@@ -377,8 +413,8 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 
 	for (auto& itr : m_on_screen)
 	{
-		if (!ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
-			continue;
+		//if (!ke::ionRange((*itr)->Icon().icon.getPosition().y, -1.5 * (*itr)->Icon().icon.getSize().y, m_window->getSize().y + 1.5 * (*itr)->Icon().icon.getSize().y))
+			//continue;
 
 		if ((*itr)->Icon().icon.isClicked(sf::Mouse::Left, mPosView, event))
 		{
@@ -657,15 +693,53 @@ void ObjectLibraryOverlay::updateSystemSorting()
 	else
 	{
 		sf::Vector2f field_size(m_background.getSize().x - m_right_section.getSize().x - m_slider.getSize().x, m_window->getSize().y - m_top_section.getSize().y);
-		float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
-		float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
+		const float field_beg = m_background.getShapeCenter().x - m_background.getSize().x * 0.5; // begginging of the overlay filed
+		const float uniheight = field_size.x / m_icons_per_row; // height of objects and system names
 
 		std::string system_name = m_objects.front()->systemName();
 		auto system_itr = m_system_names.begin();
-		sf::Vector2f position = (*system_itr)->Button().getPosition();
+		sf::Vector2f position;
 
-		position.y += uniheight;
 		int i = 0;
+
+
+
+		//for (auto& itr : m_objects)
+		//{
+		//	if (itr->systemName() != system_name)
+		//	{
+		//		system_name = itr->systemName();
+		//		system_itr++;
+		//		(*system_itr)->Button().setPosition(field_beg, position.y + uniheight);
+		//		position = (*system_itr)->Button().getPosition();
+		//		position.y += uniheight;
+		//		i = 0;
+		//	}
+
+		//	std::string objName_buffer = itr->Icon().object_name();
+		//	std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
+		//		[](unsigned char c) { return std::tolower(c); });
+
+		//	if (!objName_buffer.compare(0, m_filter.size(), m_filter) != 0)
+		//	{
+		//		position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
+
+		//		if (i % (m_icons_per_row) == 0 && i)
+		//			position.y += uniheight;
+
+		//		itr->Icon().icon.setActiveStatus(true);
+		//		itr->Icon().icon.setPosition(position);
+
+		//		i++;
+		//	}
+		//	else
+		//	{
+		//		//itr->Icon().icon.setPosition(-100, -100);
+		//		itr->Icon().icon.setActiveStatus(false);
+		//	}
+		//}
+
+
 
 		// position.x = field_beg + (i % (icons_per_row)) * size.x;
 		//
@@ -674,38 +748,129 @@ void ObjectLibraryOverlay::updateSystemSorting()
 
 		for (auto& itr : m_objects)
 		{
-			if (itr->systemName() != system_name)
-			{
-				system_name = itr->systemName();
-				system_itr++;
-				(*system_itr)->Button().setPosition(field_beg, position.y + uniheight);
-				position = (*system_itr)->Button().getPosition();
-				position.y += uniheight;
-				i = 0;
-			}
-
 			std::string objName_buffer = itr->Icon().object_name();
 			std::transform(objName_buffer.begin(), objName_buffer.end(), objName_buffer.begin(),
 				[](unsigned char c) { return std::tolower(c); });
 
 			if (!objName_buffer.compare(0, m_filter.size(), m_filter) != 0)
 			{
+				itr->Icon().icon.setActiveStatus(true);
+			}
+			else
+			{
+				itr->Icon().icon.setActiveStatus(false);
+			}
+		}
+
+
+		for (auto& itr : m_system_names)
+		{
+			size_t count = 0;
+
+			for (auto& jtr : m_objects)
+			{
+				if (jtr->systemName() == itr->name())
+				{
+					if (jtr->Icon().icon.isActive())
+					{
+						count++;
+					}
+				}
+			}
+
+			if (count == 0)
+			{
+				itr->Button().setActiveStatus(false);
+			}
+
+			std::cout << itr->name() << ": " << count << '\n';
+		}
+
+
+		position = (*system_itr)->Button().getPosition();
+		if (system_itr->get()->Button().isActive())
+			position.y += uniheight;
+		else
+			position.y -= uniheight;
+
+
+
+		for (auto& itr : m_objects)
+		{
+			if (itr->systemName() != system_name)
+			{
+				system_name = itr->systemName();
+				system_itr++;
+
+				if (system_itr->get()->Button().isActive())
+				{
+					(*system_itr)->Button().setPosition(field_beg, position.y + uniheight);
+					position = (*system_itr)->Button().getPosition();
+					position.y += uniheight;
+				}
+				i = 0;
+			}
+
+
+			if (itr->Icon().icon.isActive() && system_itr->get()->Button().isActive())
+			{
 				position.x = field_beg + (i % (m_icons_per_row)) * uniheight;
 
 				if (i % (m_icons_per_row) == 0 && i)
 					position.y += uniheight;
 
-				itr->Icon().icon.setActiveStatus(true);
+				
 				itr->Icon().icon.setPosition(position);
 
 				i++;
 			}
-			else
-			{
-				//itr->Icon().icon.setPosition(-100, -100);
-				itr->Icon().icon.setActiveStatus(false);
-			}
 		}
+
+
+		////// N E W ////
+
+		//size_t active_systems = 0;
+		//float system_position = field_beg;
+
+		//for (auto& itr : m_system_names)
+		//{
+		//	size_t count = 0;
+
+		//	for (auto& jtr : m_objects)
+		//	{
+		//		if (jtr->systemName() == itr->name())
+		//		{
+		//			if (jtr->Icon().icon.isActive())
+		//			{
+		//				count++;
+		//			}
+		//		}
+		//	}
+
+		//	if (count == 0)
+		//	{
+		//		itr->Button().setActiveStatus(false);
+		//	}
+		//	else
+		//	{
+		//		active_systems++;
+		//		
+		//		itr->Button().setPosition(itr->defaultPosition().x, system_position);
+
+		//		position = (*system_itr)->Button().getPosition();
+		//		position.y += uniheight;
+		//	}
+		//}
+
+
+
+		//for (auto& itr : m_system_names)
+		//{
+		//	if (itr->Button().isActive())
+		//	{
+
+		//	}
+		//}
 	}
 }
 

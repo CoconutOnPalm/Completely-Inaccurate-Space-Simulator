@@ -69,7 +69,8 @@ enum ObjectClass
 
 	CLASS_ObjectClassCount,							// 30
 	
-	CLASS_UNDEFINED
+	CLASS_UNDEFINED,
+	CLASS_EMPTY_ICON
 };
 
 
@@ -141,5 +142,6 @@ enum ObjectSubtype
 	
 	SUBTYPE_SubtypeCount,							// 39
 
-	SUBTYPE_UNDEFINED
+	SUBTYPE_UNDEFINED,
+	SUBTYPE_EMPTY_ICON
 };

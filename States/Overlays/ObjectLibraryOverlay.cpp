@@ -376,7 +376,24 @@ void ObjectLibraryOverlay::updatePollEvents(const MousePosition& mousePosition, 
 		}
 	}
 
-	m_slider.update(mousePosition.byWindow, event, sf::Mouse::Left, &m_obj_view);
+
+
+	if (m_slider.update(mousePosition.byWindow, event, sf::Mouse::Left, &m_obj_view))
+	{
+		// selecting objects that are visible on screen
+
+		m_on_screen.clear();
+
+		for (auto itr = m_objects.begin(); itr != m_objects.end(); ++itr)
+		{
+			if ((*itr)->Icon().icon.isActive())
+				if (!ke::isOutsideTheView(&itr->get()->Icon().icon, &m_obj_view, sf::Vector2f(10, 10)))
+					m_on_screen.push_back(itr);
+		}
+	}
+
+
+
 	m_view_barrier.updateClick(mousePosition.byWindow, sf::Mouse::Right, event);
 
 	if (event.type == sf::Event::MouseWheelScrolled)

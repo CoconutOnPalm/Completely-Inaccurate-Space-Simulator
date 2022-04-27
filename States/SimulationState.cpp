@@ -290,9 +290,9 @@ void SimulationState::InitBackground()
 	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x, 5 * winSize.y / 32), sf::Vector2f(0, 0), ke::Origin::LEFT_TOP, simulation_name_tag, winSize.y / 64, ke::Origin::MIDDLE_TOP, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
 	m_backgrounds.back()->setTextPosition(ke::Origin::MIDDLE_TOP, sf::Vector2f(0, winSize.y / 270));
 
-	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, 7 * winSize.y / 8), sf::Vector2f(winSize.x, 5 * winSize.y / 32), ke::Origin::RIGHT_TOP, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
-	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, winSize.y / 32 - winSize.y / 360), sf::Vector2f(0, winSize.y), ke::Origin::LEFT_BOTTOM, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
-	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 4 - winSize.y / 360, winSize.y / 32), sf::Vector2f(4 * winSize.x / 5, winSize.y), ke::Origin::RIGHT_BOTTOM, L"", winSize.y / 64, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255), 0.f, sf::Text::Bold, sf::Vector2f(winSize.y / 180, 0)));
+	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, 7 * winSize.y / 8), sf::Vector2f(winSize.x, 5 * winSize.y / 32 + winSize.y / 360), ke::Origin::RIGHT_TOP, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
+	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 5, winSize.y / 32), sf::Vector2f(0, winSize.y), ke::Origin::LEFT_BOTTOM, L"", 0, ke::Origin::MIDDLE_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255)));
+	m_backgrounds.emplace_back(std::make_unique<ke::Rectangle>(sf::Vector2f(winSize.x / 4, winSize.y / 32), sf::Vector2f(4 * winSize.x / 5 - winSize.y / 360, winSize.y), ke::Origin::RIGHT_BOTTOM, L"", winSize.y / 64, ke::Origin::LEFT_MIDDLE, sf::Color::Black, sf::Color(255, 255, 255, 128), winSize.y / 360, sf::Color(128, 128, 128, 255), 0.f, sf::Text::Bold, sf::Vector2f(winSize.y / 180, 0)));
 }
 
 
@@ -1597,8 +1597,19 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape && !m_text_entered)
 	{
-		(*m_selected_object)->clickRange()->setOutlineColor(sf::Color(128, 128, 128, 64));
-		m_selected_object = m_objects.begin();
+		if (m_placed_object.isActive())
+		{
+			// canceling object placing
+			m_icon_iterator = m_object_icons.begin();
+			m_placed_object.setActiveStatus(false);
+			m_orbit_preview.setActiveStatus(false);
+			m_distance_preview.setActiveStatus(false);
+		}
+		else
+		{
+			(*m_selected_object)->clickRange()->setOutlineColor(sf::Color(128, 128, 128, 64));
+			m_selected_object = m_objects.begin();
+		}
 	}
 
 
@@ -1889,17 +1900,20 @@ void SimulationState::updatePollEvents(const MousePosition& mousePosition, float
 
 		for (auto itr = m_object_icons.begin() + 1, eoi = m_object_icons.end(); itr != eoi; ++itr)
 		{
-			if ((*itr)->icon.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+			if ((*itr)->object_class() != ObjectClass::CLASS_EMPTY_ICON)
 			{
-				//sfx.play("click");
+				if ((*itr)->icon.isClicked(sf::Mouse::Left, mousePosition.byWindow, event))
+				{
+					//sfx.play("click");
 
-				// WARNING
-				m_icon_iterator = itr;
-				m_objectBuffer.load(*(m_icon_iterator->get()));
+					// WARNING
+					m_icon_iterator = itr;
+					m_objectBuffer.load(*(m_icon_iterator->get()));
 
-				m_ObjController.createObjectPreview(&m_objectBuffer, m_selected_object, itr);
-				m_placed_object.setActiveStatus(true);
-				break;
+					m_ObjController.createObjectPreview(&m_objectBuffer, m_selected_object, itr);
+					m_placed_object.setActiveStatus(true);
+					break;
+				}
 			}
 		}
 
